@@ -82,9 +82,9 @@ namespace AccountingERP.Domain.FinancialReporting
         
         private void RecalculateTotals()
         {
-            TotalAssets = Money.Sum(Assets.Select(a => a.Amount));
-            TotalLiabilities = Money.Sum(Liabilities.Select(l => l.Amount));
-            TotalEquity = Money.Sum(Equity.Select(e => e.Amount));
+            TotalAssets = Assets.Any() ? Money.Sum(Assets.Select(a => a.Amount)) : Money.Zero(Currency.VND);
+            TotalLiabilities = Liabilities.Any() ? Money.Sum(Liabilities.Select(l => l.Amount)) : Money.Zero(Currency.VND);
+            TotalEquity = Equity.Any() ? Money.Sum(Equity.Select(e => e.Amount)) : Money.Zero(Currency.VND);
         }
     }
 

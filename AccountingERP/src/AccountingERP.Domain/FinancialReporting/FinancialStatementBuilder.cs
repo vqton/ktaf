@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AccountingERP.Domain.Entities;
-using AccountingERP.Domain.Enums;
 using AccountingERP.Domain.ValueObjects;
 
 namespace AccountingERP.Domain.FinancialReporting
@@ -28,11 +27,11 @@ namespace AccountingERP.Domain.FinancialReporting
         public List<string> CurrentAssetAccounts { get; set; } = new() { "111", "112", "113", "128", "131", "133", "136", "138", "141", "151", "152", "153", "154", "155", "156", "157", "158", "161" };
         public List<string> NonCurrentAssetAccounts { get; set; } = new() { "211", "212", "213", "214", "217", "221", "222", "228", "229", "241", "242" };
         
-        // Liabilities (Nợ phải trả)
+        // Liabilities (Nợ phải trả) - Group 3 accounts
         public List<string> CurrentLiabilityAccounts { get; set; } = new() { "311", "315", "319", "331", "333", "334", "335", "338", "341", "343" };
-        public List<string> NonCurrentLiabilityAccounts { get; set; } = new() { "411", "415", "418", "419" };
+        public List<string> NonCurrentLiabilityAccounts { get; set; } = new() { "342", "347" };
         
-        // Equity (Vốn chủ sở hữu)
+        // Equity (Vốn chủ sở hữu) - Group 4 accounts
         public List<string> EquityAccounts { get; set; } = new() { "411", "4111", "4112", "412", "413", "414", "415", "417", "418", "419", "421" };
         
         // Revenue (Doanh thu)
@@ -90,21 +89,21 @@ namespace AccountingERP.Domain.FinancialReporting
             int assetOrder = 1;
             foreach (var accountCode in _mapping.CurrentAssetAccounts.OrderBy(a => a))
             {
-                var balance = trialBalance.GetBalance(accountCode);
-                if (balance.Amount != 0)
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null && account.Balance > 0)
                 {
-                    var account = GetAccountName(accountCode);
-                    balanceSheet.AddAssetItem(accountCode, $"{accountCode} - {account}", balance, assetOrder++);
+                    var accountName = GetAccountName(accountCode);
+                    balanceSheet.AddAssetItem(accountCode, $"{accountCode} - {accountName}", Money.Create(account.Balance, Currency.VND), assetOrder++);
                 }
             }
 
             foreach (var accountCode in _mapping.NonCurrentAssetAccounts.OrderBy(a => a))
             {
-                var balance = trialBalance.GetBalance(accountCode);
-                if (balance.Amount != 0)
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null && account.Balance > 0)
                 {
-                    var account = GetAccountName(accountCode);
-                    balanceSheet.AddAssetItem(accountCode, $"{accountCode} - {account}", balance, assetOrder++);
+                    var accountName = GetAccountName(accountCode);
+                    balanceSheet.AddAssetItem(accountCode, $"{accountCode} - {accountName}", Money.Create(account.Balance, Currency.VND), assetOrder++);
                 }
             }
 
@@ -112,21 +111,27 @@ namespace AccountingERP.Domain.FinancialReporting
             int liabilityOrder = 1;
             foreach (var accountCode in _mapping.CurrentLiabilityAccounts.OrderBy(a => a))
             {
-                var balance = trialBalance.GetBalance(accountCode);
-                if (balance.Amount != 0)
+                var accounts = trialBalance.Accounts.Where(a => a.AccountCode.StartsWith(accountCode)).ToList();
+                foreach (var account in accounts)
                 {
-                    var account = GetAccountName(accountCode);
-                    balanceSheet.AddLiabilityItem(accountCode, $"{accountCode} - {account}", balance, liabilityOrder++);
+                    if (account.Balance < 0)
+                    {
+                        var accountName = GetAccountName(account.AccountCode);
+                        balanceSheet.AddLiabilityItem(account.AccountCode, $"{account.AccountCode} - {accountName}", Money.Create(Math.Abs(account.Balance), Currency.VND), liabilityOrder++);
+                    }
                 }
             }
 
             foreach (var accountCode in _mapping.NonCurrentLiabilityAccounts.OrderBy(a => a))
             {
-                var balance = trialBalance.GetBalance(accountCode);
-                if (balance.Amount != 0)
+                var accounts = trialBalance.Accounts.Where(a => a.AccountCode.StartsWith(accountCode)).ToList();
+                foreach (var account in accounts)
                 {
-                    var account = GetAccountName(accountCode);
-                    balanceSheet.AddLiabilityItem(accountCode, $"{accountCode} - {account}", balance, liabilityOrder++);
+                    if (account.Balance < 0)
+                    {
+                        var accountName = GetAccountName(account.AccountCode);
+                        balanceSheet.AddLiabilityItem(account.AccountCode, $"{account.AccountCode} - {accountName}", Money.Create(Math.Abs(account.Balance), Currency.VND), liabilityOrder++);
+                    }
                 }
             }
 
@@ -134,11 +139,14 @@ namespace AccountingERP.Domain.FinancialReporting
             int equityOrder = 1;
             foreach (var accountCode in _mapping.EquityAccounts.OrderBy(a => a))
             {
-                var balance = trialBalance.GetBalance(accountCode);
-                if (balance.Amount != 0)
+                var accounts = trialBalance.Accounts.Where(a => a.AccountCode.StartsWith(accountCode)).ToList();
+                foreach (var account in accounts)
                 {
-                    var account = GetAccountName(accountCode);
-                    balanceSheet.AddEquityItem(accountCode, $"{accountCode} - {account}", balance, equityOrder++);
+                    if (account.Balance < 0)
+                    {
+                        var accountName = GetAccountName(account.AccountCode);
+                        balanceSheet.AddEquityItem(account.AccountCode, $"{account.AccountCode} - {accountName}", Money.Create(Math.Abs(account.Balance), Currency.VND), equityOrder++);
+                    }
                 }
             }
 
@@ -155,11 +163,11 @@ namespace AccountingERP.Domain.FinancialReporting
             // Revenue
             foreach (var accountCode in _mapping.RevenueAccounts)
             {
-                var balance = trialBalance.GetCreditBalance(accountCode);
-                if (balance.Amount > 0)
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null && account.CreditAmount > 0)
                 {
-                    var account = GetAccountName(accountCode);
-                    incomeStatement.AddRevenueItem(accountCode, account, balance);
+                    var accountName = GetAccountName(accountCode);
+                    incomeStatement.AddRevenueItem(accountCode, accountName, Money.Create(account.CreditAmount, Currency.VND));
                 }
             }
 
@@ -167,18 +175,22 @@ namespace AccountingERP.Domain.FinancialReporting
             var cogs = Money.Zero(Currency.VND);
             foreach (var accountCode in _mapping.CogsAccounts)
             {
-                cogs = cogs.Add(trialBalance.GetDebitBalance(accountCode));
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null)
+                {
+                    cogs = cogs.Add(Money.Create(account.DebitAmount, Currency.VND));
+                }
             }
             incomeStatement.SetCostOfGoodsSold(cogs);
 
             // Operating Expenses
             foreach (var accountCode in _mapping.SellingExpenseAccounts.Concat(_mapping.AdminExpenseAccounts))
             {
-                var balance = trialBalance.GetDebitBalance(accountCode);
-                if (balance.Amount > 0)
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null && account.DebitAmount > 0)
                 {
-                    var account = GetAccountName(accountCode);
-                    incomeStatement.AddOperatingExpense(accountCode, account, balance);
+                    var accountName = GetAccountName(accountCode);
+                    incomeStatement.AddOperatingExpense(accountCode, accountName, Money.Create(account.DebitAmount, Currency.VND));
                 }
             }
 
@@ -186,14 +198,22 @@ namespace AccountingERP.Domain.FinancialReporting
             var financialIncome = Money.Zero(Currency.VND);
             foreach (var accountCode in _mapping.FinancialIncomeAccounts)
             {
-                financialIncome = financialIncome.Add(trialBalance.GetCreditBalance(accountCode));
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null)
+                {
+                    financialIncome = financialIncome.Add(Money.Create(account.CreditAmount, Currency.VND));
+                }
             }
             incomeStatement.SetFinancialIncome(financialIncome);
 
             var financialExpenses = Money.Zero(Currency.VND);
             foreach (var accountCode in _mapping.FinancialExpenseAccounts)
             {
-                financialExpenses = financialExpenses.Add(trialBalance.GetDebitBalance(accountCode));
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null)
+                {
+                    financialExpenses = financialExpenses.Add(Money.Create(account.DebitAmount, Currency.VND));
+                }
             }
             incomeStatement.SetFinancialExpenses(financialExpenses);
 
@@ -201,14 +221,22 @@ namespace AccountingERP.Domain.FinancialReporting
             var otherIncome = Money.Zero(Currency.VND);
             foreach (var accountCode in _mapping.OtherIncomeAccounts)
             {
-                otherIncome = otherIncome.Add(trialBalance.GetCreditBalance(accountCode));
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null)
+                {
+                    otherIncome = otherIncome.Add(Money.Create(account.CreditAmount, Currency.VND));
+                }
             }
             incomeStatement.SetOtherIncome(otherIncome);
 
             var otherExpenses = Money.Zero(Currency.VND);
             foreach (var accountCode in _mapping.OtherExpenseAccounts)
             {
-                otherExpenses = otherExpenses.Add(trialBalance.GetDebitBalance(accountCode));
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null)
+                {
+                    otherExpenses = otherExpenses.Add(Money.Create(account.DebitAmount, Currency.VND));
+                }
             }
             incomeStatement.SetOtherExpenses(otherExpenses);
 
@@ -216,7 +244,11 @@ namespace AccountingERP.Domain.FinancialReporting
             var incomeTax = Money.Zero(Currency.VND);
             foreach (var accountCode in _mapping.IncomeTaxAccounts)
             {
-                incomeTax = incomeTax.Add(trialBalance.GetDebitBalance(accountCode));
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null)
+                {
+                    incomeTax = incomeTax.Add(Money.Create(account.DebitAmount, Currency.VND));
+                }
             }
             incomeStatement.SetIncomeTaxExpense(incomeTax);
 
@@ -259,12 +291,12 @@ namespace AccountingERP.Domain.FinancialReporting
         {
             // Depreciation accounts typically 214 (Accumulated Depreciation)
             var depreciationAccounts = new[] { "214", "2141", "2142", "2143" };
-            foreach (var account in depreciationAccounts)
+            foreach (var accountCode in depreciationAccounts)
             {
-                var amount = trialBalance.GetCreditBalance(account);
-                if (amount.Amount > 0)
+                var account = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == accountCode);
+                if (account != null && account.CreditAmount > 0)
                 {
-                    cashFlow.AddOperatingAdjustment($"Khấu hao TSCĐ (TK {account})", amount, true);
+                    cashFlow.AddOperatingAdjustment($"Khấu hao TSCĐ (TK {accountCode})", Money.Create(account.CreditAmount, Currency.VND), true);
                 }
             }
         }
@@ -272,33 +304,33 @@ namespace AccountingERP.Domain.FinancialReporting
         private void AddWorkingCapitalChanges(CashFlowStatement cashFlow, TrialBalance trialBalance, IEnumerable<JournalEntry> entries)
         {
             // Accounts Receivable change
-            var arChange = CalculateAccountChange("131", trialBalance, entries);
-            if (arChange.Amount != 0)
+            var arAccount = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == "131");
+            if (arAccount != null && arAccount.Balance != 0)
             {
                 cashFlow.AddOperatingAdjustment(
                     "Thay đổi phải thu khách hàng", 
-                    Money.Create(Math.Abs(arChange.Amount), arChange.Currency), 
-                    arChange.Amount < 0);
+                    Money.Create(Math.Abs(arAccount.Balance), Currency.VND), 
+                    arAccount.Balance < 0);
             }
 
             // Inventory change
-            var inventoryChange = CalculateAccountChange("156", trialBalance, entries);
-            if (inventoryChange.Amount != 0)
+            var inventoryAccount = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == "156");
+            if (inventoryAccount != null && inventoryAccount.Balance != 0)
             {
                 cashFlow.AddOperatingAdjustment(
                     "Thay đổi hàng tồn kho",
-                    Money.Create(Math.Abs(inventoryChange.Amount), inventoryChange.Currency),
-                    inventoryChange.Amount > 0);
+                    Money.Create(Math.Abs(inventoryAccount.Balance), Currency.VND),
+                    inventoryAccount.Balance > 0);
             }
 
             // Accounts Payable change
-            var apChange = CalculateAccountChange("331", trialBalance, entries);
-            if (apChange.Amount != 0)
+            var apAccount = trialBalance.Accounts.FirstOrDefault(a => a.AccountCode == "331");
+            if (apAccount != null && apAccount.Balance != 0)
             {
                 cashFlow.AddOperatingAdjustment(
                     "Thay đổi phải trả nhà cung cấp",
-                    Money.Create(Math.Abs(apChange.Amount), apChange.Currency),
-                    apChange.Amount > 0);
+                    Money.Create(Math.Abs(apAccount.Balance), Currency.VND),
+                    apAccount.Balance < 0);
             }
         }
 
@@ -332,13 +364,6 @@ namespace AccountingERP.Domain.FinancialReporting
                     }
                 }
             }
-        }
-
-        private Money CalculateAccountChange(string accountCode, TrialBalance currentPeriod, IEnumerable<JournalEntry> entries)
-        {
-            // This is a simplified calculation - in production, you'd need beginning balance
-            var currentBalance = currentPeriod.GetBalance(accountCode);
-            return currentBalance;
         }
 
         private string GetAccountName(string accountCode)

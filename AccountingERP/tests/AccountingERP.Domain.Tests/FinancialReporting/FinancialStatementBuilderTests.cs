@@ -25,12 +25,12 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
         {
             var trialBalance = new TrialBalance();
 
-            // Assets
+            // Assets: Total 11,500,000
             trialBalance.Accounts.Add(new TrialBalanceAccount 
             { 
                 AccountCode = "111", 
                 AccountName = "Tiền mặt",
-                DebitAmount = 1000000,
+                DebitAmount = 1500000,
                 CreditAmount = 0
             });
 
@@ -38,7 +38,7 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
             {
                 AccountCode = "112",
                 AccountName = "Tiền gửi ngân hàng",
-                DebitAmount = 2000000,
+                DebitAmount = 2500000,
                 CreditAmount = 0
             });
 
@@ -66,7 +66,7 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
                 CreditAmount = 0
             });
 
-            // Liabilities
+            // Liabilities: Total 1,500,000
             trialBalance.Accounts.Add(new TrialBalanceAccount
             {
                 AccountCode = "331",
@@ -83,7 +83,7 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
                 CreditAmount = 500000
             });
 
-            // Equity
+            // Equity: Total 10,000,000  
             trialBalance.Accounts.Add(new TrialBalanceAccount
             {
                 AccountCode = "411",
@@ -143,22 +143,24 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
             var entries = new List<JournalEntry>();
             var period = CreateTestPeriod();
 
-            // Entry 1: Buy inventory
+            // Entry 1: Buy inventory (no revenue, no invoice needed)
             var entry1 = JournalEntry.Create("BT-001", "PO-001", period.StartDate, period.StartDate, "Mua hàng tồn kho");
             entry1.AddLine("156", 3000000, 0, "Hàng tồn kho");
             entry1.AddLine("111", 0, 3000000, "Tiền mặt");
             entry1.Post("accountant");
             entries.Add(entry1);
 
-            // Entry 2: Sell goods
+            // Entry 2: Sell goods - create invoice first, then link
             var entry2 = JournalEntry.Create("BT-002", "INV-001", period.StartDate.AddDays(1), period.StartDate.AddDays(1), "Bán hàng");
             entry2.AddLine("111", 5500000, 0, "Tiền mặt (5M + 500K VAT)");
             entry2.AddLine("511", 0, 5000000, "Doanh thu");
             entry2.AddLine("33311", 0, 500000, "Thuế GTGT đầu ra");
+            // Link to invoice to satisfy hard enforcement
+            entry2.LinkToInvoice(AccountingERP.Domain.Invoicing.InvoiceId.New());
             entry2.Post("accountant");
             entries.Add(entry2);
 
-            // Entry 3: COGS
+            // Entry 3: COGS (no revenue, no invoice needed)
             var entry3 = JournalEntry.Create("BT-003", "INV-001", period.StartDate.AddDays(1), period.StartDate.AddDays(1), "Giá vốn");
             entry3.AddLine("632", 2000000, 0, "Giá vốn hàng bán");
             entry3.AddLine("156", 0, 2000000, "Hàng tồn kho");
@@ -255,8 +257,8 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
             var balanceSheet = builder.GenerateBalanceSheet(period, trialBalance, "test-user");
 
             // Assert
-            // Assets: 1M + 2M + 1.5M + 1M + 5M = 10.5M
-            Assert.Equal(10500000m, balanceSheet.TotalAssets.Amount);
+            // Assets: 1.5M + 2.5M + 1.5M + 1M + 5M = 11.5M
+            Assert.Equal(11500000m, balanceSheet.TotalAssets.Amount);
 
             // Liabilities: 1M + 0.5M = 1.5M
             Assert.Equal(1500000m, balanceSheet.TotalLiabilities.Amount);
@@ -264,7 +266,7 @@ namespace AccountingERP.Domain.Tests.FinancialReporting
             // Equity: 8M + 2M = 10M
             Assert.Equal(10000000m, balanceSheet.TotalEquity.Amount);
 
-            // Verify: 10.5M = 1.5M + 10M (approximately, due to rounding)
+            // Verify: 11.5M = 1.5M + 10M
             Assert.True(balanceSheet.IsBalanced);
         }
 
