@@ -74,6 +74,21 @@ namespace AccountingERP.Domain.Entities
         public int ReopenCount { get; private set; }
 
         /// <summary>
+        /// Ngày mở lại kỳ
+        /// </summary>
+        public DateTime? ReopenedAt { get; private set; }
+
+        /// <summary>
+        /// Ngườii mở lại kỳ
+        /// </summary>
+        public string? ReopenedBy { get; private set; }
+
+        /// <summary>
+        /// Trạng thái bảng cân đối số phát sinh
+        /// </summary>
+        public TrialBalanceStatus TrialBalanceStatus { get; private set; }
+
+        /// <summary>
         /// Các khoản kiểm tra trước khi đóng
         /// </summary>
         public IReadOnlyCollection<ClosingChecklistItem> ClosingChecklist => _closingChecklist.AsReadOnly();
@@ -98,6 +113,29 @@ namespace AccountingERP.Domain.Entities
                 Year = year,
                 Month = month,
                 Status = PeriodStatus.Open,
+                TrialBalanceStatus = TrialBalanceStatus.Balanced,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+
+        /// <summary>
+        /// Tạo kỳ kế toán với ngày bắt đầu và kết thúc cụ thể
+        /// </summary>
+        public static AccountingPeriod Create(int month, int year, DateTime startDate, DateTime endDate)
+        {
+            if (year < 2000 || year > 2100)
+                throw new ArgumentException("Năm tài chính không hợp lệ", nameof(year));
+
+            if (month < 1 || month > 12)
+                throw new ArgumentException("Tháng phải từ 1 đến 12", nameof(month));
+
+            return new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                Year = year,
+                Month = month,
+                Status = PeriodStatus.Open,
+                TrialBalanceStatus = TrialBalanceStatus.Balanced,
                 CreatedAt = DateTime.UtcNow
             };
         }
@@ -122,6 +160,25 @@ namespace AccountingERP.Domain.Entities
             // Create closing entries (depreciation, etc.)
             CreateClosingEntries();
             
+            Status = PeriodStatus.Closed;
+            ClosedAt = DateTime.UtcNow;
+            ClosedBy = closedBy.Trim();
+            UpdatedAt = DateTime.UtcNow;
+
+            AddDomainEvent(new PeriodClosedEvent(Year, Month, ClosedAt.Value, ClosedBy));
+        }
+
+        /// <summary>
+        /// Đóng kỳ kế toán (phiên bản đơn giản cho PeriodLockingService)
+        /// </summary>
+        public void Close(string closedBy)
+        {
+            if (Status == PeriodStatus.Closed || Status == PeriodStatus.Locked)
+                throw new InvalidOperationException($"Kỳ {Year}/{Month} đã đóng hoặc đã khóa.");
+
+            if (string.IsNullOrWhiteSpace(closedBy))
+                throw new ArgumentException("Ngườii đóng kỳ không được để trống", nameof(closedBy));
+
             Status = PeriodStatus.Closed;
             ClosedAt = DateTime.UtcNow;
             ClosedBy = closedBy.Trim();
@@ -158,6 +215,8 @@ namespace AccountingERP.Domain.Entities
 
             Status = PeriodStatus.Open;
             ReopenReason = reason.Trim();
+            ReopenedBy = reopenedBy.Trim();
+            ReopenedAt = DateTime.UtcNow;
             ReopenCount++;
             UpdatedAt = DateTime.UtcNow;
             UpdatedBy = reopenedBy.Trim();
@@ -262,7 +321,25 @@ namespace AccountingERP.Domain.Entities
             return contraAccounts.Any(ca => accountCode.StartsWith(ca));
         }
 
+        /// <summary>
+        /// Thiết lập trạng thái bảng cân đối số phát sinh
+        /// </summary>
+        public void SetTrialBalanceStatus(TrialBalanceStatus status)
+        {
+            TrialBalanceStatus = status;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public override string ToString() => $"{Year}/{Month:D2}";
+    }
+
+    /// <summary>
+    /// Trạng thái bảng cân đối số phát sinh
+    /// </summary>
+    public enum TrialBalanceStatus
+    {
+        Balanced,
+        Unbalanced
     }
 
     /// <summary>
