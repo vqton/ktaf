@@ -375,7 +375,8 @@ namespace AccountingERP.Domain.Tests.Core
 
             entry.AddLine("111", 1000000, 0, "Tiền mặt");
             entry.AddLine("511", 0, 1000000, "Doanh thu");
-
+            // Link to invoice to satisfy hard enforcement from Feature 1
+            entry.LinkToInvoice(AccountingERP.Domain.Invoicing.InvoiceId.New());
             entry.Post("accountant");
 
             Assert.True(entry.IsPosted);
@@ -540,17 +541,17 @@ namespace AccountingERP.Domain.Tests.Core
                 "accountant"
             );
 
-            // Original: Dr 111 (1M), Cr 511 (1M)
-            // Reversal should be: Cr 111 (1M), Dr 511 (1M)
+            // Original: Dr 111 (1M), Cr 131 (1M)
+            // Reversal should be: Cr 111 (1M), Dr 131 (1M)
             var line111 = reversal.Lines.FirstOrDefault(l => l.AccountCode == "111");
-            var line511 = reversal.Lines.FirstOrDefault(l => l.AccountCode == "511");
+            var line131 = reversal.Lines.FirstOrDefault(l => l.AccountCode == "131");
 
             Assert.NotNull(line111);
-            Assert.NotNull(line511);
+            Assert.NotNull(line131);
             Assert.Equal(0, line111.DebitAmount); // Was debit, now credit
             Assert.Equal(1000000m, line111.CreditAmount);
-            Assert.Equal(1000000m, line511.DebitAmount); // Was credit, now debit
-            Assert.Equal(0, line511.CreditAmount);
+            Assert.Equal(1000000m, line131.DebitAmount); // Was credit, now debit
+            Assert.Equal(0, line131.CreditAmount);
         }
 
         [Fact]
@@ -627,7 +628,7 @@ namespace AccountingERP.Domain.Tests.Core
             );
 
             entry.AddLine("111", 1000000, 0, "Tiền mặt");
-            entry.AddLine("511", 0, 1000000, "Doanh thu");
+            entry.AddLine("131", 0, 1000000, "Phải thu khách hàng");
             entry.Post("accountant");
 
             return entry;

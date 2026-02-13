@@ -4,6 +4,7 @@ using System.Linq;
 using AccountingERP.Domain.Entities;
 using AccountingERP.Domain.Enums;
 using AccountingERP.Domain.ValueObjects;
+using AccountingERP.Domain.Events;
 
 namespace AccountingERP.Domain.Inventory
 {
@@ -208,7 +209,7 @@ namespace AccountingERP.Domain.Inventory
     /// <summary>
     /// Giao dịch tồn kho
     /// </summary>
-    public class InventoryTransaction : Entity
+    public class InventoryTransaction : BaseEntity
     {
         public Guid InventoryItemId { get; private set; }
         public TransactionType Type { get; private set; }

@@ -895,6 +895,8 @@ namespace AccountingERP.Domain.Tests.Phase1
                 DateTime.Now.AddDays(-2), "Doanh thu");
             entry.AddLine("111", amount, 0, "Tiền mặt");
             entry.AddLine("511", 0, amount, "Doanh thu");
+            // Link to invoice to satisfy hard enforcement from Feature 1
+            entry.LinkToInvoice(AccountingERP.Domain.Invoicing.InvoiceId.New());
             entry.Post("test-user");
             return entry;
         }
@@ -919,6 +921,8 @@ namespace AccountingERP.Domain.Tests.Phase1
             {
                 entry.AddLine("111", amount, 0, "Thu tiền");
                 entry.AddLine("511", 0, amount, "Doanh thu");
+                // Link to invoice to satisfy hard enforcement from Feature 1
+                entry.LinkToInvoice(AccountingERP.Domain.Invoicing.InvoiceId.New());
             }
             else
             {
