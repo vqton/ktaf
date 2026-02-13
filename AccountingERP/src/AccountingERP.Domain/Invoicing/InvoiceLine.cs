@@ -1,4 +1,5 @@
 using System;
+using AccountingERP.Domain.Entities;
 using AccountingERP.Domain.ValueObjects;
 
 namespace AccountingERP.Domain.Invoicing
@@ -6,7 +7,7 @@ namespace AccountingERP.Domain.Invoicing
     /// <summary>
     /// Dòng hàng hóa/dịch vụ trên hóa đơn
     /// </summary>
-    public class InvoiceLine : Entity
+    public class InvoiceLine : BaseEntity
     {
         public InvoiceId InvoiceId { get; private set; }
         public string ProductCode { get; private set; } = string.Empty;

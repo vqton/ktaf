@@ -4,12 +4,18 @@ using System.Linq;
 using AccountingERP.Domain.ValueObjects;
 using AccountingERP.Domain.Enums;
 using AccountingERP.Domain.Events;
+using AccountingERP.Domain.Invoicing;
+using AccountingERP.Domain.Exceptions;
 
 namespace AccountingERP.Domain.Entities
 {
     /// <summary>
     /// Bút toán (Journal Entry) - Entity chính trong hệ thống kế toán
     /// Tuân thủ TT99/2025/TT-BTC: Bắt buộc số chứng từ gốc và ngày chứng từ gốc
+    /// 
+    /// HARD ENFORCEMENT (Phase 1):
+    /// - Không thể ghi sổ bút toán doanh thu không có InvoiceId
+    /// - Hóa đơn phát hành phải có bút toán tương ứng
     /// </summary>
     public class JournalEntry : BaseEntity
     {
@@ -27,6 +33,10 @@ namespace AccountingERP.Domain.Entities
         public Guid? CustomerId { get; private set; }
         public Guid? SupplierId { get; private set; }
         public string? AttachmentPath { get; private set; }                      // Đường dẫn file đính kèm
+        
+        // HARD ENFORCEMENT: Link to Invoice for revenue entries
+        public InvoiceId? InvoiceId { get; private set; }
+        public bool RequiresInvoiceLink => IsRevenueEntry;
         
         // Trạng thái
         public JournalEntryStatus Status { get; private set; }
@@ -162,12 +172,43 @@ namespace AccountingERP.Domain.Entities
             if (string.IsNullOrWhiteSpace(postedBy))
                 throw new ArgumentException("Ngườii ghi sổ không được để trống", nameof(postedBy));
 
+            // HARD ENFORCEMENT: Revenue entries must have InvoiceId
+            if (IsRevenueEntry && InvoiceId == null)
+                throw new InvoiceAccountingMismatchException(
+                    "Không thể ghi sổ bút toán doanh thu không có hóa đơn. " +
+                    "Theo TT78/2021, bút toán ghi nhận doanh thu (TK 511, 512, ...) phải có hóa đơn tương ứng.");
+
             IsPosted = true;
             PostedDate = DateTime.UtcNow;
             Status = JournalEntryStatus.Posted;
             UpdatedBy = postedBy.Trim();
             UpdatedAt = DateTime.UtcNow;
         }
+
+        /// <summary>
+        /// Liên kết bút toán với hóa đơn
+        /// </summary>
+        public void LinkToInvoice(InvoiceId invoiceId)
+        {
+            if (IsPosted)
+                throw new InvalidOperationException("Không thể liên kết bút toán đã ghi sổ với hóa đơn");
+            
+            if (InvoiceId != null)
+                throw new InvalidOperationException("Bút toán đã được liên kết với hóa đơn khác");
+            
+            InvoiceId = invoiceId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Kiểm tra có phải bút toán doanh thu không
+        /// Bút toán doanh thu có TK 511, 512, 515, 517 (Doanh thu bán hàng/dịch vụ)
+        /// </summary>
+        public bool IsRevenueEntry => _lines.Any(l => 
+            l.AccountCode.StartsWith("511") || // Doanh thu bán hàng
+            l.AccountCode.StartsWith("512") || // Doanh thu cung cấp dịch vụ
+            l.AccountCode.StartsWith("515") || // Doanh thu hoạt động tài chính
+            l.AccountCode.StartsWith("517"));  // Doanh thu khác
 
         /// <summary>
         /// Hủy bút toán (tạo bút toán đảo ngược)

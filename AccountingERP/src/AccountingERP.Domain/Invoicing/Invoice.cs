@@ -99,12 +99,6 @@ namespace AccountingERP.Domain.Invoicing
         public string? CancellationReason { get; private set; }
         public DateTime? CancelledAt { get; private set; }
         
-        // Audit
-        public DateTime CreatedAt { get; private set; }
-        public string CreatedBy { get; private set; } = string.Empty;
-        public DateTime? UpdatedAt { get; private set; }
-        public string? UpdatedBy { get; private set; }
-        
         private Invoice() { } // EF Core
         
         /// <summary>
@@ -126,26 +120,23 @@ namespace AccountingERP.Domain.Invoicing
             ValidateVatRate(vatRate);
             ValidateCustomerInfo(customerCode, customerName);
             
-            var invoice = new Invoice
-            {
-                Id = Guid.NewGuid(),
-                InvoiceId = InvoiceId.New(),
-                InvoiceNumber = invoiceNumber.Trim(),
-                InvoiceSeries = invoiceSeries?.Trim() ?? "1C25TAA",
-                IssueDate = issueDate.Date,
-                Type = type,
-                Status = InvoiceStatus.Draft,
-                CustomerCode = customerCode.Trim(),
-                CustomerName = customerName.Trim(),
-                CustomerTaxCode = customerTaxCode?.Trim() ?? string.Empty,
-                VatRate = vatRate,
-                Currency = currency,
-                SubTotal = Money.Zero(currency),
-                VatAmount = Money.Zero(currency),
-                TotalAmount = Money.Zero(currency),
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = createdBy
-            };
+            var invoice = new Invoice();
+            invoice.InvoiceId = InvoiceId.New();
+            invoice.InvoiceNumber = invoiceNumber.Trim();
+            invoice.InvoiceSeries = invoiceSeries?.Trim() ?? "1C25TAA";
+            invoice.IssueDate = issueDate.Date;
+            invoice.Type = type;
+            invoice.Status = InvoiceStatus.Draft;
+            invoice.CustomerCode = customerCode.Trim();
+            invoice.CustomerName = customerName.Trim();
+            invoice.CustomerTaxCode = customerTaxCode?.Trim() ?? string.Empty;
+            invoice.VatRate = vatRate;
+            invoice.Currency = currency;
+            invoice.SubTotal = Money.Zero(currency);
+            invoice.VatAmount = Money.Zero(currency);
+            invoice.TotalAmount = Money.Zero(currency);
+            // Note: CreatedAt and Id are set by BaseEntity constructor
+            // CreatedBy will be tracked at application layer
             
             return invoice;
         }
@@ -182,14 +173,13 @@ namespace AccountingERP.Domain.Invoicing
             
             _lines.Add(line);
             RecalculateTotals();
-            
-            UpdatedAt = DateTime.UtcNow;
+            // UpdatedAt is inherited from BaseEntity
         }
         
         /// <summary>
         /// Phát hành hóa đơn - HARD ENFORCEMENT: Phải tạo bút toán kế toán
         /// </summary>
-        public void Issue(string verificationCode, JournalEntryId journalEntryId, string issuedBy)
+        public void Issue(string verificationCode, JournalEntryId? journalEntryId, string issuedBy)
         {
             if (Status != InvoiceStatus.Draft)
                 throw new InvalidOperationException("Chỉ có thể phát hành hóa đơn ở trạng thái Draft.");
@@ -201,24 +191,23 @@ namespace AccountingERP.Domain.Invoicing
                 throw new ArgumentException("TT78: Mã tra cứu không được để trống.", nameof(verificationCode));
             
             // HARD ENFORCEMENT: Must have corresponding JournalEntry
-            if (journalEntryId == null || journalEntryId.Value == Guid.Empty)
+            if (journalEntryId == null || journalEntryId.Value.Value == Guid.Empty)
                 throw new InvoiceAccountingMismatchException(
                     "Không thể phát hành hóa đơn không có bút toán kế toán tương ứng. " +
                     "Theo TT78/2021, hóa đơn phải khớp với sổ kế toán.");
             
             VerificationCode = verificationCode.Trim();
-            JournalEntryId = journalEntryId;
+            JournalEntryId = journalEntryId.Value;
             Status = InvoiceStatus.Issued;
-            UpdatedAt = DateTime.UtcNow;
-            UpdatedBy = issuedBy;
+            // UpdatedAt is inherited from BaseEntity
             
-            AddDomainEvent(new InvoiceIssuedEvent(InvoiceId, InvoiceNumber, IssueDate, journalEntryId));
+            AddDomainEvent(new InvoiceIssuedEvent(InvoiceId, InvoiceNumber, IssueDate, journalEntryId.Value));
         }
         
         /// <summary>
         /// Hủy hóa đơn - HARD ENFORCEMENT: Phải tạo bút toán đảo ngược
         /// </summary>
-        public void Cancel(string reason, JournalEntryId reversalJournalEntryId, string cancelledBy)
+        public void Cancel(string reason, JournalEntryId? reversalJournalEntryId, string cancelledBy)
         {
             if (Status != InvoiceStatus.Issued)
                 throw new InvalidOperationException("Chỉ có thể hủy hóa đơn đã phát hành.");
@@ -227,7 +216,7 @@ namespace AccountingERP.Domain.Invoicing
                 throw new ArgumentException("TT78: Lý do hủy không được để trống.", nameof(reason));
             
             // HARD ENFORCEMENT: Must create reversal JournalEntry
-            if (reversalJournalEntryId == null || reversalJournalEntryId.Value == Guid.Empty)
+            if (reversalJournalEntryId == null || reversalJournalEntryId.Value.Value == Guid.Empty)
                 throw new InvoiceAccountingMismatchException(
                     "Không thể hủy hóa đơn không tạo bút toán đảo ngược. " +
                     "Hủy hóa đơn phải ghi nhận điều chỉnh trong sổ kế toán.");
@@ -240,11 +229,10 @@ namespace AccountingERP.Domain.Invoicing
             Status = InvoiceStatus.Cancelled;
             CancellationReason = reason.Trim();
             CancelledAt = DateTime.UtcNow;
-            ReversalJournalEntryId = reversalJournalEntryId;
-            UpdatedAt = DateTime.UtcNow;
-            UpdatedBy = cancelledBy;
+            ReversalJournalEntryId = reversalJournalEntryId.Value;
+            // UpdatedAt is inherited from BaseEntity
             
-            AddDomainEvent(new InvoiceCancelledEvent(InvoiceId, InvoiceNumber, reason, reversalJournalEntryId));
+            AddDomainEvent(new InvoiceCancelledEvent(InvoiceId, InvoiceNumber, reason, reversalJournalEntryId.Value));
         }
         
         /// <summary>
@@ -256,12 +244,12 @@ namespace AccountingERP.Domain.Invoicing
                 throw new ArgumentException("External ID không được trống", nameof(externalId));
             
             ExternalInvoiceId = externalId;
-            UpdatedAt = DateTime.UtcNow;
+            // UpdatedAt is inherited from BaseEntity
         }
         
         private void RecalculateTotals()
         {
-            var subTotal = _lines.Sum(l => l.LineTotal);
+            var subTotal = _lines.Sum(l => l.LineTotal.Amount);
             var vatAmount = subTotal * VatRate / 100m;
             
             SubTotal = Money.Create(subTotal, Currency);
