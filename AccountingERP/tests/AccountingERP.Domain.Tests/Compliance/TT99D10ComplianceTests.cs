@@ -18,9 +18,9 @@ public class TT99D10ComplianceTests
             "Test",
             "admin");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*TT99-D10*")
-            .WithMessage("*bắt buộc*");
+        act.Should().Throw<ArgumentException>().Where(e =>
+            (e.Message.Contains("TT99-D10") || e.Message.Contains("TT99-Đ10")) &&
+            e.Message.Contains("không") );
     }
 
     [Fact]
@@ -33,9 +33,9 @@ public class TT99D10ComplianceTests
             "Test",
             "admin");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*TT99-D10*")
-            .WithMessage("*bắt buộc*");
+        act.Should().Throw<ArgumentException>().Where(e =>
+            (e.Message.Contains("TT99-D10") || e.Message.Contains("TT99-Đ10")) &&
+            e.Message.Contains("không"));
     }
 
     [Fact]

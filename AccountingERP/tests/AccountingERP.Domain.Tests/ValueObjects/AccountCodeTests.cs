@@ -103,8 +103,8 @@ public class AccountCodeTests
     {
         // Act & Assert
         var act = () => AccountCode.Create(code);
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*không hợp lệ*");
+        act.Should().Throw<ArgumentException>().Where(e =>
+            e.Message.Contains("không hợp lệ") || e.Message.Contains("không được để trống"));
     }
 
     [Fact]

@@ -107,10 +107,10 @@ public class ButToanKeToanTests
             "Test",
             "admin");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*TT99-D10*")
-            .WithMessage("*Số chứng từ gốc*")
-            .WithMessage("*không được để trống*");
+        act.Should().Throw<ArgumentException>().Where(e =>
+            (e.Message.Contains("TT99-D10") || e.Message.Contains("TT99-Đ10")) &&
+            e.Message.Contains("Số chứng từ gốc") &&
+            e.Message.Contains("không được để trống"));
     }
 
     [Fact]
@@ -124,10 +124,10 @@ public class ButToanKeToanTests
             "Test",
             "admin");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*TT99-D10*")
-            .WithMessage("*Ngày chứng từ gốc*")
-            .WithMessage("*không được để trống*");
+        act.Should().Throw<ArgumentException>().Where(e =>
+            (e.Message.Contains("TT99-D10") || e.Message.Contains("TT99-Đ10")) &&
+            e.Message.Contains("Ngày chứng từ gốc") &&
+            e.Message.Contains("không được để trống"));
     }
 
     [Fact]

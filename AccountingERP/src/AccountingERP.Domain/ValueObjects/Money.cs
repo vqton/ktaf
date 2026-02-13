@@ -42,7 +42,7 @@ public sealed class Money : IEquatable<Money>
     /// <param name="amount">Số tiền (phải >= 0)</param>
     /// <param name="currency">Đơn vị tiền tệ</param>
     /// <returns>Money object</returns>
-    /// <exception cref="ArgumentException">Ném ra khi amount < 0</exception>
+    /// <exception cref="ArgumentException">Ném ra khi amount &lt; 0</exception>
     /// <remarks>
     /// TT99-Đ10 khoản 2: Số tiền trong chứng từ kế toán phải được ghi bằng số và chữ.
     /// Số tiền âm không được phép trong kế toán doanh nghiệp.
@@ -75,6 +75,13 @@ public sealed class Money : IEquatable<Money>
     /// <param name="amount">Số tiền EUR (phải >= 0)</param>
     /// <returns>Money object với currency EUR</returns>
     public static Money EUR(decimal amount) => Create(amount, Currency.EUR);
+
+    /// <summary>
+    /// Tạo Money với số tiền bằng 0
+    /// </summary>
+    /// <param name="currency">Đơn vị tiền tệ</param>
+    /// <returns>Money object với amount = 0</returns>
+    public static Money Zero(Currency currency) => new Money(0, currency);
 
     /// <summary>
     /// Tạo bản sao với số tiền mới
@@ -146,12 +153,90 @@ public sealed class Money : IEquatable<Money>
     public static bool operator !=(Money? left, Money? right) => !Equals(left, right);
 
     /// <summary>
+    /// So sánh lớn hơn
+    /// </summary>
+    public static bool operator >(Money left, Money right)
+    {
+        if (left is null || right is null) return false;
+        if (left._currency != right._currency)
+            throw new InvalidOperationException($"Không thể so sánh hai loại tiền tệ khác nhau: {left._currency} và {right._currency}");
+        return left._amount > right._amount;
+    }
+
+    /// <summary>
+    /// So sánh nhỏ hơn
+    /// </summary>
+    public static bool operator <(Money left, Money right)
+    {
+        if (left is null || right is null) return false;
+        if (left._currency != right._currency)
+            throw new InvalidOperationException($"Không thể so sánh hai loại tiền tệ khác nhau: {left._currency} và {right._currency}");
+        return left._amount < right._amount;
+    }
+
+    /// <summary>
+    /// So sánh lớn hơn hoặc bằng
+    /// </summary>
+    public static bool operator >=(Money left, Money right)
+    {
+        if (left is null || right is null) return false;
+        if (left._currency != right._currency)
+            throw new InvalidOperationException($"Không thể so sánh hai loại tiền tệ khác nhau: {left._currency} và {right._currency}");
+        return left._amount >= right._amount;
+    }
+
+    /// <summary>
+    /// So sánh nhỏ hơn hoặc bằng
+    /// </summary>
+    public static bool operator <=(Money left, Money right)
+    {
+        if (left is null || right is null) return false;
+        if (left._currency != right._currency)
+            throw new InvalidOperationException($"Không thể so sánh hai loại tiền tệ khác nhau: {left._currency} và {right._currency}");
+        return left._amount <= right._amount;
+    }
+
+    /// <summary>
+    /// Chia cho một số
+    /// </summary>
+    /// <param name="divisor">Số chia (phải > 0)</param>
+    /// <returns>Money mới</returns>
+    /// <exception cref="ArgumentException">Khi divisor <= 0</exception>
+    public Money Divide(decimal divisor)
+    {
+        if (divisor <= 0)
+            throw new ArgumentException("Số chia phải lớn hơn 0", nameof(divisor));
+        return new Money(_amount / divisor, _currency);
+    }
+
+    /// <summary>
+    /// Tính tổng một collection Money
+    /// </summary>
+    /// <param name="monies">Collection các Money object</param>
+    /// <returns>Tổng Money</returns>
+    public static Money Sum(IEnumerable<Money> monies)
+    {
+        if (monies == null || !monies.Any())
+            throw new ArgumentException("Collection không được rỗng", nameof(monies));
+
+        var first = monies.First();
+        var total = monies.Skip(1).Aggregate(first._amount, (sum, m) =>
+        {
+            if (m._currency != first._currency)
+                throw new InvalidOperationException($"Không thể cộng các loại tiền tệ khác nhau: {first._currency} và {m._currency}");
+            return sum + m._amount;
+        });
+
+        return new Money(total, first._currency);
+    }
+
+    /// <summary>
     /// Định dạng chuỗi hiển thị
     /// </summary>
     public override string ToString() =>
         _currency switch
         {
-            Currency.VND => $"{_amount:N0} VND",
+            Currency.VND => $"{_amount:N2} VND",
             Currency.USD => $"{_amount:C} USD",
             Currency.EUR => $"{_amount:C} EUR",
             _ => $"{_amount} {_currency}"
@@ -162,7 +247,7 @@ public sealed class Money : IEquatable<Money>
     /// </summary>
     /// <param name="culture">Culture info (mặc định vi-VN)</param>
     public string ToString(IFormatProvider? culture) =>
-        _amount.ToString("N", culture ?? new CultureInfo("vi-VN"));
+        _amount.ToString("N2", culture ?? new CultureInfo("vi-VN"));
 }
 
 /// <summary>
