@@ -1,0 +1,63 @@
+@using Microsoft.FluentUI.AspNetCore.Components
+@inherits LayoutComponentBase
+
+<FluentLayout>
+    <FluentHeader>
+        <div class="d-flex align-items-center">
+            <i class="bi bi-calculator me-2"></i>
+            <span>AccountingERP - Hệ thống Kế toán TT99</span>
+        </div>
+    </FluentHeader>
+    
+    <FluentStack Orientation="Orientation.Horizontal" Width="100%">
+        <!-- Sidebar Navigation -->
+        <FluentNavMenu Width="250" Collapsible="true">
+            <FluentNavLink Href="/" Icon="@Icon.FromImageUrl("/icons/home.svg")" Match="NavLinkMatch.All">
+                <i class="bi bi-house-door me-2"></i> Trang chủ
+            </FluentNavLink>
+            
+            <FluentNavGroup Title="Kế toán" Icon="@Icon.FromImageUrl("/icons/accounting.svg")" Expanded="true">
+                <FluentNavLink Href="/journal-entries">
+                    <i class="bi bi-journal-text me-2"></i> Bút toán
+                </FluentNavLink>
+                <FluentNavLink Href="/accounts">
+                    <i class="bi bi-list-ol me-2"></i> Hệ thống tài khoản
+                </FluentNavLink>
+            </FluentNavGroup>
+            
+            <FluentNavGroup Title="Báo cáo" Icon="@Icon.FromImageUrl("/icons/report.svg")" Expanded="true">
+                <FluentNavLink Href="/reports/balance-sheet">
+                    <i class="bi bi-table me-2"></i> Bảng cân đối (B01)
+                </FluentNavLink>
+                <FluentNavLink Href="/reports/income-statement">
+                    <i class="bi bi-graph-up me-2"></i> Kết quả KD (B02)
+                </FluentNavLink>
+                <FluentNavLink Href="/reports/cash-flow">
+                    <i class="bi bi-cash-stack me-2"></i> Lưu chuyển tiền (B03)
+                </FluentNavLink>
+            </FluentNavGroup>
+        </FluentNavMenu>
+        
+        <!-- Main Content -->
+        <FluentBodyContent Class="p-4">
+            @Body
+        </FluentBodyContent>
+    </FluentStack>
+    
+    <FluentFooter>
+        <div class="text-center text-muted">
+            <small>AccountingERP &copy; 2026 - Tuân thủ TT99/2025/TT-BTC</small>
+        </div>
+    </FluentFooter>
+</FluentLayout>
+
+<div id="blazor-error-ui">
+    <environment include="Staging,Production">
+        An error has occurred. This application may no longer respond until reloaded.
+    </environment>
+    <environment include="Development">
+        An unhandled exception has occurred. See browser dev tools for details.
+    </environment>
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

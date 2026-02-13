@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.blazorwasm-companion",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "formulahendry.dotnet-test-explorer",
+    "ms-vscode.vscode-json",
+    "pkief.material-icon-theme",
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github"
+  ]
+}
