@@ -1,6 +1,0 @@
-/mnt/e/glApp/tests/AccountingERP.Domain.Tests/obj/Debug/net8.0/AccountingPrinciples.Tests.csproj.AssemblyReference.cache
-/mnt/e/glApp/tests/AccountingERP.Domain.Tests/obj/Debug/net8.0/AccountingPrinciples.Tests.GeneratedMSBuildEditorConfig.editorconfig
-/mnt/e/glApp/tests/AccountingERP.Domain.Tests/obj/Debug/net8.0/AccountingPrinciples.Tests.AssemblyInfoInputs.cache
-/mnt/e/glApp/tests/AccountingERP.Domain.Tests/obj/Debug/net8.0/AccountingPrinciples.Tests.AssemblyInfo.cs
-/mnt/e/glApp/tests/AccountingERP.Domain.Tests/obj/Debug/net8.0/AccountingPrinciples.Tests.csproj.CoreCompileInputs.cache
-/mnt/e/glApp/tests/AccountingERP.Domain.Tests/obj/Debug/net8.0/AccountingPrinciples.Tests.sourcelink.json
