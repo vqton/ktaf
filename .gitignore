@@ -1,0 +1,30 @@
+# Python Flask .gitignore
+
+# Virtual environments
+env/
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+
+# Database files (SQLite example)
+*.sqlite
+*.log
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Flask instance folder
+instance/
+
+# Packaging files
+*.egg-info/
+dist/
+build/
