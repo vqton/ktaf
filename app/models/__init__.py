@@ -1,3 +1,10 @@
+"""Database models base classes and mixins.
+
+Provides:
+- Base: SQLAlchemy declarative base for all models
+- AuditMixin: Automatic created_at, updated_at, created_by, updated_by fields
+"""
+
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import TIMESTAMPTZ
 from sqlalchemy import text
@@ -6,6 +13,7 @@ from typing import Optional
 
 
 class Base(DeclarativeBase):
+    """SQLAlchemy declarative base for all database models."""
     pass
 
 

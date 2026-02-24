@@ -1,3 +1,11 @@
+"""Application configuration module.
+
+Provides configuration classes for different environments:
+- Development: Local development with debug mode
+- Production: Optimized settings for deployment
+- Testing: Isolated test environment
+"""
+
 import os
 from datetime import timedelta
 

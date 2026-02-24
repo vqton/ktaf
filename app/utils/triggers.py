@@ -1,6 +1,10 @@
-"""
-PostgreSQL Triggers for automatic SoCai updates
-Run this SQL in PostgreSQL to create the triggers
+"""PostgreSQL triggers for automatic SoCai (general ledger) updates.
+
+Provides SQL trigger definitions that automatically update the SoCai table
+when DinhKhoan (journal entries) are inserted, updated, or deleted.
+
+Usage:
+    Run SQL directly in PostgreSQL or use create_triggers() function.
 """
 
 TRIGGER_FUNCTION = """
@@ -74,7 +78,17 @@ EXECUTE FUNCTION accounting.update_so_cai();
 
 
 def create_triggers(connection):
-    """Create triggers in database"""
+    """Create all SoCai update triggers in database.
+
+    Args:
+        connection: SQLAlchemy connection object
+
+    Creates:
+        - update_so_cai() function
+        - trig_dinhkhoan_insert trigger
+        - trig_dinhkhoan_update trigger
+        - trig_dinhkhoan_delete trigger
+    """
     from sqlalchemy import text
     
     connection.execute(text(TRIGGER_FUNCTION))

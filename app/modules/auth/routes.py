@@ -1,3 +1,12 @@
+"""Authentication API endpoints.
+
+Provides:
+- POST /login: User login with username/password
+- POST /register: User registration
+- GET /me: Get current user info (JWT required)
+- POST /change-password: Change password (JWT required)
+"""
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.extensions import db

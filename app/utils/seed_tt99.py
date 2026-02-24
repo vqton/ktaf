@@ -1,6 +1,10 @@
-"""
-Seed data for TT99/2025 Chart of Accounts
-Run: flask seed-tt99
+"""Seed data for TT99/2025 Chart of Accounts.
+
+Contains ~140 accounts following Thông tư 99/2025/TT-BTC chart of accounts.
+
+Usage:
+    flask seed-tt99
+    python -m app.utils.seed_tt99
 """
 
 TT99_ACCOUNTS = [
@@ -151,7 +155,13 @@ TT99_ACCOUNTS = [
 
 
 def seed_tt99_accounts():
-    """Seed TT99 chart of accounts"""
+    """Seed TT99 chart of accounts into database.
+
+    Only inserts accounts that don't already exist (idempotent).
+
+    Returns:
+        int: Number of accounts seeded
+    """
     from app import create_app
     from app.extensions import db
     from app.modules.he_thong_tk.models import HeThongTaiKhoan

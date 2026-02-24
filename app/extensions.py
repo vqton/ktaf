@@ -1,3 +1,10 @@
+"""
+Flask extensions initialization module.
+
+This module initializes and exports Flask extensions used throughout
+the application including SQLAlchemy, Flask-Migrate, JWT, and Celery.
+"""
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -10,6 +17,15 @@ celery = Celery()
 
 
 def init_celery(app=None):
+    """
+    Initialize Celery with Flask application context.
+    
+    Args:
+        app: Flask application instance. If None, returns unconfigured celery.
+    
+    Returns:
+        Configured Celery instance.
+    """
     celery.conf.update(
         broker_url=app.config.get('CELERY_BROKER_URL'),
         result_backend=app.config.get('CELERY_RESULT_BACKEND'),
