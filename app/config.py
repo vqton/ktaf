@@ -15,6 +15,8 @@ class Config:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
 
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'postgresql+psycopg2://postgres:123456@127.0.0.1:15432/GL_TT99'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
@@ -50,7 +52,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-        'postgresql+psycopg2://postgres:password@localhost:5432/accounting_test'
+        'postgresql+psycopg2://postgres:123456@127.0.0.1:15432/GL_TT99'
 
     @staticmethod
     def init_app(app):

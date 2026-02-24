@@ -54,10 +54,21 @@ TT99_ACCOUNTS = [
     {'ma_tk': '19', 'ten_tk': 'Tài sản thuế thu nhập hoãn lại', 'loai_tk': 'tai_san', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
     {'ma_tk': '191', 'ten_tk': 'Tài sản thuế thu nhập hoãn lại', 'loai_tk': 'tai_san', 'cap_tk': 2, 'ma_tk_cha': '19', 'tinh_chat': 'du', 'co_the_dk': True},
 
+    {'ma_tk': '41', 'ten_tk': 'Chênh lệch tỷ giá hối đoái', 'loai_tk': 'tai_san', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '413', 'ten_tk': 'Chênh lệch tỷ giá hối đoái', 'loai_tk': 'tai_san', 'cap_tk': 2, 'ma_tk_cha': '41', 'tinh_chat': 'du', 'co_the_dk': True},
+    {'ma_tk': '4131', 'ten_tk': 'Chênh lệch tỷ giá hối đoái đánh giá lại cuối năm', 'loai_tk': 'tai_san', 'cap_tk': 3, 'ma_tk_cha': '413', 'tinh_chat': 'du', 'co_the_dk': True},
+    {'ma_tk': '4132', 'ten_tk': 'Chênh lệch tỷ giá hối đoái trong giai đoạn trước hoạt động', 'loai_tk': 'tai_san', 'cap_tk': 3, 'ma_tk_cha': '413', 'tinh_chat': 'du', 'co_the_dk': True},
+
+    # TK 215 - TÀI SẢN SINH HỌC (Biological Assets) - NEW in TT99
+    {'ma_tk': '215', 'ten_tk': 'Tài sản sinh học', 'loai_tk': 'tai_san', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': True},
+    {'ma_tk': '2151', 'ten_tk': 'Tài sản sinh học tăng trưởng', 'loai_tk': 'tai_san', 'cap_tk': 2, 'ma_tk_cha': '215', 'tinh_chat': 'du', 'co_the_dk': True},
+    {'ma_tk': '2152', 'ten_tk': 'Tài sản sinh học giảm trừ', 'loai_tk': 'tai_san', 'cap_tk': 2, 'ma_tk_cha': '215', 'tinh_chat': 'du', 'co_the_dk': True},
+    {'ma_tk': '2153', 'ten_tk': 'Chênh lệch đánh giá TSBĐ', 'loai_tk': 'tai_san', 'cap_tk': 2, 'ma_tk_cha': '215', 'tinh_chat': 'du', 'co_the_dk': True},
+
     # CLASS 2: NGUỒN VỐN (Sources)
     {'ma_tk': '21', 'ten_tk': 'Phải trả người bán', 'loai_tk': 'nguon_von', 'cap_tk': 1, 'tinh_chat': 'co', 'co_the_dk': False},
-    {'ma_tk': '211', 'ten_tk': 'Phải trả người bán', 'loai_tk': 'nguon_von', 'cap_tk': 2, 'ma_tk_cha': '21', 'tinh_chat': 'co', 'co_the_dk': True},
-    {'ma_tk': '212', 'ten_tk': 'Phải trả người bán là bên liên quan', 'loai_tk': 'nguon_von', 'cap_tk': 2, 'ma_tk_cha': '21', 'tinh_chat': 'co', 'co_the_dk': True},
+    {'ma_tk': '331', 'ten_tk': 'Phải trả người bán', 'loai_tk': 'nguon_von', 'cap_tk': 2, 'ma_tk_cha': '21', 'tinh_chat': 'co', 'co_the_dk': True},
+    {'ma_tk': '332', 'ten_tk': 'Phải trả người bán là bên liên quan', 'loai_tk': 'nguon_von', 'cap_tk': 2, 'ma_tk_cha': '21', 'tinh_chat': 'co', 'co_the_dk': True},
 
     {'ma_tk': '22', 'ten_tk': 'Thuế và các khoản phải nộp nhà nước', 'loai_tk': 'nguon_von', 'cap_tk': 1, 'tinh_chat': 'co', 'co_the_dk': False},
     {'ma_tk': '222', 'ten_tk': 'Thuế thu nhập doanh nghiệp phải nộp', 'loai_tk': 'nguon_von', 'cap_tk': 2, 'ma_tk_cha': '22', 'tinh_chat': 'co', 'co_the_dk': True},
@@ -129,24 +140,24 @@ TT99_ACCOUNTS = [
     {'ma_tk': '533', 'ten_tk': 'Thu nhập từ nợ khó đòi đã xử lý', 'loai_tk': 'doanh_thu', 'cap_tk': 2, 'ma_tk_cha': '53', 'tinh_chat': 'co', 'co_the_dk': True},
     {'ma_tk': '538', 'ten_tk': 'Thu nhập khác', 'loai_tk': 'doanh_thu', 'cap_tk': 2, 'ma_tk_cha': '53', 'tinh_chat': 'co', 'co_the_dk': True},
 
-    {'ma_tk': '54', 'ten_tk': 'Giá vốn hàng bán', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'no', 'co_the_dk': False},
-    {'ma_tk': '541', 'ten_tk': 'Giá vốn hàng bán', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '54', 'tinh_chat': 'no', 'co_the_dk': True},
+    {'ma_tk': '54', 'ten_tk': 'Giá vốn hàng bán', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '541', 'ten_tk': 'Giá vốn hàng bán', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '54', 'tinh_chat': 'du', 'co_the_dk': True},
 
-    {'ma_tk': '55', 'ten_tk': 'Chi phí hoạt động tài chính', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'no', 'co_the_dk': False},
-    {'ma_tk': '632', 'ten_tk': 'Giá vốn hàng bán', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '55', 'tinh_chat': 'no', 'co_the_dk': True},
-    {'ma_tk': '635', 'ten_tk': 'Chi phí tài chính', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '55', 'tinh_chat': 'no', 'co_the_dk': True},
+    {'ma_tk': '55', 'ten_tk': 'Chi phí hoạt động tài chính', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '632', 'ten_tk': 'Giá vốn hàng bán', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '55', 'tinh_chat': 'du', 'co_the_dk': True},
+    {'ma_tk': '635', 'ten_tk': 'Chi phí tài chính', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '55', 'tinh_chat': 'du', 'co_the_dk': True},
 
-    {'ma_tk': '56', 'ten_tk': 'Chi phí bán hàng', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'no', 'co_the_dk': False},
-    {'ma_tk': '641', 'ten_tk': 'Chi phí bán hàng', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '56', 'tinh_chat': 'no', 'co_the_dk': True},
+    {'ma_tk': '56', 'ten_tk': 'Chi phí bán hàng', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '641', 'ten_tk': 'Chi phí bán hàng', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '56', 'tinh_chat': 'du', 'co_the_dk': True},
 
-    {'ma_tk': '57', 'ten_tk': 'Chi phí quản lý doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'no', 'co_the_dk': False},
-    {'ma_tk': '642', 'ten_tk': 'Chi phí quản lý doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '57', 'tinh_chat': 'no', 'co_the_dk': True},
+    {'ma_tk': '57', 'ten_tk': 'Chi phí quản lý doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '642', 'ten_tk': 'Chi phí quản lý doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '57', 'tinh_chat': 'du', 'co_the_dk': True},
 
-    {'ma_tk': '58', 'ten_tk': 'Chi phí khác', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'no', 'co_the_dk': False},
-    {'ma_tk': '811', 'ten_tk': 'Chi phí khác', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '58', 'tinh_chat': 'no', 'co_the_dk': True},
+    {'ma_tk': '58', 'ten_tk': 'Chi phí khác', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '811', 'ten_tk': 'Chi phí khác', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '58', 'tinh_chat': 'du', 'co_the_dk': True},
 
-    {'ma_tk': '59', 'ten_tk': 'Thuế thu nhập doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'no', 'co_the_dk': False},
-    {'ma_tk': '821', 'ten_tk': 'Thuế thu nhập doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '59', 'tinh_chat': 'no', 'co_the_dk': True},
+    {'ma_tk': '59', 'ten_tk': 'Thuế thu nhập doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 1, 'tinh_chat': 'du', 'co_the_dk': False},
+    {'ma_tk': '821', 'ten_tk': 'Thuế thu nhập doanh nghiệp', 'loai_tk': 'chi_phi', 'cap_tk': 2, 'ma_tk_cha': '59', 'tinh_chat': 'du', 'co_the_dk': True},
 
     # CLASS 9: KẾT QUẢ HOẠT ĐỘNG KINH DOANH (Operating Results)
     {'ma_tk': '91', 'ten_tk': 'Xác định kết quả kinh doanh', 'loai_tk': 'ngoai_bang', 'cap_tk': 1, 'tinh_chat': 'luong_tinh', 'co_the_dk': False},
