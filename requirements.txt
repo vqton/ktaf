@@ -1,0 +1,29 @@
+# Flask Core
+Flask==3.0.3
+Werkzeug==3.0.3
+
+# SQLAlchemy & Database
+SQLAlchemy==2.0.30
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+psycopg2-binary==2.9.9  # Bắt buộc dùng binary trên Windows
+
+# Authentication
+Flask-JWT-Extended==4.6.0
+
+# Validation
+marshmallow==3.21.3
+python-dotenv==1.0.1
+
+# Task Queue
+celery==5.3.6
+redis==5.0.4
+
+# Server (Windows-compatible)
+waitress==3.0.0  # WSGI server cho Windows dev
+gunicorn==22.0.0  # Chỉ dùng khi deploy lên Linux
+
+# Utilities
+python-dateutil==2.9.0.post0
+email-validator==2.2.0
+EOF
