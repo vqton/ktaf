@@ -1,3 +1,14 @@
+"""Chart of accounts (Hệ thống tài khoản) API endpoints.
+
+Provides CRUD operations for HeThongTaiKhoan:
+- GET /: List all accounts with optional tree structure
+- POST /: Create new account
+- GET /<ma_tk>: Get account details
+- PUT /<ma_tk>: Update account
+- DELETE /<ma_tk>: Delete account
+- GET /tree: Get hierarchical tree view
+"""
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db

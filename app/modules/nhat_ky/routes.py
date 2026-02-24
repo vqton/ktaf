@@ -1,3 +1,16 @@
+"""Journal entry (Nhật ký) API endpoints.
+
+Provides CRUD operations for:
+- ChungTu: Journal documents
+- DinhKhoan: Booking entries within documents
+
+Features:
+- Automatic balance validation (Nợ = Có)
+- Automatic document number generation
+- Period locking check
+- Approval workflow (duyet/huy)
+"""
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db

@@ -1,3 +1,15 @@
+"""Accounting period (Kỳ kế toán) API endpoints.
+
+Provides CRUD operations for KyKeToan:
+- GET /: List all periods
+- POST /: Create new period
+- GET /<id>: Get period details
+- PUT /<id>: Update period
+- DELETE /<id>: Delete period
+- POST /<id>/khoa: Lock period
+- POST /<id>/mo: Unlock period
+"""
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
