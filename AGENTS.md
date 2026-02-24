@@ -78,6 +78,7 @@ docker compose -f docker-compose.dev.yml up -d
 │   │   ├── thue/            # Taxes
 │   │   ├── bao_cao/         # Financial reports (MauBaoCao)
 │   │   └── thanh_tra/       # Inspection & Audit (QuyetDinh, KienNghi)
+│   │   └── hoa_don_dien_tu/ # E-Invoice (ND123/2020, TT78/2021)
 │   └── utils/
 │       ├── so_hieu.py       # Document number generation
 │       ├── ky_ke_toan.py    # Accounting period handling
@@ -167,6 +168,9 @@ POST   /api/v1/chung-tu/<id>/huy     # Cancel
 GET    /api/v1/so-cai?tk=111&tu=...&den=...  # Ledger
 GET    /api/v1/thanh-tra/ho-so/xuat-chung-tu  # Export documents for inspection
 GET    /api/v1/thanh-tra/kiem-tra/hoa-don-tien-mat  # Pre-inspection checks
+GET    /api/v1/hoa-don-dien-tu/ban-ra  # E-invoices for sales
+POST   /api/v1/hoa-don-dien-tu/ban-ra  # Create e-invoice
+POST   /api/v1/hoa-don-dien-tu/ban-ra/<id>/ky-so  # Sign & send to CQT
 ```
 
 ### Database Conventions
@@ -218,6 +222,12 @@ raise AppException("Kỳ kế toán đã khóa", 400)
 | `QuyetDinhThanhTra` | `quyet_dinh_thanh_tra` | Inspection decisions |
 | `KienNghiThanhTra` | `kien_nghi_thanh_tra` | Inspection recommendations |
 | `PhieuThuThueTruyThu` | `phieu_thu_thue_truy_thu` | Tax penalty payments |
+| `CauHinhHoaDon` | `cau_hinh_hoa_don` | E-invoice configuration |
+| `MauSoKyHieu` | `mau_so_ky_hieu` | Invoice templates |
+| `HoaDonBanRa` | `hoa_don_ban_ra` | E-invoices for sales |
+| `HoaDonMuaVao` | `hoa_don_mua_vao` | E-invoices for purchases |
+| `HoaDonDieuChinh` | `hoa_don_dieu_chinh` | Adjustment invoices |
+| `LichSuXuLyHD` | `lich_su_xu_ly_hd` | Invoice processing history |
 | `User` | `users` | Authentication (public schema) |
 
 ---

@@ -157,6 +157,7 @@ def register_blueprints(app: Flask) -> None:
     from app.modules.thue import thue_bp
     from app.modules.bao_cao import bao_cao_bp
     from app.modules.thanh_tra import thanh_tra_bp
+    from app.modules.hoa_don_dien_tu import hoa_don_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(he_thong_tk_bp, url_prefix='/api/v1/he-thong-tk')
@@ -173,6 +174,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(thue_bp, url_prefix='/api/v1/thue')
     app.register_blueprint(bao_cao_bp, url_prefix='/api/v1/bao-cao')
     app.register_blueprint(thanh_tra_bp, url_prefix='/api/v1/thanh-tra')
+    app.register_blueprint(hoa_don_bp, url_prefix='/api/v1/hoa-don-dien-tu')
 
 
 def register_shell_context(app: Flask) -> None:
