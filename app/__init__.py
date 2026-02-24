@@ -63,6 +63,7 @@ def register_blueprints(app):
     from app.modules.auth import auth_bp
     from app.modules.he_thong_tk import he_thong_tk_bp
     from app.modules.nhat_ky import nhat_ky_bp
+    from app.modules.ky_ke_toan import ky_ke_toan_bp
     from app.modules.danh_muc.doi_tuong import doi_tuong_bp
     from app.modules.danh_muc.hang_hoa import hang_hoa_bp
     from app.modules.danh_muc.ngan_hang import ngan_hang_bp
@@ -77,6 +78,7 @@ def register_blueprints(app):
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(he_thong_tk_bp, url_prefix='/api/v1/he-thong-tk')
     app.register_blueprint(nhat_ky_bp, url_prefix='/api/v1/nhat-ky')
+    app.register_blueprint(ky_ke_toan_bp, url_prefix='/api/v1/ky-ke-toan')
     app.register_blueprint(doi_tuong_bp, url_prefix='/api/v1/doi-tuong')
     app.register_blueprint(hang_hoa_bp, url_prefix='/api/v1/hang-hoa')
     app.register_blueprint(ngan_hang_bp, url_prefix='/api/v1/ngan-hang')
