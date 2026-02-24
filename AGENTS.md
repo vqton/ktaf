@@ -76,7 +76,8 @@ docker compose -f docker-compose.dev.yml up -d
 │   │   ├── tai_san/         # Fixed assets
 │   │   ├── luong/           # Payroll
 │   │   ├── thue/            # Taxes
-│   │   └── bao_cao/         # Financial reports (MauBaoCao)
+│   │   ├── bao_cao/         # Financial reports (MauBaoCao)
+│   │   └── thanh_tra/       # Inspection & Audit (QuyetDinh, KienNghi)
 │   └── utils/
 │       ├── so_hieu.py       # Document number generation
 │       ├── ky_ke_toan.py    # Accounting period handling
@@ -164,6 +165,8 @@ DELETE /api/v1/{module}/<id>       # Delete
 POST   /api/v1/chung-tu/<id>/duyet  # Approve
 POST   /api/v1/chung-tu/<id>/huy     # Cancel
 GET    /api/v1/so-cai?tk=111&tu=...&den=...  # Ledger
+GET    /api/v1/thanh-tra/ho-so/xuat-chung-tu  # Export documents for inspection
+GET    /api/v1/thanh-tra/kiem-tra/hoa-don-tien-mat  # Pre-inspection checks
 ```
 
 ### Database Conventions
@@ -212,6 +215,9 @@ raise AppException("Kỳ kế toán đã khóa", 400)
 | `HangHoa` | `hang_hoa` | Goods/Services |
 | `NganHang` | `ngan_hang` | Bank accounts |
 | `MauBaoCao` | `mau_bao_cao` | Financial report templates |
+| `QuyetDinhThanhTra` | `quyet_dinh_thanh_tra` | Inspection decisions |
+| `KienNghiThanhTra` | `kien_nghi_thanh_tra` | Inspection recommendations |
+| `PhieuThuThueTruyThu` | `phieu_thu_thue_truy_thu` | Tax penalty payments |
 | `User` | `users` | Authentication (public schema) |
 
 ---
