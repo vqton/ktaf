@@ -79,6 +79,7 @@ docker compose -f docker-compose.dev.yml up -d
 │   │   ├── bao_cao/         # Financial reports (MauBaoCao)
 │   │   └── thanh_tra/       # Inspection & Audit (QuyetDinh, KienNghi)
 │   │   └── hoa_don_dien_tu/ # E-Invoice (ND123/2020, TT78/2021)
+│   │   └── audit_log/        # Audit trail, document retention
 │   └── utils/
 │       ├── so_hieu.py       # Document number generation
 │       ├── ky_ke_toan.py    # Accounting period handling
@@ -171,6 +172,9 @@ GET    /api/v1/thanh-tra/kiem-tra/hoa-don-tien-mat  # Pre-inspection checks
 GET    /api/v1/hoa-don-dien-tu/ban-ra  # E-invoices for sales
 POST   /api/v1/hoa-don-dien-tu/ban-ra  # Create e-invoice
 POST   /api/v1/hoa-don-dien-tu/ban-ra/<id>/ky-so  # Sign & send to CQT
+GET    /api/v1/audit-log/logs           # Query audit trail
+POST   /api/v1/audit-log/bao-cao-view  # Log view financial report
+POST   /api/v1/audit-log/bao-quan/khong-cho-phep-xoa  # Check delete allowed
 ```
 
 ### Database Conventions
@@ -228,6 +232,9 @@ raise AppException("Kỳ kế toán đã khóa", 400)
 | `HoaDonMuaVao` | `hoa_don_mua_vao` | E-invoices for purchases |
 | `HoaDonDieuChinh` | `hoa_don_dieu_chinh` | Adjustment invoices |
 | `LichSuXuLyHD` | `lich_su_xu_ly_hd` | Invoice processing history |
+| `AuditLog` | `audit_log` | Immutable audit trail with IP, digital signature |
+| `CauHinhBaoQuan` | `cau_hinh_bao_quan` | Document retention config (10 years) |
+| `LichSuBaoQuan` | `lich_su_bao_quan` | Document retention history |
 | `User` | `users` | Authentication (public schema) |
 
 ---
