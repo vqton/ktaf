@@ -232,6 +232,10 @@ raise AppException("Kỳ kế toán đã khóa", 400)
 | `HoaDonMuaVao` | `hoa_don_mua_vao` | E-invoices for purchases |
 | `HoaDonDieuChinh` | `hoa_don_dieu_chinh` | Adjustment invoices |
 | `LichSuXuLyHD` | `lich_su_xu_ly_hd` | Invoice processing history |
+| `B04DNThuyetMinh` | `b04dn_thuyet_minh` | B04-DN Financial statements explanations |
+| `BCTCSignature` | `bc_tc_signature` | BCTC digital signatures |
+| `BCTCSubmission` | `bc_tc_submission` | Electronic BCTC submission |
+| `DeadlineReminder` | `deadline_reminder` | Compliance deadline reminders |
 | `AuditLog` | `audit_log` | Immutable audit trail with IP, digital signature |
 | `CauHinhBaoQuan` | `cau_hinh_bao_quan` | Document retention config (10 years) |
 | `LichSuBaoQuan` | `lich_su_bao_quan` | Document retention history |
