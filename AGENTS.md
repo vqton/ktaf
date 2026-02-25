@@ -80,6 +80,7 @@ docker compose -f docker-compose.dev.yml up -d
 │   │   └── thanh_tra/       # Inspection & Audit (QuyetDinh, KienNghi)
 │   │   └── hoa_don_dien_tu/ # E-Invoice (ND123/2020, TT78/2021)
 │   │   └── audit_log/        # Audit trail, document retention
+│   │   └── but_toan_cuoi_ky/ # End-of-period (provisions, checklists)
 │   └── utils/
 │       ├── so_hieu.py       # Document number generation
 │       ├── ky_ke_toan.py    # Accounting period handling
@@ -175,6 +176,14 @@ POST   /api/v1/hoa-don-dien-tu/ban-ra/<id>/ky-so  # Sign & send to CQT
 GET    /api/v1/audit-log/logs           # Query audit trail
 POST   /api/v1/audit-log/bao-cao-view  # Log view financial report
 POST   /api/v1/audit-log/bao-quan/khong-cho-phep-xoa  # Check delete allowed
+POST   /api/v1/but-toan-cuoi-ky/du-phong/phai-thu/tao  # Create AR provision
+POST   /api/v1/but-toan-cuoi-ky/du-phong/phai-thu/hach-toan  # Book AR provision
+POST   /api/v1/but-toan-cuoi-ky/du-phong/hang-ton-kho/tao  # Create inventory provision
+GET    /api/v1/but-toan-cuoi-ky/chi-phi-tra-truoc  # Prepaid expenses list
+POST   /api/v1/but-toan-cuoi-ky/checklist/tao  # Create pre-closing checklist
+GET    /api/v1/but-toan-cuoi-ky/checklist/<id>  # Get checklist
+PUT    /api/v1/but-toan-cuoi-ky/checklist/<id>/update  # Update checklist item
+POST   /api/v1/but-toan-cuoi-ky/checklist/<id>/run-auto  # Auto-check items
 ```
 
 ### Database Conventions
@@ -240,6 +249,11 @@ raise AppException("Kỳ kế toán đã khóa", 400)
 | `CauHinhBaoQuan` | `cau_hinh_bao_quan` | Document retention config (10 years) |
 | `LichSuBaoQuan` | `lich_su_bao_quan` | Document retention history |
 | `User` | `users` | Authentication (public schema) |
+| `DuPhongPhaiThu` | `du_phong_phai_thu` | Provision for doubtful debts (TT48) |
+| `DuPhongHangTonKho` | `du_phong_hang_ton_kho` | Provision for inventory devaluation (VAS 02) |
+| `DuPhongDauTu` | `du_phong_dau_tu` | Provision for financial investment |
+| `ChiPhiTraTruoc` | `chi_phi_tra_truoc` | Prepaid expenses (TK 242) |
+| `ChecklistTruocKhoa` | `checklist_truoc_khoa` | Pre-closing checklist |
 
 ---
 
