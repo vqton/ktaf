@@ -49,6 +49,11 @@ public class AMSDbContext : DbContext
     public DbSet<LedgerEntry> LedgerEntries => Set<LedgerEntry>();
 
     /// <summary>
+    /// Gets or sets the AccountBalances DbSet.
+    /// </summary>
+    public DbSet<AccountBalance> AccountBalances => Set<AccountBalance>();
+
+    /// <summary>
     /// Gets or sets the ChartOfAccounts DbSet.
     /// </summary>
     public DbSet<ChartOfAccounts> ChartOfAccounts => Set<ChartOfAccounts>();
@@ -315,6 +320,34 @@ public class AMSDbContext : DbContext
             entity.HasIndex(e => e.FiscalPeriodId);
             entity.HasIndex(e => e.AccountId);
             entity.HasIndex(e => e.VoucherDate);
+        });
+
+        modelBuilder.Entity<AccountBalance>(entity =>
+        {
+            entity.ToTable("account_balances");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("balance_id");
+            entity.Property(e => e.FiscalPeriodId).HasColumnName("fiscal_period_id").IsRequired();
+            entity.Property(e => e.AccountId).HasColumnName("account_id").IsRequired();
+            entity.Property(e => e.AccountCode).HasColumnName("account_code").HasMaxLength(20);
+            entity.Property(e => e.OpeningDebit).HasColumnName("opening_debit").HasPrecision(18, 0);
+            entity.Property(e => e.OpeningCredit).HasColumnName("opening_credit").HasPrecision(18, 0);
+            entity.Property(e => e.PeriodDebit).HasColumnName("period_debit").HasPrecision(18, 0);
+            entity.Property(e => e.PeriodCredit).HasColumnName("period_credit").HasPrecision(18, 0);
+            entity.Property(e => e.ClosingDebit).HasColumnName("closing_debit").HasPrecision(18, 0);
+            entity.Property(e => e.ClosingCredit).HasColumnName("closing_credit").HasPrecision(18, 0);
+
+            entity.HasIndex(e => new { e.FiscalPeriodId, e.AccountId }).IsUnique();
+            entity.HasIndex(e => e.FiscalPeriodId);
+            entity.HasIndex(e => e.AccountId);
+
+            entity.HasOne(e => e.FiscalPeriod)
+                .WithMany()
+                .HasForeignKey(e => e.FiscalPeriodId);
+
+            entity.HasOne(e => e.Account)
+                .WithMany()
+                .HasForeignKey(e => e.AccountId);
         });
 
         modelBuilder.Entity<ChartOfAccounts>(entity =>

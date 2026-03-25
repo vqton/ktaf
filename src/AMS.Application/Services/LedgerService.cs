@@ -14,17 +14,20 @@ public class LedgerService : ILedgerService
     private readonly ILedgerRepository _ledgerRepository;
     private readonly IVoucherRepository _voucherRepository;
     private readonly IChartOfAccountsRepository _accountRepository;
+    private readonly IAccountBalanceRepository _accountBalanceRepository;
 
     public LedgerService(
         IUnitOfWork unitOfWork,
         ILedgerRepository ledgerRepository,
         IVoucherRepository voucherRepository,
-        IChartOfAccountsRepository accountRepository)
+        IChartOfAccountsRepository accountRepository,
+        IAccountBalanceRepository accountBalanceRepository)
     {
         _unitOfWork = unitOfWork;
         _ledgerRepository = ledgerRepository;
         _voucherRepository = voucherRepository;
         _accountRepository = accountRepository;
+        _accountBalanceRepository = accountBalanceRepository;
     }
 
     public async Task<LedgerEntryDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -157,6 +160,46 @@ public class LedgerService : ILedgerService
         }).ToList();
 
         await _ledgerRepository.AddRangeAsync(entries, cancellationToken);
+
+        var balancesToUpdate = new List<AccountBalance>();
+        foreach (var line in voucher.Lines)
+        {
+            var balance = await _accountBalanceRepository.GetByPeriodAndAccountAsync(voucher.FiscalPeriodId, line.AccountId, cancellationToken);
+            if (balance == null)
+            {
+                balance = new AccountBalance
+                {
+                    Id = Guid.NewGuid(),
+                    FiscalPeriodId = voucher.FiscalPeriodId,
+                    AccountId = line.AccountId,
+                    AccountCode = accountCodeMap.GetValueOrDefault(line.AccountId, ""),
+                    OpeningDebit = 0,
+                    OpeningCredit = 0,
+                    PeriodDebit = line.DebitAmount,
+                    PeriodCredit = line.CreditAmount,
+                    ClosingDebit = line.DebitAmount > line.CreditAmount ? line.DebitAmount - line.CreditAmount : 0,
+                    ClosingCredit = line.CreditAmount > line.DebitAmount ? line.CreditAmount - line.DebitAmount : 0,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "system",
+                    IsDeleted = false
+                };
+                await _accountBalanceRepository.AddAsync(balance, cancellationToken);
+            }
+            else
+            {
+                balance.PeriodDebit += line.DebitAmount;
+                balance.PeriodCredit += line.CreditAmount;
+                balance.RecalculateClosing();
+                balance.ModifiedAt = DateTime.UtcNow;
+                balancesToUpdate.Add(balance);
+            }
+        }
+
+        if (balancesToUpdate.Any())
+        {
+            await _accountBalanceRepository.UpdateRangeAsync(balancesToUpdate, cancellationToken);
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return ServiceResult.Success();
