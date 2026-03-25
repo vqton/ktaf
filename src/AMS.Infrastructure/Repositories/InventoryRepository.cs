@@ -5,26 +5,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AMS.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for inventory-related entities (Products, Transactions, Balances).
+/// </summary>
 public class InventoryRepository : IInventoryRepository
 {
     private readonly AMSDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the InventoryRepository class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public InventoryRepository(AMSDbContext context)
     {
         _context = context;
     }
 
+    /// <inheritdoc />
     public async Task<Product?> GetProductByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Products.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<Product?> GetProductByCodeAsync(string productCode, CancellationToken cancellationToken = default)
     {
         return await _context.Products
             .FirstOrDefaultAsync(p => p.ProductCode == productCode, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<(IEnumerable<Product> Products, int TotalCount)> GetAllPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _context.Products.Where(p => !p.IsDeleted);
@@ -39,6 +49,7 @@ public class InventoryRepository : IInventoryRepository
         return (items, totalCount);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Product>> GetActiveProductsAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Products
@@ -47,22 +58,26 @@ public class InventoryRepository : IInventoryRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task AddProductAsync(Product product, CancellationToken cancellationToken = default)
     {
         await _context.Products.AddAsync(product, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default)
     {
         _context.Products.Update(product);
         await Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public async Task<InventoryTransaction?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.InventoryTransactions.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<(IEnumerable<InventoryTransaction> Transactions, int TotalCount)> GetByProductPagedAsync(Guid productId, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _context.InventoryTransactions.Where(t => t.ProductId == productId && !t.IsDeleted);
@@ -77,6 +92,7 @@ public class InventoryRepository : IInventoryRepository
         return (items, totalCount);
     }
 
+    /// <inheritdoc />
     public async Task<(IEnumerable<InventoryTransaction> Transactions, int TotalCount)> GetByWarehousePagedAsync(Guid warehouseId, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _context.InventoryTransactions.Where(t => t.WarehouseId == warehouseId && !t.IsDeleted);
@@ -91,11 +107,13 @@ public class InventoryRepository : IInventoryRepository
         return (items, totalCount);
     }
 
+    /// <inheritdoc />
     public async Task AddTransactionAsync(InventoryTransaction transaction, CancellationToken cancellationToken = default)
     {
         await _context.InventoryTransactions.AddAsync(transaction, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<InventoryBalance>> GetBalancesAsync(Guid? warehouseId = null, CancellationToken cancellationToken = default)
     {
         var query = _context.InventoryBalances
@@ -108,18 +126,21 @@ public class InventoryRepository : IInventoryRepository
         return await query.ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<InventoryBalance?> GetProductBalanceAsync(Guid productId, Guid warehouseId, CancellationToken cancellationToken = default)
     {
         return await _context.InventoryBalances
             .FirstOrDefaultAsync(b => b.ProductId == productId && b.WarehouseId == warehouseId && !b.IsDeleted, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task UpdateBalanceAsync(InventoryBalance balance, CancellationToken cancellationToken = default)
     {
         _context.InventoryBalances.Update(balance);
         await Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public async Task AddBalanceAsync(InventoryBalance balance, CancellationToken cancellationToken = default)
     {
         await _context.InventoryBalances.AddAsync(balance, cancellationToken);

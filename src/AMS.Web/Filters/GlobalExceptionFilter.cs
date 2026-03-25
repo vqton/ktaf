@@ -4,15 +4,23 @@ using Serilog;
 
 namespace AMS.Web.Filters;
 
+/// <summary>
+/// Global exception filter that handles unhandled exceptions and returns appropriate responses.
+/// </summary>
 public class GlobalExceptionFilter : IExceptionFilter
 {
     private readonly Serilog.ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the GlobalExceptionFilter class.
+    /// </summary>
+    /// <param name="logger">The Serilog logger instance.</param>
     public GlobalExceptionFilter(Serilog.ILogger logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public void OnException(ExceptionContext context)
     {
         var exception = context.Exception;

@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-25 14:30  
+**Last Updated:** 2026-03-25 16:00  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -16,7 +16,7 @@
 | AMS.Infrastructure | ✅ Pass | 0 |
 | AMS.Web | ⚠️ Warning | 1 (Newtonsoft.Json vulnerability) |
 
-**Last Build:** ✅ PASSED - 2026-03-25 13:00 (9 warnings, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-25 16:00 (9 warnings, 0 errors)
 
 ---
 
@@ -213,6 +213,11 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 16. Implemented TaxRepository and InventoryRepository
 17. Added InventoryBalance navigation property for Product
 18. Added DefaultPersonalDeduction constant (11,000,000 VND)
+19. Added XML documentation to Infrastructure layer (AMSDbContext, DbContextFactory, UnitOfWork, 8 Repositories)
+20. Added XML documentation to Web layer (VouchersController, BaseController, GlobalExceptionFilter, Program.cs)
+21. Fixed VoucherService.PostAsync to create ledger entries via LedgerService.CreateFromVoucherAsync
+22. Added fiscal period validation before posting (must be Open)
+23. Added transaction wrapper for posting voucher and creating ledger entries
 
 ## Domain Entities Complete (2026-03-24)
 
@@ -237,7 +242,7 @@ All 5 repository interfaces implemented:
 - ILedgerRepository
 - IFiscalPeriodRepository
 
-## XML Documentation (2026-03-24)
+## XML Documentation (2026-03-25)
 
 All domain entities, enums, exceptions, interfaces, and Application layer have XML documentation:
 - Base classes: `<summary>` for class and all properties
@@ -248,3 +253,5 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
 - Application DTOs: `<summary>` for class and all properties
 - Application Services: `<summary>`, `<param>`, and `<returns>` tags
 - Application Constants: `<summary>` for class and constants
+- **Infrastructure layer (2026-03-25):** Added `<summary>` to AMSDbContext, DbContextFactory, UnitOfWork, and all 8 Repositories
+- **Web layer (2026-03-25):** Added `<summary>` to Controllers, BaseController, GlobalExceptionFilter, Program.cs

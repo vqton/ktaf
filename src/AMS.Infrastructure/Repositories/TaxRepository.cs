@@ -5,15 +5,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AMS.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for tax-related entities (TaxRates, PITBrackets, PITAllowances).
+/// </summary>
 public class TaxRepository : ITaxRepository
 {
     private readonly AMSDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the TaxRepository class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public TaxRepository(AMSDbContext context)
     {
         _context = context;
     }
 
+    /// <inheritdoc />
     public async Task<TaxRate?> GetTaxRateByKeyAsync(string taxRateKey, DateTime date, CancellationToken cancellationToken = default)
     {
         return await _context.TaxRates
@@ -24,6 +32,7 @@ public class TaxRepository : ITaxRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TaxRate>> GetActiveTaxRatesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.TaxRates
@@ -33,11 +42,13 @@ public class TaxRepository : ITaxRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task AddTaxRateAsync(TaxRate taxRate, CancellationToken cancellationToken = default)
     {
         await _context.TaxRates.AddAsync(taxRate, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<PITBracket>> GetActivePITBracketsAsync(CancellationToken cancellationToken = default)
     {
         return await _context.PITBrackets
@@ -46,11 +57,13 @@ public class TaxRepository : ITaxRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task AddPITBracketAsync(PITBracket bracket, CancellationToken cancellationToken = default)
     {
         await _context.PITBrackets.AddAsync(bracket, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<PITAllowance>> GetEmployeeAllowancesAsync(Guid employeeId, DateTime date, CancellationToken cancellationToken = default)
     {
         return await _context.PITAllowances

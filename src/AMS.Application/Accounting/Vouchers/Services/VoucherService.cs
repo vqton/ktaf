@@ -2,6 +2,7 @@ using AMS.Application.Accounting.Vouchers.DTOs;
 using AMS.Application.Accounting.Vouchers.Interfaces;
 using AMS.Application.Common.Constants;
 using AMS.Application.Common.Results;
+using AMS.Application.Interfaces;
 using AMS.Domain.Enums;
 using AMS.Domain.Interfaces;
 
@@ -14,16 +15,22 @@ public class VoucherService : IVoucherService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IVoucherRepository _voucherRepository;
+    private readonly ILedgerService _ledgerService;
 
     /// <summary>
     /// Initializes a new instance of the VoucherService class.
     /// </summary>
     /// <param name="unitOfWork">The unit of work instance.</param>
     /// <param name="voucherRepository">The voucher repository instance.</param>
-    public VoucherService(IUnitOfWork unitOfWork, IVoucherRepository voucherRepository)
+    /// <param name="ledgerService">The ledger service instance.</param>
+    public VoucherService(
+        IUnitOfWork unitOfWork,
+        IVoucherRepository voucherRepository,
+        ILedgerService ledgerService)
     {
         _unitOfWork = unitOfWork;
         _voucherRepository = voucherRepository;
+        _ledgerService = ledgerService;
     }
 
     /// <inheritdoc />
@@ -174,15 +181,38 @@ public class VoucherService : IVoucherService
         if (voucher == null)
             return ServiceResult<VoucherDto>.Failure("Không tìm thấy chứng từ.");
 
+        if (voucher.FiscalPeriod == null)
+            return ServiceResult<VoucherDto>.Failure("Kỳ kế toán không tồn tại.");
+
+        if (voucher.FiscalPeriod.Status != FiscalPeriodStatus.Open)
+            return ServiceResult<VoucherDto>.Failure($"Kỳ kế toán {voucher.FiscalPeriod.Year}/{voucher.FiscalPeriod.Month} đang đóng, không thể hạch toán.");
+
         try
         {
+            await _unitOfWork.BeginTransactionAsync();
+
             voucher.Post();
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var ledgerResult = await _ledgerService.CreateFromVoucherAsync(id, cancellationToken);
+            if (!ledgerResult.IsSuccess)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ServiceResult<VoucherDto>.Failure($"Hạch toán thất bại: {ledgerResult.ErrorMessage}");
+            }
+
+            await _unitOfWork.CommitTransactionAsync();
             return ServiceResult<VoucherDto>.Success(MapToDto(voucher));
         }
         catch (Domain.Exceptions.DomainException ex)
         {
+            await _unitOfWork.RollbackTransactionAsync();
             return ServiceResult<VoucherDto>.Failure(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            return ServiceResult<VoucherDto>.Failure($"Lỗi hệ thống: {ex.Message}");
         }
     }
 

@@ -6,21 +6,34 @@ using AMS.Application.Common.Constants;
 
 namespace AMS.Web.Controllers;
 
+/// <summary>
+/// Controller for managing accounting vouchers.
+/// </summary>
 public class VouchersController : BaseController
 {
     private readonly IVoucherService _voucherService;
 
+    /// <summary>
+    /// Initializes a new instance of the VouchersController class.
+    /// </summary>
+    /// <param name="voucherService">The voucher service.</param>
     public VouchersController(IVoucherService voucherService)
     {
         _voucherService = voucherService;
     }
 
+    /// <summary>
+    /// Displays the voucher list page.
+    /// </summary>
     public async Task<IActionResult> Index(int page = 1, int pageSize = AppConstants.DefaultPageSize)
     {
         var result = await _voucherService.GetAllAsync(page, pageSize);
         return View(result);
     }
 
+    /// <summary>
+    /// Displays the voucher details page.
+    /// </summary>
     public async Task<IActionResult> Details(Guid id)
     {
         var voucher = await _voucherService.GetByIdAsync(id);
@@ -30,11 +43,17 @@ public class VouchersController : BaseController
         return View(voucher);
     }
 
+    /// <summary>
+    /// Displays the create voucher form.
+    /// </summary>
     public IActionResult Create()
     {
         return View();
     }
 
+    /// <summary>
+    /// Creates a new voucher.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([FromForm] CreateVoucherDto voucher)
@@ -53,6 +72,9 @@ public class VouchersController : BaseController
         return RedirectToAction(nameof(Details), new { id = result.Data!.Id });
     }
 
+    /// <summary>
+    /// Submits a voucher for approval.
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Submit(Guid id)
     {
@@ -60,6 +82,9 @@ public class VouchersController : BaseController
         return FromResult(result);
     }
 
+    /// <summary>
+    /// Approves a pending voucher.
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Approve(Guid id)
     {
@@ -68,6 +93,9 @@ public class VouchersController : BaseController
         return FromResult(result);
     }
 
+    /// <summary>
+    /// Rejects a pending voucher.
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Reject(Guid id, [FromForm] string reason)
     {
@@ -75,6 +103,9 @@ public class VouchersController : BaseController
         return FromResult(result);
     }
 
+    /// <summary>
+    /// Posts an approved voucher to the general ledger.
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Post(Guid id)
     {

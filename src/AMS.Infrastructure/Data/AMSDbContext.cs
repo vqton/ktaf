@@ -10,48 +10,198 @@ using AMS.Domain.Entities.Audit;
 using AMS.Domain.Entities.Cfg;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Entity Framework Core database context for the AMS application.
+/// Manages all database operations and entity configurations.
+/// </summary>
 public class AMSDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes a new instance of the AMSDbContext class.
+    /// </summary>
+    /// <param name="options">The options to be used by the DbContext.</param>
     public AMSDbContext(DbContextOptions<AMSDbContext> options) : base(options)
     {
     }
 
+    /// <summary>
+    /// Gets or sets the Vouchers DbSet.
+    /// </summary>
     public DbSet<Voucher> Vouchers => Set<Voucher>();
+    /// <summary>
+    /// Gets or sets the VoucherLines DbSet.
+    /// </summary>
     public DbSet<VoucherLine> VoucherLines => Set<VoucherLine>();
+
+    /// <summary>
+    /// Gets or sets the VoucherAttachments DbSet.
+    /// </summary>
     public DbSet<VoucherAttachment> VoucherAttachments => Set<VoucherAttachment>();
+
+    /// <summary>
+    /// Gets or sets the FiscalPeriods DbSet.
+    /// </summary>
     public DbSet<FiscalPeriod> FiscalPeriods => Set<FiscalPeriod>();
+
+    /// <summary>
+    /// Gets or sets the LedgerEntries DbSet.
+    /// </summary>
     public DbSet<LedgerEntry> LedgerEntries => Set<LedgerEntry>();
+
+    /// <summary>
+    /// Gets or sets the ChartOfAccounts DbSet.
+    /// </summary>
     public DbSet<ChartOfAccounts> ChartOfAccounts => Set<ChartOfAccounts>();
+
+    /// <summary>
+    /// Gets or sets the Customers DbSet.
+    /// </summary>
     public DbSet<Customer> Customers => Set<Customer>();
+
+    /// <summary>
+    /// Gets or sets the Vendors DbSet.
+    /// </summary>
     public DbSet<Vendor> Vendors => Set<Vendor>();
+
+    /// <summary>
+    /// Gets or sets the Employees DbSet.
+    /// </summary>
     public DbSet<Employee> Employees => Set<Employee>();
+
+    /// <summary>
+    /// Gets or sets the Products DbSet.
+    /// </summary>
     public DbSet<Product> Products => Set<Product>();
+
+    /// <summary>
+    /// Gets or sets the ProductGroups DbSet.
+    /// </summary>
     public DbSet<ProductGroup> ProductGroups => Set<ProductGroup>();
+
+    /// <summary>
+    /// Gets or sets the Warehouses DbSet.
+    /// </summary>
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+
+    /// <summary>
+    /// Gets or sets the Banks DbSet.
+    /// </summary>
     public DbSet<Bank> Banks => Set<Bank>();
+
+    /// <summary>
+    /// Gets or sets the ExchangeRates DbSet.
+    /// </summary>
     public DbSet<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
+
+    /// <summary>
+    /// Gets or sets the FixedAssets DbSet.
+    /// </summary>
     public DbSet<FixedAsset> FixedAssets => Set<FixedAsset>();
+
+    /// <summary>
+    /// Gets or sets the DepreciationSchedules DbSet.
+    /// </summary>
     public DbSet<DepreciationSchedule> DepreciationSchedules => Set<DepreciationSchedule>();
+
+    /// <summary>
+    /// Gets or sets the AssetGroups DbSet.
+    /// </summary>
     public DbSet<AssetGroup> AssetGroups => Set<AssetGroup>();
+
+    /// <summary>
+    /// Gets or sets the Departments DbSet.
+    /// </summary>
     public DbSet<Department> Departments => Set<Department>();
+
+    /// <summary>
+    /// Gets or sets the TaxRates DbSet.
+    /// </summary>
     public DbSet<TaxRate> TaxRates => Set<TaxRate>();
+
+    /// <summary>
+    /// Gets or sets the PITBrackets DbSet.
+    /// </summary>
     public DbSet<PITBracket> PITBrackets => Set<PITBracket>();
+
+    /// <summary>
+    /// Gets or sets the PITAllowances DbSet.
+    /// </summary>
     public DbSet<PITAllowance> PITAllowances => Set<PITAllowance>();
+
+    /// <summary>
+    /// Gets or sets the ExciseTaxItems DbSet.
+    /// </summary>
     public DbSet<ExciseTaxItem> ExciseTaxItems => Set<ExciseTaxItem>();
+
+    /// <summary>
+    /// Gets or sets the TaxDeclarations DbSet.
+    /// </summary>
     public DbSet<TaxDeclaration> TaxDeclarations => Set<TaxDeclaration>();
+
+    /// <summary>
+    /// Gets or sets the VATInputRegisters DbSet.
+    /// </summary>
     public DbSet<VATInputRegister> VATInputRegisters => Set<VATInputRegister>();
+
+    /// <summary>
+    /// Gets or sets the VATOutputRegisters DbSet.
+    /// </summary>
     public DbSet<VATOutputRegister> VATOutputRegisters => Set<VATOutputRegister>();
+
+    /// <summary>
+    /// Gets or sets the TaxPayments DbSet.
+    /// </summary>
     public DbSet<TaxPayment> TaxPayments => Set<TaxPayment>();
+
+    /// <summary>
+    /// Gets or sets the TaxCalendars DbSet.
+    /// </summary>
     public DbSet<TaxCalendar> TaxCalendars => Set<TaxCalendar>();
+
+    /// <summary>
+    /// Gets or sets the CITAdjustments DbSet.
+    /// </summary>
     public DbSet<CITAdjustment> CITAdjustments => Set<CITAdjustment>();
+
+    /// <summary>
+    /// Gets or sets the CITLossCarryForwards DbSet.
+    /// </summary>
     public DbSet<CITLossCarryForward> CITLossCarryForwards => Set<CITLossCarryForward>();
+
+    /// <summary>
+    /// Gets or sets the WithholdingTaxes DbSet.
+    /// </summary>
     public DbSet<WithholdingTax> WithholdingTaxes => Set<WithholdingTax>();
+
+    /// <summary>
+    /// Gets or sets the InventoryTransactions DbSet.
+    /// </summary>
     public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
+
+    /// <summary>
+    /// Gets or sets the InventoryBalances DbSet.
+    /// </summary>
     public DbSet<InventoryBalance> InventoryBalances => Set<InventoryBalance>();
+
+    /// <summary>
+    /// Gets or sets the NumberSequences DbSet.
+    /// </summary>
     public DbSet<NumberSequence> NumberSequences => Set<NumberSequence>();
+
+    /// <summary>
+    /// Gets or sets the AppSettings DbSet.
+    /// </summary>
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+
+    /// <summary>
+    /// Gets or sets the OutboxMessages DbSet.
+    /// </summary>
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
+    /// <summary>
+    /// Configures the model relationships and constraints using Fluent API.
+    /// </summary>
+    /// <param name="modelBuilder">The builder used to configure the model.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

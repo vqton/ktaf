@@ -7,20 +7,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AMS.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for Voucher entities.
+/// </summary>
 public class VoucherRepository : IVoucherRepository
 {
     private readonly AMSDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the VoucherRepository class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public VoucherRepository(AMSDbContext context)
     {
         _context = context;
     }
 
+    /// <inheritdoc />
     public async Task<Voucher?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Vouchers.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<Voucher?> GetByIdWithLinesAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Vouchers
@@ -29,6 +38,7 @@ public class VoucherRepository : IVoucherRepository
             .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Voucher>> GetByPeriodAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default)
     {
         return await _context.Vouchers
@@ -36,6 +46,7 @@ public class VoucherRepository : IVoucherRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<Voucher>> GetByStatusAsync(AMS.Domain.Enums.VoucherStatus status, CancellationToken cancellationToken = default)
     {
         return await _context.Vouchers
@@ -43,6 +54,7 @@ public class VoucherRepository : IVoucherRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<(IEnumerable<Voucher> Vouchers, int TotalCount)> GetAllPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _context.Vouchers.AsQueryable();
@@ -58,6 +70,7 @@ public class VoucherRepository : IVoucherRepository
         return (vouchers, totalCount);
     }
 
+    /// <inheritdoc />
     public async Task<(IEnumerable<Voucher> Vouchers, int TotalCount)> GetByPeriodPagedAsync(Guid fiscalPeriodId, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _context.Vouchers.Where(v => v.FiscalPeriodId == fiscalPeriodId);
@@ -73,6 +86,7 @@ public class VoucherRepository : IVoucherRepository
         return (vouchers, totalCount);
     }
 
+    /// <inheritdoc />
     public async Task<int> GetNextSequenceAsync(Guid fiscalPeriodId, string voucherType, CancellationToken cancellationToken = default)
     {
         var sequence = await _context.NumberSequences
@@ -97,11 +111,13 @@ public class VoucherRepository : IVoucherRepository
         return sequence.CurrentValue;
     }
 
+    /// <inheritdoc />
     public async Task AddAsync(Voucher voucher, CancellationToken cancellationToken = default)
     {
         await _context.Vouchers.AddAsync(voucher, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task UpdateAsync(Voucher voucher, CancellationToken cancellationToken = default)
     {
         _context.Vouchers.Update(voucher);

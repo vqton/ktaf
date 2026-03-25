@@ -1,5 +1,7 @@
 using AMS.Application.Interfaces;
 using AMS.Application.Services;
+using AMS.Application.Accounting.Vouchers.Interfaces;
+using AMS.Application.Accounting.Vouchers.Services;
 using AMS.Domain.Interfaces;
 using AMS.Infrastructure;
 using AMS.Infrastructure.Data;
@@ -25,7 +27,7 @@ builder.Services.AddScoped<IFiscalPeriodRepository, FiscalPeriodRepository>();
 builder.Services.AddScoped<ITaxRepository, TaxRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 
-builder.Services.AddScoped<IVoucherService, AMS.Application.Accounting.Vouchers.Services.VoucherService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IVendorService, VendorService>();
@@ -58,4 +60,7 @@ app.MapGet("/", () => "AMS - Accounting Management System");
 
 app.Run();
 
+/// <summary>
+/// Partial class for Program to support top-level statements.
+/// </summary>
 public partial class Program { }
