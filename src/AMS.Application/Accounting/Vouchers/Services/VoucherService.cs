@@ -223,15 +223,44 @@ public class VoucherService : IVoucherService
         if (voucher == null)
             return ServiceResult<VoucherDto>.Failure("Không tìm thấy chứng từ.");
 
+        if (voucher.FiscalPeriod == null)
+            return ServiceResult<VoucherDto>.Failure("Kỳ kế toán không tồn tại.");
+
+        if (voucher.FiscalPeriod.Status != FiscalPeriodStatus.Open)
+            return ServiceResult<VoucherDto>.Failure($"Kỳ kế toán {voucher.FiscalPeriod.Year}/{voucher.FiscalPeriod.Month} đang đóng, không thể đảo.");
+
         try
         {
+            await _unitOfWork.BeginTransactionAsync();
+
             voucher.Reverse(reversedById);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var reversalVoucherNo = $"{voucher.VoucherNo}-R";
+            var ledgerResult = await _ledgerService.CreateReversalEntriesAsync(
+                id,
+                reversalVoucherNo,
+                voucher.VoucherDate,
+                cancellationToken);
+
+            if (!ledgerResult.IsSuccess)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return ServiceResult<VoucherDto>.Failure($"Đảo bút toán thất bại: {ledgerResult.ErrorMessage}");
+            }
+
+            await _unitOfWork.CommitTransactionAsync();
             return ServiceResult<VoucherDto>.Success(MapToDto(voucher));
         }
         catch (Domain.Exceptions.DomainException ex)
         {
+            await _unitOfWork.RollbackTransactionAsync();
             return ServiceResult<VoucherDto>.Failure(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            return ServiceResult<VoucherDto>.Failure($"Lỗi hệ thống: {ex.Message}");
         }
     }
 

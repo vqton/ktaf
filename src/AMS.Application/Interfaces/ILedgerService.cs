@@ -13,4 +13,5 @@ public interface ILedgerService
     Task<IEnumerable<LedgerSummaryDto>> GetSummaryAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default);
     Task<ServiceResult<LedgerEntryDto>> CreateAsync(CreateLedgerEntryDto dto, CancellationToken cancellationToken = default);
     Task<ServiceResult> CreateFromVoucherAsync(Guid voucherId, CancellationToken cancellationToken = default);
+    Task<ServiceResult> CreateReversalEntriesAsync(Guid originalVoucherId, string reversalVoucherNo, DateTime reversalDate, CancellationToken cancellationToken = default);
 }

@@ -217,6 +217,9 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 20. Added XML documentation to Web layer (VouchersController, BaseController, GlobalExceptionFilter, Program.cs)
 21. Fixed VoucherService.PostAsync to create ledger entries via LedgerService.CreateFromVoucherAsync
 22. Added fiscal period validation before posting (must be Open)
+24. Fixed VoucherService.ReverseAsync to create reversal ledger entries
+25. Added LedgerService.CreateReversalEntriesAsync method (swaps debit/credit, marks as adjustment)
+26. Added fiscal period validation before reversing (must be Open)
 23. Added transaction wrapper for posting voucher and creating ledger entries
 
 ## Domain Entities Complete (2026-03-24)

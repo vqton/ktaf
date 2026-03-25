@@ -158,6 +158,44 @@ public class LedgerService : ILedgerService
         return ServiceResult.Success();
     }
 
+    public async Task<ServiceResult> CreateReversalEntriesAsync(Guid originalVoucherId, string reversalVoucherNo, DateTime reversalDate, CancellationToken cancellationToken = default)
+    {
+        var originalEntries = await _ledgerRepository.GetByVoucherAsync(originalVoucherId, cancellationToken);
+        if (!originalEntries.Any())
+            return ServiceResult.Failure("Không tìm thấy bút toán gốc.");
+
+        var reversedEntries = originalEntries.Select(entry => new LedgerEntry
+        {
+            Id = Guid.NewGuid(),
+            FiscalPeriodId = entry.FiscalPeriodId,
+            VoucherId = entry.VoucherId,
+            VoucherNo = reversalVoucherNo,
+            VoucherDate = reversalDate,
+            AccountId = entry.AccountId,
+            AccountCode = entry.AccountCode,
+            DebitAmount = entry.CreditAmount,
+            CreditAmount = entry.DebitAmount,
+            Description = $"[REVERSAL] {entry.Description}",
+            CurrencyCode = entry.CurrencyCode,
+            ExchangeRate = entry.ExchangeRate,
+            PartnerId = entry.PartnerId,
+            PartnerType = entry.PartnerType,
+            CostCenter = entry.CostCenter,
+            ProjectCode = entry.ProjectCode,
+            ContractNo = entry.ContractNo,
+            IsAdjustEntry = true,
+            RefVoucherNo = entry.VoucherNo,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "system",
+            IsDeleted = false
+        }).ToList();
+
+        await _ledgerRepository.AddRangeAsync(reversedEntries, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return ServiceResult.Success();
+    }
+
     private static List<string> Validate(CreateLedgerEntryDto dto)
     {
         var errors = new List<string>();
