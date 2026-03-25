@@ -1,146 +1,78 @@
-# Virtual environments
-.venv
-venv
-*.env
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Xx]64/
+[Xx]86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio 2022/2025 cache and settings
+.vs/
+# Unlock next line if you want to check in Microsoft.PythonTools.Analysis.v1.0.etl
+#*.etl
+
+## Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.history/
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## Windows candidate artifacts
+thumbtails.db
+desktop.ini
+
+## Node.js / Web build tools (nếu bạn dùng SPA như React/Angular)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+bower_components/
+
+## Entity Framework Core (Migrations & SQLite)
+*.db
+*.sqlite
+*.scripts/
+
+## Secrets and environment variables
 .env
+.env.test
+.env.production
 .env.local
-.env.*.local
+appsettings.Development.json
+appsettings.local.json
+UserSecrets/
+secrets.json
 
-# Runtime/distraction files
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-*.egg
-*.egg-info
-*.scons
-*.swp
-*.sok
-*.so
-*.rpm
-*.spec
-*.dll
-*.dylib
-*.wsp
-*.wsf
-*.wsx
-*.cache
-*.log
-*.sqlite3
-*.sqlite
+## Publishing output
+publish/
+*.azurepubxml
+*.pubxml
+*.pubxml.user
 
-# Build directories
-build/
-dist/
-*.dll
-*.dylib
-*.exe
-*.gif
-*.jar
-*.js
-*.json
-*.log
-*.o
-*.rgb
-*.rpm
-*.so
-*.swf
-*.tap
-*.tgz
-*.whl
-*.xpi
-*.ztf
+## Docker
+.dockerignore
 
-# IDE/Editor specific files
-.DS_Store
-.idea
-*.xcdatamodeld
-*.xib
-*.ipynb.checkpoint
-*.ipynb_dir
-*.ipynb_checkpoints
-*~
-
-# Hidden files
-*.swp
-*.sok
-*.sQueen
-*.sQkie
-
-# OS-specific files
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN
-NTFS GiorgioFS
-*.orig
-*.bak
-*.swp
-*.spres
-*.spro
-*.sScc
-
-# Test/coverage files
-coverage/
-.nox/
-*.pyc
-*.tox
-*.pytest_cache
-*.pytest_runtests.cpython-3*.pyc
-*.cache
-*.db-cachedir
-*.log
-
-# Configuration files
-*.key
-*.pem
-*.pfx
-*.ca
-*.cfg
-*.conf
-*.ini
-*.yml
-*.yaml
-*.yml.lock
-*.env
-
-# Framework-specific (customize based on your project)
-*.log
-*.pyc
-*.pyo
-*.pyd
-*.so
-
-# Lock files
-*.lock
-*.rbenv
-*.rbenv.lock
-*.sublime-project
-*.sublime-workspace
-
-# Job/log files
-*.log
-*.out
-*.err
-*.bst
-*.xml
-*.tsv
-*.csv
-*.slim
-*.hbs
-*.php
-*.js
-*.json
-*.yaml
-*.yml
-
-# Miscellaneous
-*.o
-*.pyc
-*.pyo
-*.pyd
-*.so
-*.swp
-*.sparql
-*.sparql.db
-*.sqlite3
-*.sqlite
+## Testing
+TestResults/
+*.vstest

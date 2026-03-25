@@ -1,290 +1,175 @@
-# AGENTS.md - Accounting Application (Thông tư 99/2025)
+# AGENTS.md - Guidelines for Agentic Coding in glApp Repository
 
-Flask-based accounting app following Vietnamese regulations (Thông tư 99/2025/TT-BTC).
+This file provides instructions for AI coding agents working in this repository. It covers build/test commands, code style guidelines, and development practices.
 
-**Tech Stack:** Python 3.11+, Flask 3.0.3, SQLAlchemy 2.0, PostgreSQL 15+, Flask-Migrate, Flask-JWT-Extended, Marshmallow, Celery + Redis
-
----
-
-## Build / Lint / Test Commands
-
-### Setup (Windows PowerShell)
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### Running the Application
-```powershell
-$env:FLASK_APP = "run.py"
-$env:FLASK_ENV = "development"
-flask run --host=0.0.0.0 --port=5000
-```
-
-### Database Migrations
-```powershell
-flask db migrate -m "migration message"
-flask db upgrade
-flask db downgrade
-```
-
-### Running Tests
-```powershell
-pytest tests/ -v
-pytest tests/test_nhat_ky.py -v
-pytest tests/test_nhat_ky.py::test_validate_but_toan_can_bang -v
-pytest tests/ --cov=app --cov-report=html
-```
-
-### Celery Worker (Windows)
-```powershell
-celery -A app.celery worker --loglevel=info --pool=solo
-```
-
-### Docker Services
-```powershell
-docker compose -f docker-compose.dev.yml up -d
-```
+## Table of Contents
+1. [Build, Lint, and Test Commands](#1-build-lint-and-test-commands)
+2. [Code Style Guidelines](#2-code-style-guidelines)
+3. [Development Practices](#3-development-practices)
+4. [Project Structure](#4-project-structure)
+5. [References](#5-references)
 
 ---
 
-## Code Style Guidelines
+## 1. Build, Lint, and Test Commands
 
-### Project Structure
-```
-.
-├── app/
-│   ├── __init__.py           # Application Factory
-│   ├── extensions.py         # db, jwt, migrate, celery
-│   ├── config.py             # Config class (Dev/Prod/Test)
-│   ├── models/
-│   │   └── __init__.py      # Base + AuditMixin
-│   ├── modules/
-│   │   ├── auth/            # Authentication (models.py, routes.py)
-│   │   ├── danh_muc/
-│   │   │   ├── doi_tuong/  # Customers/Suppliers
-│   │   │   ├── hang_hoa/   # Goods/Services
-│   │   │   └── ngan_hang/  # Bank accounts
-│   │   ├── he_thong_tk/     # Chart of accounts
-│   │   ├── nhat_ky/         # Journal entries (ChungTu, DinhKhoan)
-│   │   ├── ky_ke_toan/      # Accounting periods
-│   │   ├── so_cai/          # Ledger (SoCai, SoDuDauKy)
-│   │   ├── tien/            # Cash/bank accounting
-│   │   ├── cong_no/         # Receivables/payables
-│   │   ├── hang_ton_kho/    # Inventory
-│   │   ├── tai_san/         # Fixed assets
-│   │   ├── luong/           # Payroll
-│   │   ├── thue/            # Taxes
-│   │   ├── bao_cao/         # Financial reports (MauBaoCao)
-│   │   └── thanh_tra/       # Inspection & Audit (QuyetDinh, KienNghi)
-│   │   └── hoa_don_dien_tu/ # E-Invoice (ND123/2020, TT78/2021)
-│   │   └── audit_log/        # Audit trail, document retention
-│   │   └── but_toan_cuoi_ky/ # End-of-period (provisions, checklists)
-│   └── utils/
-│       ├── so_hieu.py       # Document number generation
-│       ├── ky_ke_toan.py    # Accounting period handling
-│       └── validators.py    # Validation helpers
-├── migrations/              # Flask-Migrate
-├── scripts/
-│   └── dev.ps1            # PowerShell dev commands
-├── tests/                  # Test files
-├── alembic.ini            # Alembic config
-├── docker-compose.dev.yml # Redis + PostgreSQL
-├── run.py                 # Entry point
-└── requirements.txt
-```
+### Build Commands
+- Build entire solution: `dotnet build E:\glApp\AMS.sln`
+- Build specific project: `dotnet build src/<ProjectName>/<ProjectName>.csproj`
+- Clean solution: `dotnet clean E:\glApp\AMS.sln`
+- Restore packages: `dotnet restore E:\glApp\AMS.sln`
+
+### Test Commands
+> Note: This repository currently does not have a test project configured.
+> When tests are added, standard .NET test commands will apply:
+> - Run all tests: `dotnet test E:\glApp\AMS.sln`
+> - Run specific test project: `dotnet test tests/<TestProject>/<TestProject>.csproj`
+> - Run single test method: `dotnet test --filter "FullyQualifiedName~Namespace.Class.Method"`
+> - Run tests with specific category: `dotnet test --filter "Category=UnitTest"`
+
+### Lint/Formatting Commands
+- Format code with dotnet format: `dotnet format`
+- Analyze code style violations: `dotnet format --verify-no-changes`
+- Run Roslyn analyzers: Built into build process
+
+### Development Server
+- Run web application: `dotnet run --project src/AMS.Web/AMS.Web.csproj`
+- Run with hot reload: `dotnet watch run --project src/AMS.Web/AMS.Web.csproj`
+
+---
+
+## 2. Code Style Guidelines
+
+This repository follows the coding standards defined in [CODING_STANDARDS.md](CODING_STANDARDS.md). Key guidelines include:
 
 ### Naming Conventions
-| Type | Convention | Example |
-|------|------------|---------|
-| Models | PascalCase | `ChungTu`, `DinhKhoan` |
-| Tables | snake_case | `chung_tu`, `dinh_khoan` |
-| Routes/Blueprints | snake_case | `/api/v1/nhat-ky/` |
-| Variables | snake_case | `so_ct`, `ngay_ct` |
-| Constants | UPPER_SNAKE_CASE | `MAX_AMOUNT` |
+- **Classes, Interfaces**: PascalCase (e.g., `PurchaseOrderService`, `IInvoiceRepository`)
+- **Methods, Properties**: PascalCase (e.g., `CalculateTotalAmount()`, `OrderDate`)
+- **Variables, Parameters**: camelCase (e.g., `purchaseOrder`, `orderId`)
+- **Private Fields**: `_camelCase` (e.g., `_unitOfWork`, `_logger`)
+- **Constants**: PascalCase (e.g., `MaxApprovalLevel`, `DefaultCurrency`)
+- **Interfaces**: Prefix with `I` (e.g., `IOrderService`, `IRepository<T>`)
 
-### Import Order (PEP 8)
-1. Standard library
-2. Third-party packages
-3. Local application imports
+### Code Organization
+- Follow layered architecture: `Web → Application → Domain`, `Infrastructure → Application`
+- Domain layer must not reference any other layers
+- Web layer must not call Infrastructure directly - must go through Application
+- Organize code by business module, not by technical type (e.g., `/Purchasing/` not `/Services/`)
 
-```python
-from datetime import datetime
-from typing import Optional
+### Formatting
+- Use 4 spaces for indentation (not tabs)
+- Place opening braces on same line as declaration
+- One statement per line
+- Maximum line length: 120 characters
+- Use `var` only when type is obvious from right-hand side
+- Prefer expression-bodied members for simple methods/properties
 
-from flask import Blueprint, request, jsonify
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from marshmallow import Schema, fields
+### Imports/Usings
+- Sort usings alphabetically
+- Group System usings first, then third-party, then project-specific
+- Remove unused usings
+- Use namespace aliases only when necessary to resolve conflicts
 
-from app.extensions import db
-from app.modules.nhat_ky.models import ChungTu
-```
-
-### SQLAlchemy 2.0 Style
-```python
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import String, Numeric, ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMPTZ
-from sqlalchemy import text
-
-class Base(DeclarativeBase):
-    pass
-
-class AuditMixin:
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, server_default=text("NOW()"), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, server_default=text("NOW()"),
-        onupdate=text("NOW()"), nullable=False
-    )
-
-class MyModel(AuditMixin, Base):
-    __tablename__ = "my_model"
-    __table_args__ = {"schema": "accounting"}
-    
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
-```
-
-### API Response Format
-```json
-{
-  "success": true,
-  "data": {},
-  "message": "",
-  "pagination": {"page": 1, "per_page": 20, "total": 100}
-}
-```
-
-### API URL Conventions
-```
-GET    /api/v1/{module}/           # List
-POST   /api/v1/{module}/           # Create
-GET    /api/v1/{module}/<id>       # Detail
-PUT    /api/v1/{module}/<id>       # Update
-DELETE /api/v1/{module}/<id>       # Delete
-POST   /api/v1/chung-tu/<id>/duyet  # Approve
-POST   /api/v1/chung-tu/<id>/huy     # Cancel
-GET    /api/v1/so-cai?tk=111&tu=...&den=...  # Ledger
-GET    /api/v1/thanh-tra/ho-so/xuat-chung-tu  # Export documents for inspection
-GET    /api/v1/thanh-tra/kiem-tra/hoa-don-tien-mat  # Pre-inspection checks
-GET    /api/v1/hoa-don-dien-tu/ban-ra  # E-invoices for sales
-POST   /api/v1/hoa-don-dien-tu/ban-ra  # Create e-invoice
-POST   /api/v1/hoa-don-dien-tu/ban-ra/<id>/ky-so  # Sign & send to CQT
-GET    /api/v1/audit-log/logs           # Query audit trail
-POST   /api/v1/audit-log/bao-cao-view  # Log view financial report
-POST   /api/v1/audit-log/bao-quan/khong-cho-phep-xoa  # Check delete allowed
-POST   /api/v1/but-toan-cuoi-ky/du-phong/phai-thu/tao  # Create AR provision
-POST   /api/v1/but-toan-cuoi-ky/du-phong/phai-thu/hach-toan  # Book AR provision
-POST   /api/v1/but-toan-cuoi-ky/du-phong/hang-ton-kho/tao  # Create inventory provision
-GET    /api/v1/but-toan-cuoi-ky/chi-phi-tra-truoc  # Prepaid expenses list
-POST   /api/v1/but-toan-cuoi-ky/checklist/tao  # Create pre-closing checklist
-GET    /api/v1/but-toan-cuoi-ky/checklist/<id>  # Get checklist
-PUT    /api/v1/but-toan-cuoi-ky/checklist/<id>/update  # Update checklist item
-POST   /api/v1/but-toan-cuoi-ky/checklist/<id>/run-auto  # Auto-check items
-```
-
-### Database Conventions
-- Use PostgreSQL schema: `accounting`
-- Use BIGSERIAL for auto-increment
-- Use VARCHAR with CHECK constraint instead of ENUM
-- Use JSONB for flexible metadata
-- Use `server_default=text("NOW()")` instead of `default=datetime.now`
-- Always define indexes for query performance
+### Types
+- Prefer immutable types when possible
+- Use records for DTOs and data carriers
+- Make fields readonly unless they need to be modified after construction
+- Use appropriate accessibility modifiers (private by default)
 
 ### Error Handling
-```python
-class AppException(Exception):
-    def __init__(self, message: str, status_code: int = 400):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
+- Use `ServiceResult<T>` pattern for application layer operations
+- Handle business rule violations in Domain layer with `DomainException`
+- Log all exceptions with contextual information
+- Never expose exception details to users in production
+- Use global exception handler for unhandled exceptions
 
-@app.errorhandler(AppException)
-def handle_app_exception(e):
-    return jsonify({"success": False, "message": e.message}), e.status_code
+### Logging
+- Use structured logging with contextual properties
+- Log at appropriate levels (Debug, Info, Warn, Error, Fatal)
+- Never log sensitive information (passwords, tokens, personal data)
+- Include relevant IDs and contextual information in log messages
 
-raise AppException("Kỳ kế toán đã khóa", 400)
-```
+### Security
+- Always use parameterized queries or EF/LINQ - never concatenate SQL
+- Validate all input at application layer boundary
+- Use role-based authorization with `[Authorize]` attributes
+- Implement proper authentication and session management
 
-### Accounting-Specific Rules
-1. **Balance Validation**: Total Debit (Nợ) = Total Credit (Có) for every document
-2. **Period Locking**: Check `ky_ke_toan.trang_thai = 'khoa'` before INSERT/UPDATE/DELETE
-3. **Document Numbers**: Format `[LoạiCT][YYYY][MM]-[00001]` (e.g., PC202501-00001)
-4. **Use pg_advisory_lock()** for concurrent document number generation
-
----
-
-## Database Models
-
-### Core Models
-| Model | Table | Description |
-|-------|-------|-------------|
-| `HeThongTaiKhoan` | `he_thong_tai_khoan` | Chart of accounts (TT99) |
-| `ChungTu` | `chung_tu` | Journal documents |
-| `DinhKhoan` | `dinh_khoan` | Journal entries (debit/credit) |
-| `KyKeToan` | `ky_ke_toan` | Accounting periods |
-| `SoCai` | `so_cai` | General ledger |
-| `SoDuDauKy` | `so_du_dau_ky` | Opening balances |
-| `DoiTuong` | `doi_tuong` | Customers/Suppliers |
-| `HangHoa` | `hang_hoa` | Goods/Services |
-| `NganHang` | `ngan_hang` | Bank accounts |
-| `MauBaoCao` | `mau_bao_cao` | Financial report templates |
-| `QuyetDinhThanhTra` | `quyet_dinh_thanh_tra` | Inspection decisions |
-| `KienNghiThanhTra` | `kien_nghi_thanh_tra` | Inspection recommendations |
-| `PhieuThuThueTruyThu` | `phieu_thu_thue_truy_thu` | Tax penalty payments |
-| `CauHinhHoaDon` | `cau_hinh_hoa_don` | E-invoice configuration |
-| `MauSoKyHieu` | `mau_so_ky_hieu` | Invoice templates |
-| `HoaDonBanRa` | `hoa_don_ban_ra` | E-invoices for sales |
-| `HoaDonMuaVao` | `hoa_don_mua_vao` | E-invoices for purchases |
-| `HoaDonDieuChinh` | `hoa_don_dieu_chinh` | Adjustment invoices |
-| `LichSuXuLyHD` | `lich_su_xu_ly_hd` | Invoice processing history |
-| `B04DNThuyetMinh` | `b04dn_thuyet_minh` | B04-DN Financial statements explanations |
-| `BCTCSignature` | `bc_tc_signature` | BCTC digital signatures |
-| `BCTCSubmission` | `bc_tc_submission` | Electronic BCTC submission |
-| `DeadlineReminder` | `deadline_reminder` | Compliance deadline reminders |
-| `AuditLog` | `audit_log` | Immutable audit trail with IP, digital signature |
-| `CauHinhBaoQuan` | `cau_hinh_bao_quan` | Document retention config (10 years) |
-| `LichSuBaoQuan` | `lich_su_bao_quan` | Document retention history |
-| `User` | `users` | Authentication (public schema) |
-| `DuPhongPhaiThu` | `du_phong_phai_thu` | Provision for doubtful debts (TT48) |
-| `DuPhongHangTonKho` | `du_phong_hang_ton_kho` | Provision for inventory devaluation (VAS 02) |
-| `DuPhongDauTu` | `du_phong_dau_tu` | Provision for financial investment |
-| `ChiPhiTraTruoc` | `chi_phi_tra_truoc` | Prepaid expenses (TK 242) |
-| `ChecklistTruocKhoa` | `checklist_truoc_khoa` | Pre-closing checklist |
+### Performance
+- Implement pagination for all list queries
+- Use `AsNoTracking()` for read-only queries
+- Select only required fields in queries
+- Cache infrequently changing reference data
+- Avoid N+1 query patterns
 
 ---
 
-## Git Workflow
-```
-main        ← production-ready
-develop     ← integration branch
-feature/*   ← new features
-hotfix/*    ← urgent fixes
-```
+## 3. Development Practices
 
-### Commit Message Format
-```
-feat(module):     new feature
-fix(module):      bug fix
-chore:            configuration, setup
-refactor(module): code restructuring
-test(module):     test additions
-docs:             documentation
-db(module):       migration, schema changes
-```
+### Git Workflow
+- Main branch: `main` (production-ready)
+- Development branch: `develop` (integration branch)
+- Feature branches: `feature/*`
+- Hotfix branches: `hotfix/*`
+- Release branches: `release/*`
+- Pull requests required for all changes
+- Minimum 1 reviewer for PRs
+- Squash merge for feature branches
+
+### Class Design
+- Follow SOLID principles
+- Single Responsibility Principle: One class should have one reason to change
+- Methods should not exceed 50 lines
+- Avoid magic numbers - use named constants
+- Comments should explain why, not what (code should be self-explanatory)
+
+### Dependency Management
+- Use dependency injection for all external dependencies
+- Prefer constructor injection over property injection
+- Register services with appropriate lifetimes (Scoped, Transient, Singleton)
+- Avoid static dependencies and service locator pattern
+
+### Testing (when implemented)
+- Write unit tests for business logic
+- Use Arrange-Act-Assert pattern
+- Test public interface, not private implementation details
+- Mock external dependencies
+- Aim for high code coverage on complex logic
+- Write integration tests for critical workflows
 
 ---
 
-## Environment Variables (.env)
-```env
-DATABASE_URL=postgresql+psycopg2://postgres:password@localhost:5432/accounting_db
-REDIS_URL=redis://localhost:6379/0
-FLASK_ENV=development
-SECRET_KEY=your-secret-key
-JWT_SECRET_KEY=your-jwt-secret
+## 4. Project Structure
+
+```
+AMS.sln
+├── src/
+│   ├── AMS.Web              # Presentation layer: Controllers, Views, ViewModels
+│   ├── AMS.Application      # Application layer: Use cases, Services, DTOs, Interfaces
+│   ├── AMS.Domain           # Domain layer: Entities, Business rules, Domain Events
+│   ├── AMS.Infrastructure   # Infrastructure layer: EF DbContext, Repositories, Email, File...
+│   └── AMS.Common           # Shared: Extensions, Constants, Helpers
+└── tools/
+    └── dbcreate/            # Database creation scripts and tools
 ```
 
-**Key References:** `ARCHITECTURE.md`, `requirements.txt`, `.env.example`
+### Layer Responsibilities
+- **Web**: HTTP concerns only (routing, model binding, action results)
+- **Application**: Orchestrates use cases, coordinates between domain and infrastructure
+- **Domain**: Pure business logic and rules, no infrastructure concerns
+- **Infrastructure**: Technical implementations (database, file system, external services)
+- **Common**: Cross-cutting concerns used across layers
+
+---
+
+## 5. References
+
+- [CODING_STANDARDS.md](CODING_STANDARDS.md) - Primary coding standards document
+- [AMS.sln](AMS.sln) - Solution file
+- Individual project files in src/ directory for specific project configurations
+
+### When in Doubt
+1. Follow existing code patterns in the repository
+2. Refer to CODING_STANDARDS.md for detailed guidelines
+3. Maintain consistency with surrounding code
+4. Prioritize readability and maintainability

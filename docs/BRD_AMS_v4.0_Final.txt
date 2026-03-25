@@ -1,0 +1,197 @@
+﻿⬛ AMS
+Accounting Management System
+
+BUSINESS REQUIREMENTS DOCUMENT
+Tài Liệu Yêu Cầu Nghiệp Vụ - Phiên Bản 4.0
+Bổ sung: System Architecture Diagram + PostgreSQL 16 (Tùy chọn song song SQL Server 2022) + .NET 10
+Dự ánAMS - Accounting Management SystemPhiên bản
+4.1 - Nâng cấp .NET 10 + PostgreSQL 16Ngày lập23/03/2026Thay thếBRD v3.0 (23/03/2026) - file duy nhất có hiệu lựcDB Option ASQL Server 2022 Developer/Standard - Windows Auth (SSPI) ONLYDB Option BPostgreSQL 16 - Windows Auth (SSPI/pg_ident) OR Username+Password (pg_hba.conf)Visual mớiSystem Architecture Diagram (5 tầng, song song dual-DB) nhúng trong Chương 3Căn cứ pháp lýTT 99/2025 | Luật 67/2025 | Luật TNCN 2025 | Luật GTGT 2025 | Luật TTĐB 2025 | Luật 108/2025Trạng tháiFINAL DRAFT - Sẵn sàng Review & Sign-off
+
+
+AMS BRD v4.0 | On-Premise | Microsoft Ecosystem | SQL Server 2022 OR PostgreSQL 16 | Bootstrap 5.3 | .NET 10
+
+
+LỊCH SỬ THAY ĐỔI
+VerNgàyNội dungv1.023/03/2026Bản nháp đầu tiên: 11 module KT, module TX sơ bộv2.023/03/2026Cập nhật 5 Luật Thuế 2025-2026: TTĐB, NTC, QLTv3.023/03/2026Tổng hợp hoàn chỉnh: 15 Chương, Compliance Matrix 24 điều, Risk Register 10 rủi rov4.0 - HIỆN TẠI
+23/03/2026
+Bổ sung: (1) System Architecture Diagram 5 tầng PNG nhúng trong Word; (2) PostgreSQL 16 song song SQL Server 2022 - Tùy chọn admin khi cài đặt; (3) Cả 2 auth method cho PG; (4) So sánh SQL Server vs PostgreSQL chi tiết; (5) Chương 3 viết lại hoàn toàn
+v4.1
+24/03/2026
+Nâng cấp .NET 8 lên .NET 10: ASP.NET Core 10, EF Core 10, Npgsql 10, Microsoft.AspNetCore.Authentication.Negotiate 10
+
+MỤC LỤC
+LỊCH SỬ THAY ĐỔI	2
+MỤC LỤC	3
+CHƯƠNG 1 - TỔNG QUAN DỰ ÁN	5
+1.1 Mục Tiêu	5
+1.2 Phạm Vi	5
+CHƯƠNG 2 - CĂN CỨ PHÁP LÝ ĐẦY ĐỦ	6
+2.1 Văn Bản Kế Toán	6
+2.2 Văn Bản Thuế 2025-2026	6
+CHƯƠNG 3 - KIẾN TRÚC HỆ THỐNG & TECH STACK	7
+3.1 System Architecture Diagram	7
+3.2 Mô Tả Chi Tiết 5 Tầng	9
+3.3 So Sánh SQL Server 2022 vs PostgreSQL 16	10
+3.4 Cấu Hình Database - Hướng Dẫn Admin	11
+Option A: SQL Server 2022 - Cấu Hình	11
+Option B: PostgreSQL 16 - Cấu Hình	11
+3.5 Tech Stack Đầy Đủ	13
+CHƯƠNG 4 - STAKEHOLDERS & MA TRẬN PHÂN QUYỀN	14
+4.1 Actor & AD Security Group Mapping	14
+4.2 Ma Trận Phân Quyền	14
+CHƯƠNG 5 - YÊU CẦU NGHIỆP VỤ: MODULE KẾ TOÁN	15
+5.1 Module DM - Danh Mục	15
+5.2 Module CT - Chứng Từ	15
+5.3 Các Module Còn Lại	15
+CHƯƠNG 6 - YÊU CẦU NGHIỆP VỤ: MODULE THUẾ (TX)	17
+6.1 TX-GTGT (Luật GTGT 2025 + NĐ 174/2025)	17
+6.2 TX-TNDN (Luật 67/2025 + NĐ 320/2025)	17
+6.3 TX-TNCN (Luật TNCN 2025 + NQ 110/2025)	17
+6.4 TX-TTĐB (Luật TTĐB 2025 - Hiệu lực 01/01/2026)	18
+6.5 TX-QLT (Luật 108/2025 - Hiệu lực 01/7/2026)	18
+CHƯƠNG 7 - THIẾT KẾ CƠ SỞ DỮ LIỆU (DUAL DATABASE)	19
+7.1 Nguyên Tắc Chung Cho Cả Hai DB	19
+7.2 Bảng Dữ Liệu Chính - Cú Pháp Song Song	20
+7.3 Bảng Tham Số Thuế - Dùng Chung Cả Hai DB	20
+7.4 Stored Procedures Chính	20
+CHƯƠNG 8 - YÊU CẦU PHI CHỨC NĂNG (NFR)	22
+8.1 Hiệu Năng	22
+8.2 Bảo Mật	22
+CHƯƠNG 9 - MA TRẬN TUÂN THỦ PHÁP LÝ (COMPLIANCE MATRIX)	23
+CHƯƠNG 10 - KẾ HOẠCH TRIỂN KHAI & RỦI RO	24
+10.1 Roadmap 9 Phase	24
+10.2 Risk Register (Top 10)	24
+CHƯƠNG 11 - PHỤ LỤC	25
+11.1 Tham Số Thuế Cần Cấu Hình Trước Go-Live	25
+11.2 appsettings.json - Cấu Hình Database	25
+
+
+
+CHƯƠNG 1 - TỔNG QUAN DỰ ÁN
+1.1 Mục Tiêu
+• Xây dựng webapp kế toán AMS on-premise, tuân thủ TT 99/2025 và toàn bộ luật thuế 2025-2026
+• Hệ sinh thái Microsoft: ASP.NET Core 10, IIS, Windows AD, Bootstrap 5.3
+• Linh hoạt database: SQL Server 2022 (mặc định) hoặc PostgreSQL 16 - admin chọn 1 lần khi cài đặt
+• Bảo mật: Windows AD authentication, không lưu mật khẩu riêng; PostgreSQL hỗ trợ thêm pg login
+• Tham số hoá 100% thuế suất trong DB - tự cập nhật theo lộ trình pháp lý
+
+1.2 Phạm Vi
+Tiêu chíNội dungLoại hìnhCông ty TNHH / Cổ phần - Thương mại, Dịch vụ, Phân phối hàng TTĐBDatabaseSQL Server 2022 Developer/Standard  OR  PostgreSQL 16 - chọn 1 khi càiAuth DBSQL Server: Windows SSPI only. PostgreSQL: Windows SSPI + pg login (cả hai)Chế độ KTTT 99/2025/TT-BTC (từ 01/01/2026)ThuếGTGT 8%/10% | TNDN 20%/15% | TNCN 5 bậc | TTĐB | NTC (Optional)Ngoài phạm viCloud, SaaS, mobile app, multi-tenant
+
+CHƯƠNG 2 - CĂN CỨ PHÁP LÝ ĐẦY ĐỦ
+2.1 Văn Bản Kế Toán
+Văn bảnNội dungHiệu lựcTrạng tháiLuật 88/2015/QH13 (sđbs 56/2024)Luật Kế toán - nền tảng pháp lý01/01/2017 | 01/01/2025✅ HLựcNĐ 174/2016/NĐ-CPHướng dẫn chi tiết Luật KT 201501/01/2017✅ HLựcTT 99/2025/TT-BTCChế độ KT DN MỚI - thay TT 200/201401/01/2026🆕 MỚINĐ 123/2020 + NĐ 70/2025Hóa đơn điện tử, chứng từ01/6/2025🆕 SĐBTT 45/2013/TT-BTCKhấu hao TSCĐCòn HLực✅ HLựcTT 48/2019/TT-BTCTrích lập dự phòngCòn HLực✅ HLực
+2.2 Văn Bản Thuế 2025-2026
+Văn bảnNội dungHiệu lựcẢnh hưởng AMSLuật 67/2025/QH15Luật TNDN mới01/10/2025TS 20%/15%. NĐ 320/2025 hướng dẫnLuật TNCN 2025Biểu 5 bậcLương từ 01/01/20265/10/20/30/35%. GTGC 15,5tr+6,2tr/NPTLuật GTGT 2025GTGT sđbs01/01/2026DT≤500tr miễn. Bỏ điều kiện HT hoàn thuếNĐ 174/2025Giảm GTGT 2%01/7/2025-31/12/20268% thay 10%. Auto switch sang 10% ngày 01/01/2027Luật TTĐB 2025TTĐB mới01/01/2026Đồ uống có đường 10%. Bia/Rượu tăng 5%/nămLuật 108/2025/QH15Quản lý thuế mới01/7/2026Khai điện tử 100%. Phạt 0.03%/ngày chậm nộpTT 103/2014/TT-BTCThuế nhà thầu NTCòn HLựcOptional module NTCNQ 110/2025GTGC 15,5tr01/01/2026PITAllowances cập nhật
+
+CHƯƠNG 3 - KIẾN TRÚC HỆ THỐNG & TECH STACK
+3.1 System Architecture Diagram
+Sơ đồ dưới đây mô tả toàn bộ kiến trúc 5 tầng của AMS chạy on-premise. Điểm đặc biệt của v4.0: Tầng Data hỗ trợ song song hai lựa chọn cơ sở dữ liệu - admin chọn 1 lần duy nhất trong appsettings.json khi cài đặt, không cần thay đổi code.
+
+📌 Lưu ý: Sơ đồ trên là ảnh tĩnh (PNG 220 DPI). Phiên bản SVG tương tác xem tại file UseCase_Register_AMS_v1.0.xlsx tab Architecture hoặc trong hệ thống wiki nội bộ.
+
+
+3.2 Mô Tả Chi Tiết 5 Tầng
+TầngThành phầnCông nghệ / Chi tiếtTầng 0 - ClientTrình duyệt nội bộChrome/Edge. Windows Negotiate Auth tự động (Kerberos). Không hỗ trợ trình duyệt cá nhân hoặc mobile từ ngoài mạng nội bộ.Tầng 0 - ClientUI FrameworkBootstrap 5.3.x + Bootstrap Icons 1.11 + DataTables.js 2.x + Chart.js 4.x + Select2 4.1 + Flatpickr 4.6 + SweetAlert2 + SignalR clientTầng 1 - PresentationWeb ServerIIS 10 trên Windows Server 2019/2022. HTTPS/TLS 1.2+ bắt buộc. HTTP → HTTPS redirect. HSTS header.Tầng 1 - Presentation
+App Framework
+ASP.NET Core 10 MVC + Razor Pages. RDLC report viewer nhúng. SSRS Report Server (optional).
+Tầng 2 - Logic
+Core Services
+REST Web API, Windows Auth Middleware, RBAC Policy, EF Core 10, Hangfire Scheduler (job store = DB), SignalR Hub, SerilogTầng 2 - LogicDomain Modules12 module: DM, CT, QT, CN, HH, TS, CP, DT, TX (GTGT/TNDN/TNCN/TTĐB/NTC/QLT), SK, BC, SYSTầng 3 - DataOption A: SQL Server 2022Developer Ed (dev/test) → Standard Ed (production). Auth: Integrated Security=SSPI ONLY. T-SQL Stored Procs. SQL Server Agent backup.Tầng 3 - DataOption B: PostgreSQL 16Auth: Windows SSPI qua pg_ident.conf  HOẶC  username+password qua pg_hba.conf. Npgsql EF provider. pgAgent/pg_cron backup. PL/pgSQL procs.Tầng 4 - InfraDomain & IdentityActive Directory - source of truth cho user/role. LDAP sync mỗi 15 phút.Tầng 4 - InfraCommunicationExchange Server hoặc Microsoft 365 SMTP relay (port 587, TLS) cho email notification.Tầng 4 - InfraFile & DevOpsWindows File Server (UNC path) lưu file scan CT. Azure DevOps Server on-premise (Git + CI/CD pipelines).Tầng 5 - ExternalOutbound integrationsHĐDT API (MISA/VNPT/Viettel), XML iTaxViewer (TCT), API kiểm tra MST, Import sao kê NH (CSV/Excel)
+
+3.3 So Sánh SQL Server 2022 vs PostgreSQL 16
+🆕 MỚI: Cả hai lựa chọn đều expose IDENTICAL schemas (acc, tax, audit, cfg, rpt). Application code không cần thay đổi - chỉ EF Core provider và connection string khác nhau.
+
+Tiêu chíSQL Server 2022 (Option A)PostgreSQL 16 (Option B)Phiên bảnDeveloper Edition (dev) → Standard (prod)PostgreSQL 16.x (Community - miễn phí)LicenseTrả phí (Standard ~$900/core hoặc $3,700/server)Miễn phí - PostgreSQL LicenseAuthenticationWindows Auth (SSPI) - BẮT BUỘC. Không có SQL Login.Windows Auth (SSPI/pg_ident) HOẶC Username+Password (pg_hba.conf md5/scram-sha-256)Connection StringServer=.;DB=AMS_DB;Integrated Security=SSPI;Host=localhost;DB=ams_db;Username=ams_user; (pg login) hoặc Integrated Security=true; (SSPI)EF Core ProviderMicrosoft.EntityFrameworkCore.SqlServerNpgsql.EntityFrameworkCore.PostgreSQLStored ProceduresT-SQL (SP_PostVoucher, SP_CloseMonth...)PL/pgSQL (tương đương T-SQL, cú pháp khác)Backup & RestoreSQL Server Agent + Maintenance PlanspgAgent hoặc pg_cron + pg_dump/pg_restoreCollation tiếng ViệtVietnamese_CI_AS trên từng columnCollation: vi-x-icu (ICU collation) hoặc C.UTF-8Full-Text SearchSQL Server FTS built-inpg_trgm extension (LIKE fast), tsvector/tsqueryJSON SupportNVARCHAR(MAX) + JSON functionsJSONB native (indexable, nhanh hơn)MonitoringSQL Server Profiler, Activity Monitorpg_stat_activity, pgBadger, pgAdmin 4Windows IntegrationNative - SQL Server đi kèm WindowsCài riêng. pg_ident.conf map AD user → pg userKhuyến nghịƯu tiên nếu team đã quen SQL ServerƯu tiên nếu muốn zero license cost, hoặc sau này cần scale Linux
+
+3.4 Cấu Hình Database - Hướng Dẫn Admin
+Option A: SQL Server 2022 - Cấu Hình
+Kết nối bắt buộc dùng Windows Authentication. Không được cấu hình SQL Login cho bất kỳ user nào.
+BướcThao tácChi tiết1appsettings.json"DatabaseProvider": "SqlServer" "ConnectionStrings:DefaultConnection": "Server=.;Database=AMS_DB;Integrated Security=SSPI;TrustServerCertificate=True"2SQL Server AuthAuthentication Mode: Windows Authentication ONLY. Không enable Mixed Mode.3AD Group → SQL LoginTạo SQL Server Login từ AD Group: CREATE LOGIN [DOMAIN\AMS_App] FROM WINDOWS4DB PermissionGRANT db_datareader, db_datawriter, EXECUTE TO [DOMAIN\AMS_App]5Hangfire Job StoreHangfire tự tạo schema trong AMS_DB. SQL Server Agent cho backup riêng biệt.6Developer Ed noteDeveloper Edition KHÔNG dùng production. Nâng cấp Standard Edition trước go-live.
+Option B: PostgreSQL 16 - Cấu Hình
+PostgreSQL hỗ trợ cả hai phương thức xác thực - admin chọn theo chính sách bảo mật của doanh nghiệp.
+Auth MethodMô tảCấu hình pg_hba.confappsettings.jsonWindows Auth (SSPI)Dùng Kerberos/NTLM qua AD - không cần nhập mật khẩu PGhost  all  all  127.0.0.1/32  sspi  include_realm=0  krb_realm=DOMAIN.LOCAL"DatabaseProvider": "PostgreSql" Integrated Security=true;Host=localhost;Database=ams_dbpg Login (Username+Password)Tạo user riêng trong PostgreSQL - phù hợp khi AD chưa cấu hình SSPIhost  all  ams_user  127.0.0.1/32  scram-sha-256"DatabaseProvider": "PostgreSql" Host=localhost;Database=ams_db;Username=ams_user;Password=<secret>Cả 2 (Hybrid)AD user dùng SSPI; service account dùng pg loginCấu hình cả 2 dòng pg_hba theo thứ tự ưu tiênChọn theo user type - EF DbContext factory
+BướcThao tác PostgreSQLChi tiết1appsettings.json"DatabaseProvider": "PostgreSql" (switch EF provider). Connection string tương ứng auth method.2Tạo databaseCREATE DATABASE ams_db WITH ENCODING='UTF8' LC_COLLATE='vi_VN.UTF-8' TEMPLATE=template0;3Tạo user (pg login)CREATE ROLE ams_user LOGIN PASSWORD 'strong_password'; GRANT CONNECT ON DATABASE ams_db TO ams_user;4Tạo schemasCREATE SCHEMA acc; CREATE SCHEMA tax; CREATE SCHEMA audit; CREATE SCHEMA cfg; CREATE SCHEMA rpt;5EF Migrationdotnet ef database update -- sẽ tạo toàn bộ tables theo migration scripts6Collation tiếng ViệtĐặt collation cho cột Name, Description: ALTER TABLE... ALTER COLUMN name TYPE varchar COLLATE "vi-x-icu"7pgAgent backupCấu hình pgAgent job: pg_dump -Fc ams_db > /backup/ams_$(date +%Y%m%d).dump hàng đêm8SSPI config (nếu dùng)Sửa pg_ident.conf: map AD username → pg username. Khởi động lại PostgreSQL service.
+
+3.5 Tech Stack Đầy Đủ
+TầngThành phầnCông nghệ / Phiên bảnGhi chúPresentationFrontendBootstrap 5.3.x + Bootstrap IconsKhông CDN ngoài - bundle localDataTableDataTables.js 2.x + BS5 pluginSort, filter, paginate, export tất cả bảngChartsChart.js 4.xDashboard - không phụ thuộc cloudDropdownSelect2 4.1.x + BS5 themeDanh mục dàiDatePickerFlatpickr 4.6.x (locale vi)Ngày tháng VNNotificationSweetAlert2 + ToastifyKHÔNG dùng browser alert()Real-timeSignalR (ASP.NET Core Hub)Push: duyệt CT, cảnh báo, deadline thuếLogic
+Framework
+ASP.NET Core 10 LTS (C#)APIREST Web API + Swagger/OpenAPITích hợp HĐDT, thuếAuthWindows Authentication (Kerberos/NTLM)KHÔNG form login/passwordAuthzRBAC + Policy (AD Security Group)Unauthorized → HTTP 403 + AuditLogSchedulerHangfire (job store = DB)Khấu hao, phân bổ, switch thuế, emailLoggingSerilog → SQL + Rolling FileRetention 90 ngàyReportsSSRS / RDLCMẫu TT 99/2025 sửa không cần deployDataOption ASQL Server 2022 Developer/StandardWindows Auth SSPI ONLYOption BPostgreSQL 16 (Community)SSPI + pg login - chọn qua appsettings.jsonORM
+EF Core 10 Code-First MigrationsSP cho nghiệp vụ phức tạpBackupSQL Agent (SS) / pgAgent (PG)Full daily + Differential hourlyInfraWeb ServerIIS 10 - Windows Server 2019/2022TLS 1.2+. TLS 1.0/1.1 disabledIdentityActive Directory - Domain ControllerLDAP sync mỗi 15 phútEmailExchange / M365 SMTP (port 587 TLS)Notification + nhắc deadlineFilesWindows File Server (UNC)Lưu file scan CTDevOpsAzure DevOps Server on-premise + GitCI/CD pipelines nội bộ
+
+CHƯƠNG 4 - STAKEHOLDERS & MA TRẬN PHÂN QUYỀN
+4.1 Actor & AD Security Group Mapping
+ActorAD Security GroupQuyền hạn chínhKeToanTruongAMS_KeToanTruongDuyệt CT, khoá sổ, ký BCTC, khai thuế, cấu hình tham sốKeToanVienAMS_KeToanVienNhập CT, xem sổ sách, lập tờ khai (không duyệt)ThuQuyAMS_ThuQuyPhiếu Thu/Chi, sổ quỹ, TK ngân hàngTaxOfficerAMS_TaxOfficerModule TX đầy đủ, xuất XML tờ khaiGiamDocAMS_GiamDocDashboard, BCTC xem (read-only)ITAdminAMS_ITAdminQuản lý AD Group, cấu hình DB, backup, tham số thuếReadOnlyAMS_ReadOnlyXem sổ sách, báo cáo, audit log - không ghi
+4.2 Ma Trận Phân Quyền
+Chức năngKT TrưởngKT ViênThủ quỹTax OfficerGiám đốcIT AdminRead-onlyDanh mục (TKKT, KH, NCC, HH)✅ FullXem/Thêm❌Xem❌✅ FullXemNhập chứng từ (Draft)✅✅✅ (PT/PC)❌❌❌❌Duyệt & Post chứng từ✅❌❌❌❌❌❌Khoá sổ tháng / năm✅❌❌❌❌❌❌Module Thuế - lập tờ khai✅ DuyệtXem❌✅ Lập❌❌❌Xuất XML iTaxViewer✅❌❌✅❌❌❌BCTC B01-B04✅ FullHạn chế❌Xem✅ Xem❌✅ XemDashboard BI✅❌❌✅✅❌✅Cấu hình tham số thuế✅❌❌❌❌✅❌Quản lý User / AD / DB❌❌❌❌❌✅ Full❌Audit Log✅ Xem❌❌Xem❌✅ Full✅ Xem
+
+CHƯƠNG 5 - YÊU CẦU NGHIỆP VỤ: MODULE KẾ TOÁN
+Toàn bộ module áp dụng TT 99/2025/TT-BTC và Luật KT 88/2015. Xem chi tiết đầy đủ tại BRD v3.0 Chương 5. Phần này tóm tắt các module chính.
+
+5.1 Module DM - Danh Mục
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứDM-001TKKT TT 99/2025Cài sẵn TKKT mới. Ẩn TK 3338 (môn bài) từ 01/01/2026. Thêm TK cấp 2-4.MUSTKeToanTruongTT 99/2025DM-002Khách hàng / NCCCRUD + kiểm tra MST API TCT + Import Excel. Đánh dấu NCC nước ngoài (NTC).MUSTKeToanTruongLuật KTDM-004Hàng hoá / DVGắn flag TTĐB + thuế suất. Phân loại HH/DV/TS. Thuế suất GTGT.MUSTKeToanTruongLuật TTĐB 2025DM-006Nhân viên & TNCNLiên kết AD username. GTGC 15,5tr + NPT 6,2tr/người.MUSTKeToanTruongLuật TNCN 2025
+5.2 Module CT - Chứng Từ
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứCT-001Tạo Chứng TừSố CT tự sinh. Validate ΣNợ=ΣCó. Đa loại: PT/PC/BC/BN/HB/HM/NK/XK/PB/KC/BT.MUSTKeToanVienĐ.16 Luật KTCT-002Workflow 5 Trạng TháiDRAFT→PENDING→APPROVED→POSTED→REVERSED. Notification SignalR+Email.MUSTKeToanVien, KeToanTruongĐ.24 Luật KTCT-004Audit Trail Bất BiếnAuditLogs append-only. Before/After JSON. Không UPDATE/DELETE.MUSTSystemTT 99/2025CT-005Đa Tiền TệNguyên tệ + tỷ giá → VNĐ. Cảnh báo tỷ giá chưa nhập.MUSTKeToanVienTT 99/2025
+5.3 Các Module Còn Lại
+ModuleYêu cầu chínhCăn cứQT - Quỹ/NHĐa quỹ TM, đa TK NH, đối chiếu sao kê NH, CLTG cuối kỳ, BC LCTT B03-DNTT 99/2025CN - Công nợSổ chi tiết TK 131/331, Aging Report, bù trừ CN, dự phòng PTKĐ 25-100%TT 48/2019HH - KhoNXT real-time, tính giá FIFO/BQGQ, kiểm kê, dự phòng giảm giá HTKVAS 02TS - TSCĐHồ sơ TS, khấu hao 3 phương pháp tự động, ghi tăng/giảm, thanh lýTT 45/2013CP - Chi phíTập hợp CP theo đối tượng, phân bổ CP trả trước, kết chuyển cuối kỳTT 99/2025DT - Doanh thuGhi nhận theo VAS 14, HĐ DV tiến độ, liên kết HĐDT APIVAS 14SK - Sổ KTNKC, Sổ Cái, Sổ chi tiết, Trial Balance, Khoá sổ tháng 8 bước, Khoá nămĐ.24 Luật KTBC - Báo cáoB01-B04-DN TT 99/2025, Dashboard BI Chart.js, So sánh đa kỳ, PDF/Excel/WordTT 99/2025
+
+CHƯƠNG 6 - YÊU CẦU NGHIỆP VỤ: MODULE THUẾ (TX)
+Toàn bộ thuế suất tham số hoá trong bảng TaxRates / PITBrackets / ExciseTaxItems. KHÔNG hardcode. Cùng một bảng DB hoạt động trên cả SQL Server và PostgreSQL.
+
+6.1 TX-GTGT (Luật GTGT 2025 + NĐ 174/2025)
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứGTGT-003Tờ Khai 01/GTGTTháng (DT≥50 tỷ) / Quý (<50 tỷ). XML iTaxViewer + PDF. Lưu 10 năm.MUSTTaxOfficerLuật 108/2025GTGT-004Auto Switch 8%→10%Hangfire đêm 31/12/2026: TaxRates GTGT_STANDARD 0.08→0.10. Cảnh báo 30 ngày trước.MUSTSystem_SchedulerNĐ 174/2025GTGT-006Ngưỡng 500trCảnh báo KH/NCC có DT ≤500tr/năm thuộc diện miễn GTGT.MUSTSystemLuật GTGT 2025
+6.2 TX-TNDN (Luật 67/2025 + NĐ 320/2025)
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứTNDN-001Xác định TS tự độngDT≤3 tỷ → 15%; >3 tỷ → 20%. Cảnh báo khi đạt 80% ngưỡng.MUSTSystemLuật 67/2025TNDN-002Gắn cờ CP không được trừAuto-flag CITAdjFlag: quà >2tr, tiệc không HĐ, CP cá nhân...MUSTSystemNĐ 320/2025TNDN-004Quyết toán TNDN năm03/TNDN + Reconciliation LNKT vs TNCT. Chuyển lỗ 5 năm.MUSTTaxOfficerLuật 67/2025
+6.3 TX-TNCN (Luật TNCN 2025 + NQ 110/2025)
+BậcThu nhập tính thuế / thángThuế suất1Đến 10.000.000 đ5%210.000.001 - 30.000.000 đ10%330.000.001 - 80.000.000 đ20%480.000.001 - 200.000.000 đ30%5Trên 200.000.000 đ35%
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứTNCN-001Biểu 5 bậcCập nhật PITBrackets EffectiveFrom=2026-01-01. Giữ biểu 7 bậc cho kỳ ≤12/2025.MUSTKeToanTruongLuật TNCN 2025TNCN-002GTGC & NPT15,5tr/tháng bản thân + 6,2tr/NPT. Cảnh báo NPT sắp hết hạn.MUSTKeToanVienNQ 110/2025TNCN-005QT TNCN năm05/QTT-TNCN + 05-1/BK-QTT. XML iTaxViewer + PDF. Hạn 31/3 năm sau.MUSTTaxOfficerLuật TNCN 2025
+
+6.4 TX-TTĐB (Luật TTĐB 2025 - Hiệu lực 01/01/2026)
+Hàng hoáTS 2026Lộ trìnhBia (tất cả)65%Tăng 5%/năm 2027-2031 → 90% năm 2031Rượu ≥ 20 độ65%Tăng 5%/năm 2027-2031Rượu < 20 độ35%Ổn địnhĐồ uống có đường (MỚI 2026)10%Ổn địnhThuốc lá / xì gà75%Lộ trình riêng
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứTTDB-002Tính TTĐB tự độngGiá tính thuế = Giá bán/(1+TS). Tạo dòng TK 3332 tự động trên CT.MUSTSystemLuật TTĐB 2025TTDB-004Cập nhật lộ trình TSHangfire 01/01 hàng năm đọc ExciseTaxItems.ScheduledRates JSON → update CurrentRate.MUSTSystem_SchedulerLuật TTĐB 2025
+6.5 TX-QLT (Luật 108/2025 - Hiệu lực 01/7/2026)
+MãYêu cầuMô tả chi tiếtƯu tiênActorCăn cứQLT-001Lịch khai báo thuếTất cả deadline năm. Cảnh báo toast+email 7 ngày trước.MUSTTaxOfficer, SystemLuật 108/2025QLT-002Vòng đời tờ khaiDRAFT→SUBMITTED→ACCEPTED/AMENDED. Lưu XML+biên lai 10 năm.MUSTTaxOfficerLuật 108/2025QLT-004Tính phạt chậm nộp0.03%/ngày trên số thuế nộp chậm.SHOULDSystemLuật 108/2025
+
+CHƯƠNG 7 - THIẾT KẾ CƠ SỞ DỮ LIỆU (DUAL DATABASE)
+7.1 Nguyên Tắc Chung Cho Cả Hai DB
+Nguyên tắcSQL Server 2022PostgreSQL 16Schema tổ chứcacc, tax, audit, cfg, rpt (tương tự)acc, tax, audit, cfg, rpt (tương tự)Primary KeyUNIQUEIDENTIFIER + NEWSEQUENTIALID()UUID + gen_random_uuid() hoặc uuid_generate_v4()Auto IncrementINT IDENTITY(1,1)SERIAL hoặc GENERATED ALWAYS AS IDENTITYDateTimedatetime2(7), DEFAULT SYSUTCDATETIME()timestamptz, DEFAULT now() AT TIME ZONE 'UTC'Stringnvarchar(N) - Unicode built-invarchar(N) với UTF-8 encodingJSONnvarchar(MAX) + JSON_VALUE/JSON_QUERYjsonb (native, indexable, hiệu quả hơn)Collation tiếng ViệtVietnamese_CI_AS (per column)vi-x-icu (ICU collation) hoặc C.UTF-8Soft DeleteIsDeleted BIT DEFAULT 0is_deleted BOOLEAN DEFAULT FALSEAudit ColumnsCreatedAt, CreatedBy, ModifiedAt, ModifiedBycreated_at, created_by, modified_at, modified_byOptimistic LockRowVersion ROWVERSIONxmin (system column) hoặc version INTStored ProceduresCREATE PROCEDURE ... T-SQLCREATE FUNCTION ... RETURNS ... LANGUAGE plpgsqlBackupSQL Server Agent - .bak filepg_dump -Fc → .dump file. pgAgent schedule.Monitoringsys.dm_exec_requests, Profilerpg_stat_activity, pg_stat_statements, pgBadger
+
+7.2 Bảng Dữ Liệu Chính - Cú Pháp Song Song
+Ví dụ bảng Vouchers - cú pháp tương đương trên cả hai hệ thống:
+CộtSQL Server DDLPostgreSQL DDLGhi chúVoucherIdUNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()UUID DEFAULT gen_random_uuid()PKVoucherNoNVARCHAR(25) NOT NULLVARCHAR(25) NOT NULLUNIQUE per FiscalPeriodVoucherDateDATE NOT NULLDATE NOT NULLINDEXStatusNVARCHAR(15) DEFAULT 'DRAFT'VARCHAR(15) DEFAULT 'DRAFT'CHECK constraintTotalDebitDECIMAL(18,0) NOT NULLNUMERIC(18,0) NOT NULL= TotalCredit khi APPROVEDCurrencyCodeCHAR(3) DEFAULT 'VND'CHAR(3) DEFAULT 'VND'ExchangeRateDECIMAL(18,4) DEFAULT 1NUMERIC(18,4) DEFAULT 1CreatedAtdatetime2 DEFAULT SYSUTCDATETIME()timestamptz DEFAULT now()AuditRowVersionROWVERSIONxmin (dùng trong EF: IsRowVersion())Optimistic lockIsDeletedBIT DEFAULT 0BOOLEAN DEFAULT FALSESoft delete
+7.3 Bảng Tham Số Thuế - Dùng Chung Cả Hai DB
+BảngSchemaMục đíchKey columnsTaxRatestaxThuế suất tất cả loại thuế - không hardcodeTaxRateKey, Rate, EffectiveFrom, EffectiveToPITBracketstaxBiểu thuế TNCN 5 bậc (từ 01/01/2026)BracketNo, FromAmount, ToAmount, TaxRate, EffectiveFromPITAllowancestaxGTGC bản thân + NPT theo NVEmployeeId, SelfAllowance, DependentCountExciseTaxItemstaxHàng TTĐB + ScheduledRates JSON lộ trình 2027-2031ProductId, CurrentRate, ScheduledRates (jsonb/nvarchar)TaxCalendarstaxLịch deadline khai thuếTaxType, PeriodType, DueDate, PenaltyRateTaxDeclarationstaxTờ khai các loại + XML lưu trữTaxType, Period, Status, XMLContent, SubmittedAtCITLossCarryForwardtaxTheo dõi chuyển lỗ TNDN 5 nămFiscalYear, LossAmount, UsedAmount, ExpiryYear
+7.4 Stored Procedures Chính
+SP NameMục đíchSQL ServerPostgreSQLSP_PostVoucherPost CT lên sổ cáiCREATE PROCEDURECREATE OR REPLACE FUNCTION ... RETURNS VOID LANGUAGE plpgsqlSP_CloseMonthKhoá sổ tháng 8 bướcCREATE PROCEDURECREATE OR REPLACE FUNCTIONSP_AutoSwitchTaxRatesSwitch thuế suất tự động (Hangfire)CREATE PROCEDURECREATE OR REPLACE FUNCTIONSP_CalcExciseTaxTính thuế TTĐB theo kỳCREATE PROCEDURECREATE OR REPLACE FUNCTIONSP_GenTrialBalanceTổng hợp Trial BalanceCREATE PROCEDURECREATE OR REPLACE FUNCTIONSP_CalcPITMonthlyTính khấu trừ TNCN thángCREATE PROCEDURECREATE OR REPLACE FUNCTIONSP_CITFinalizationQuyết toán TNDN nămCREATE PROCEDURECREATE OR REPLACE FUNCTION
+
+CHƯƠNG 8 - YÊU CẦU PHI CHỨC NĂNG (NFR)
+8.1 Hiệu Năng
+NFR-IDChỉ sốMục tiêuGhi chú DBNFR-P-001Page load ≤1000 dòng< 2 giâyÁp dụng cả SQL Server và PostgreSQLNFR-P-002Báo cáo BCTC năm< 10 giâySSRS/RDLC renderNFR-P-00350 concurrent usersKhông degradationLAN Gigabit nội bộNFR-P-004DB query thường ngàyP95 < 500msIndex tương đương trên cả 2 DBNFR-P-005Import Excel 5000 dòng< 30 giâyServer-sideNFR-P-007Uptime giờ hành chính≥ 99.5%/thángExcluding maintenance
+8.2 Bảo Mật
+NFR-IDYêu cầuSQL ServerPostgreSQLNFR-S-001Authentication DBIntegrated Security=SSPI ONLY. 0 SQL Login.SSPI/pg_ident  HOẶC  scram-sha-256 pg login. Cấu hình pg_hba.conf.NFR-S-002RBAC từ ADASP.NET Core Policy: [Authorize(Roles='AMS_KeToanTruong')]Giống nhau - AD group check ở tầng Application, không phải DBNFR-S-003AuditLogs bất biếnDENY UPDATE, DELETE ON audit.AuditLogs TO PUBLICREVOKE UPDATE, DELETE ON audit.audit_logs FROM PUBLICNFR-S-004HTTPS/TLSIIS: TLS 1.2+. HSTS. Cert AD CSGiống nhau - TLS ở tầng IIS, không liên quan DBNFR-S-005Backup encryptSQL Server Backup Encryption (AES 256)pg_dump với --compress + mã hoá file ở OS layer
+
+CHƯƠNG 9 - MA TRẬN TUÂN THỦ PHÁP LÝ (COMPLIANCE MATRIX)
+#Điều khoảnVăn bảnYêu cầu hệ thốngMức1CT KT đủ 7 yếu tốĐ.16 Luật KTCT-001: validate SubmitMUST2Bảo quản 5-10 nămĐ.41 Luật KTSoft-delete + backup 10 nămMUST3TKKT TT 99/2025TT 99/2025DM-001 + Ẩn TK 3338MUST4BCTC B01-B04 TT 99/2025TT 99/2025BC-001→004 RDLC mớiMUST5GTGT 8% → 10% từ 01/01/2027NĐ 174/2025GTGT-004 auto switchMUST6DT ≤500tr miễn GTGTLuật GTGT 2025GTGT-006 cảnh báoMUST7TNDN 20%/15% (DT≤3 tỷ)Luật 67/2025TNDN-001 auto TSMUST8CP không được trừNĐ 320/2025TNDN-002 CITAdjFlagMUST9TNCN biểu 5 bậc 01/01/2026Luật TNCN 2025TNCN-001 PITBracketsMUST10GTGC 15,5tr+6,2tr/NPTNQ 110/2025TNCN-002MUST11TTĐB đồ uống có đường 10%Luật TTĐB 2025TTDB-001MUST12TTĐB lộ trình tăng 2027-2031Luật TTĐB 2025TTDB-004 ScheduledRatesMUST13Khai điện tử 100% 01/7/2026Luật 108/2025QLT-002, XML iTaxViewerMUST14Bỏ môn bài 01/01/2026Luật 108/2025Ẩn TK 3338MUST15HĐDT bắt buộcNĐ 123+NĐ 70/2025DT-003 API HĐDTMUST16Audit trail kiểm toánTT 99/2025SYS-003 AuditLogs bất biếnMUST
+
+CHƯƠNG 10 - KẾ HOẠCH TRIỂN KHAI & RỦI RO
+10.1 Roadmap 9 Phase
+PhaseThời gianNội dungDB Task0 - Khởi tạoTuần 1-2Phân tích, ERD, setup AD, IIS, Azure DevOpsAdmin quyết định SQL Server hoặc PostgreSQL. Cài đặt, cấu hình auth, migration scripts.1 - Core KTTuần 3-10DM, CT workflow, SK, QT, Windows AuthEF Core migrations. Test connection cả 2 DB option.2 - Nghiệp vụTuần 11-18CN, HH, TS, CP, DT, HĐDT APISP_PostVoucher, SP_CloseMonth cho cả SS và PG.3 - TX GTGT+TNDNTuần 19-21Module thuế GTGT, TNDN, switch 8%→10%TaxRates, CITAdjustments, auto-switch job.4 - TX TNCN+TTĐBTuần 22-25TNCN biểu 5 bậc, GTGC mới, TTĐB lộ trìnhPITBrackets, ExciseTaxItems.ScheduledRates JSON.5 - Báo cáoTuần 26-28BC B01-B04 TT 99/2025, Dashboard, SSRSRDLC templates cho BCTC và tờ khai.6 - Tích hợpTuần 29-30XML iTaxViewer, SignalR, NTC (Optional)Test performance DB: EXPLAIN ANALYZE (PG) / Exec Plan (SS).7 - UAT & Go-liveTuần 31-34UAT, data migration, training 2 ngàyDB backup/restore test. Verify audit trail.8 - Bảo hànhT9-12/2026Sửa lỗi, patch NĐ hướng dẫn TNCN 2025Nâng cấp SQL Standard hoặc PG minor version.
+10.2 Risk Register (Top 10)
+#Rủi roXác suấtTác độngGiải phápR01TT 99/2025 mẫu BCTC sửa sau go-liveTBCaoRDLC tách file - upload không deployR02GTGT không switch 8%→10% đúng hạnThấpRất caoSP_AutoSwitch + UAT tháng 12/2026R03SQL Server Dev dùng productionCaoCaoMua SQL Standard trước Phase 7R04PostgreSQL SSPI config lỗiTBCaoTest pg_ident.conf sớm Phase 0. Fallback pg login.R05NĐ hướng dẫn TNCN 2025 chưa đủCaoTBBiểu 5 bậc đã rõ. Theo dõi MoF, patch khi NĐ ra.R06Data migration từ phần mềm cũ lỗiCaoCaoScript migration + Trial Balance sau migrateR07User kháng cựTBTBTraining 2 ngày + manual VN chi tiếtR08TTĐB tăng TS hàng năm không cập nhậtChắc chắnTBScheduledRates JSON sẵn. Admin update mỗi T12R09XML iTaxViewer format thay đổi 01/7/2026TBCaoXML template file config riêng - không hardcodeR10PostgreSQL PL/pgSQL SP khác T-SQLTBTBReview tất cả SP khi chọn PG. Unit test mỗi SP.
+
+CHƯƠNG 11 - PHỤ LỤC
+11.1 Tham Số Thuế Cần Cấu Hình Trước Go-Live
+⚠️ Cảnh báo: Tất cả tham số dưới đây phải được INSERT vào bảng tax.TaxRates / PITBrackets / ExciseTaxItems trước khi go-live - áp dụng cho cả SQL Server và PostgreSQL.
+TaxRateKeyGiá trịHLực từBảng DBNguồnGTGT_STANDARD_REDUCED0.08 (8%)01/7/2025TaxRatesNĐ 174/2025GTGT_STANDARD0.10 (10%)01/01/2027TaxRatesLuật GTGT 2025CIT_STANDARD0.20 (20%)01/10/2025TaxRatesLuật 67/2025CIT_SME0.15 (15%)01/10/2025TaxRatesLuật 67/2025PIT_BRACKET_1→55/10/20/30/35%01/01/2026PITBracketsLuật TNCN 2025PIT_SELF_ALLOWANCE15.500.000 đ/tháng01/01/2026PITAllowancesNQ 110/2025PIT_DEPENDENT6.200.000 đ/NPT/tháng01/01/2026PITAllowancesNQ 110/2025EXCISE_BIA0.65 + ScheduledRates JSON01/01/2026ExciseTaxItemsLuật TTĐB 2025EXCISE_NUOC_CO_DUONG0.1001/01/2026 (MỚI)ExciseTaxItemsLuật TTĐB 2025LATE_PENALTY0.0003 (0.03%/ngày)Luật 108/2025TaxCalendarsLuật 108/2025
+11.2 appsettings.json - Cấu Hình Database
+Toàn bộ switch database thực hiện qua 1 key trong appsettings.json. EF Core DbContext factory tự động chọn provider tương ứng:
+Cấu hìnhSQL Server 2022PostgreSQL 16DatabaseProvider"SqlServer""PostgreSql"ConnectionStrings:DefaultConnection"Server=.;Database=AMS_DB;Integrated Security=SSPI;TrustServerCertificate=True""Host=localhost;Database=ams_db;Username=ams_user;Password=<secret>"  (pg login) "Host=localhost;Database=ams_db;Integrated Security=true"  (SSPI)HangfireConnectionDùng chung DefaultConnectionDùng chung DefaultConnection (Npgsql Hangfire)EF Core PackageMicrosoft.EntityFrameworkCore.SqlServerNpgsql.EntityFrameworkCore.PostgreSQL
+
+
+- HẾT TÀI LIỆU BRD v4.0 -
+AMS | On-Premise | Microsoft Ecosystem | SQL Server 2022 OR PostgreSQL 16 | Bootstrap 5.3 | .NET 10
+TT 99/2025 | Luật 67/2025 | Luật TNCN 2025 | Luật GTGT 2025 | Luật TTĐB 2025 | Luật 108/2025
+AMS - BRD v4.0 | Architecture Diagram + PostgreSQL 16 | Tài Liệu Hoàn Chỉnh	1
+
+CONFIDENTIAL | AMS BRD v4.0 (c) 2026 | SQL Server 2022 OR PostgreSQL 16 | TT 99/2025 | Luật Thuế 2025-2026
+

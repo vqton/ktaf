@@ -1,0 +1,125 @@
+﻿⬛ AMS
+Accounting Management System
+
+SOFTWARE REQUIREMENTS SPECIFICATION
+Đặc Tả Yêu Cầu Phần Mềm - SRS v2.0
+Cập nhật: PostgreSQL 16 (Dual-DB) · System Architecture Diagram · Actor DBAdmin · FR-DB mới · .NET 10
+Thông tinNội dungDự ánAMS - Accounting Management SystemPhiên bản SRS
+2.0 - Cập nhật PostgreSQL 16 + Architecture Diagram + .NET 10Ngày lập23/03/2026Thay thế
+SRS v1.0 (23/03/2026)
+Dựa trên
+BRD v4.1 ngày 24/03/2026ChuẩnIEEE 830-1998 / IEEE 29148-2018DB Option ASQL Server 2022 Developer/Standard - Windows Auth SSPI ONLYDB Option BPostgreSQL 16 - Windows Auth SSPI  HOẶC  Username+Password (pg_hba.conf)Căn cứ KTTT 99/2025/TT-BTC | Luật KT 88/2015 (sđbs 56/2024)Căn cứ ThuếLuật 67/2025 | Luật TNCN 2025 | Luật GTGT 2025 | Luật TTĐB 2025 | Luật 108/2025Trạng tháiFINAL DRAFT - Pending Review
+
+MỤC LỤC
+MỤC LỤC	2
+1. GIỚI THIỆU	3
+1.1 Mục Đích & Phạm Vi	3
+1.2 Thay Đổi So Với SRS v1.0	3
+1.3 Định Nghĩa Bổ Sung v2.0	3
+2. MÔ TẢ TỔNG QUAN HỆ THỐNG	4
+2.1 System Context Diagram	4
+2.2 Danh Sách Actor Đầy Đủ (Bổ Sung DBAdmin)	6
+2.3 Tích Hợp Hệ Thống Ngoài	7
+3. YÊU CẦU CHỨC NĂNG - MODULE KẾ TOÁN	8
+4. YÊU CẦU CHỨC NĂNG - MODULE THUẾ	9
+5. YÊU CẦU CHỨC NĂNG - DATABASE (FR-DB) 🆕 v2.0	10
+6. YÊU CẦU PHI CHỨC NĂNG (NFR)	12
+6.1 NFR Hiệu Năng, Bảo Mật, Usability, Maintainability	12
+6.2 NFR - Database (MỚI v2.0)	12
+7. DATA DICTIONARY - CÚ PHÁP SONG SONG (SQL SERVER & POSTGRESQL)	13
+7.1 acc.Vouchers / acc.vouchers	13
+7.2 tax.TaxRates / tax.tax_rates	14
+7.3 tax.ExciseTaxItems / tax.excise_tax_items	14
+7.4 audit.AuditLogs / audit.audit_logs	14
+7.5 cfg.AppSettings / cfg.app_settings	16
+8. USE CASE DIAGRAM - CẬP NHẬT v2.0	17
+8.1 UC Map Bổ Sung (Module DB)	17
+8.2 Use Case Specification - UC-DB-003 (Brief - PostgreSQL Auth)	18
+8.3 Use Case Specification - UC-DB-005 (Brief - Backup)	19
+9. TRACEABILITY MATRIX - BRD → SRS (CẬP NHẬT v2.0)	20
+
+
+
+1. GIỚI THIỆU
+1.1 Mục Đích & Phạm Vi
+SRS v2.0 cập nhật hai điểm mới từ BRD v4.0: (1) System Architecture Diagram nhúng trực tiếp vào tài liệu; (2) Bổ sung toàn bộ yêu cầu cho PostgreSQL 16 chạy song song SQL Server 2022 - admin chọn 1 trong 2 khi cài đặt, không cần thay đổi code ứng dụng. Toàn bộ FR, NFR, Data Dictionary, Use Case từ SRS v1.0 được giữ nguyên và bổ sung phần DB mới.
+1.2 Thay Đổi So Với SRS v1.0
+MụcSRS v1.0SRS v2.0 (thay đổi)DatabaseSQL Server 2022 duy nhấtSQL Server 2022 OR PostgreSQL 16 - admin chọn qua appsettings.jsonAuth DBWindows SSPI onlySQL Server: SSPI only. PostgreSQL: SSPI OR pg username/passwordActor mới-DBAdmin (quản trị DB - cả SQL Server và PostgreSQL)FR mới-FR-DB-001→008: 8 yêu cầu mới cho Dual-DB setupNFR DBKhông cóNFR-DB-001→005: Hiệu năng, bảo mật, backup riêng cho dual-DBData DictionaryCú pháp SQL ServerCú pháp song song: SQL Server DDL + PostgreSQL DDLArchitecture VisualKhông cóSystem Architecture Diagram 5 tầng nhúng PNG 220 DPIUC mới-UC-DB-001→005: Setup DB, migrate, switch, backup, monitoring1.3 Định Nghĩa Bổ Sung v2.0
+Ký hiệuGiải nghĩaSSSQL Server 2022 (viết tắt dùng trong bảng so sánh)PGPostgreSQL 16 (viết tắt)NpgsqlThư viện EF Core provider cho PostgreSQL (.NET)pg_hba.confPostgreSQL Host-Based Authentication config filepg_ident.confPostgreSQL identity map - map Windows user → PG userSSPISecurity Support Provider Interface - Windows Kerberos/NTLMscram-sha-256PostgreSQL auth method - password hash an toàn nhất hiện tạipgAgentPostgreSQL job scheduler - tương đương SQL Server Agentpg_cronPostgreSQL extension - cron job trực tiếp trong DBEXPLAIN ANALYZEPostgreSQL query plan + runtime stats - tương đương SQL Server Execution Planappsettings.jsonASP.NET Core configuration file - chứa DatabaseProvider switchDBAdminActor mới: Quản trị viên cơ sở dữ liệu (cả SS và PG)
+
+2. MÔ TẢ TỔNG QUAN HỆ THỐNG
+2.1 System Context Diagram
+Sơ đồ dưới đây mô tả kiến trúc 5 tầng của AMS on-premise, bao gồm cả hai lựa chọn database song song. Đây là System Architecture Diagram chính thức của dự án AMS v4.0.
+
+📌 Lưu ý: Tầng Data (Tier 3) hiển thị SQL Server 2022 và PostgreSQL 16 song song. Admin chọn 1 lần duy nhất khi cài đặt. Cả hai expose identical schemas (acc, tax, audit, cfg, rpt). Application code hoàn toàn không thay đổi.
+
+
+2.2 Danh Sách Actor Đầy Đủ (Bổ Sung DBAdmin)
+ActorLoạiAD Security GroupMô tảQuyền hạn DBKeToanVienHuman - InternalAMS_KeToanVienKế toán viên - nhập liệu hàng ngàyChỉ ghi qua EF Core / App - không direct DB accessKeToanTruongHuman - InternalAMS_KeToanTruongKế toán trưởng - kiểm soát toàn bộChỉ qua App. Cấu hình tham số thuế.ThuQuyHuman - InternalAMS_ThuQuyThủ quỹ - PT/PC, sổ quỹChỉ qua AppTaxOfficerHuman - InternalAMS_TaxOfficerKê khai thuế chuyên biệtChỉ qua AppGiamDocHuman - InternalAMS_GiamDocBan giám đốc - xem báo cáoRead-only qua AppITAdminHuman - InternalAMS_ITAdminQuản trị IT, AD, IISQuản lý AD group, IIS config, NOT direct DBDBAdminHuman - InternalAMS_DBAdminQuản trị Database (SS + PG)Direct DB access: backup, restore, migration, monitoring, config authKiemToanNBHuman - InternalAMS_ReadOnlyKiểm toán nội bộRead-only qua AppSystem_SchedulerSystem-Hangfire JobsDùng App service account để kết nối DBHDDT_SystemSystem - External-Phần mềm HĐDTKhông có DB access
+
+2.3 Tích Hợp Hệ Thống Ngoài
+Hệ thống ngoàiKết nốiMục đíchGiao thứcActive DirectoryInboundAuth user, sync RoleLDAP / KerberosHĐDT (MISA/VNPT/Viettel)Outbound APIXuất thông tin HĐREST / XMLiTaxViewer (TCT)Outbound FileNộp tờ khai XMLXML UploadAPI Tổng cục ThuếOutbound APIKiểm tra MSTREST HTTPSExchange / M365Outbound EmailNotification, nhắc deadlineSMTP TLS 587SSRS Report ServerInternalRender BCTC, tờ khaiHTTP / RDLCWindows File ServerInternalFile scan CTSMB / UNCSao kê NHInbound FileImport đối chiếuCSV / Excel Upload
+
+3. YÊU CẦU CHỨC NĂNG - MODULE KẾ TOÁN
+Các FR module DM, CT, QT, CN, HH, TS, CP, DT, SK, BC giữ nguyên từ SRS v1.0. Phần này chỉ liệt kê FR-ID để tham chiếu.
+ModuleFR-IDTên nhóm yêu cầuSố FRGhi chúDMFR-DM-001→010Danh mục hệ thống10Không thay đổiCTFR-CT-001→012Chứng từ kế toán12Không thay đổiQTFR-QT-001→006Quỹ / Ngân hàng6Không thay đổiCNFR-CN-001→006Công nợ6Không thay đổiHHFR-HH-001→006Hàng tồn kho6Không thay đổiTSFR-TS-001→006Tài sản cố định6Không thay đổiCP+DTFR-CP-001→004, FR-DT-001→003Chi phí + Doanh thu7Không thay đổiSKFR-SK-001→006Sổ kế toán6Không thay đổiBCFR-BC-001→007Báo cáo tài chính7Không thay đổiSYSFR-SYS-001→009Hệ thống / Admin9FR-SYS-009 (backup) giữ nguyên📌 Lưu ý: Xem chi tiết đầy đủ từng FR tại SRS v1.0 Chương 4. Toàn bộ FR module kế toán không thay đổi trong v2.0.
+
+
+4. YÊU CẦU CHỨC NĂNG - MODULE THUẾ
+Toàn bộ FR module TX (GTGT, TNDN, TNCN, TTĐB, NTC, QLT) giữ nguyên từ SRS v1.0 Chương 4.7. Không có thay đổi do bổ sung PostgreSQL.
+Sub-moduleFR-IDCăn cứ pháp lýGhi chúTX-GTGTFR-GTGT-001→006Luật GTGT 2025 + NĐ 174/2025Không thay đổiTX-TNDNFR-TNDN-001→005Luật 67/2025 + NĐ 320/2025Không thay đổiTX-TNCNFR-TNCN-001→006Luật TNCN 2025 + NQ 110/2025Không thay đổiTX-TTĐBFR-TTDB-001→005Luật TTĐB 2025Không thay đổiTX-NTCFR-NTC-001→003TT 103/2014Optional - không thay đổiTX-QLTFR-QLT-001→005Luật 108/2025Không thay đổi📌 Lưu ý: Lưu ý kỹ thuật: Toàn bộ bảng tham số thuế (TaxRates, PITBrackets, ExciseTaxItems) sử dụng cú pháp ANSI SQL tương thích cả SQL Server và PostgreSQL. ScheduledRates dùng NVARCHAR(MAX) trên SS hoặc JSONB trên PG.
+
+
+5. YÊU CẦU CHỨC NĂNG - DATABASE (FR-DB) 🆕 v2.0
+🆕 MỚI v2.0: Chương này hoàn toàn mới trong SRS v2.0. Mô tả 8 FR liên quan đến việc cài đặt, cấu hình, vận hành dual-database (SQL Server 2022 OR PostgreSQL 16).
+
+FR-IDTên yêu cầuMô tả chi tiếtƯu tiênActorCăn cứFR-DB-001Database Provider SwitchSystem đọc key "DatabaseProvider" trong appsettings.json khi khởi động. Giá trị "SqlServer" → dùng EF Core SqlServer provider + connection string SSPI. Giá trị "PostgreSql" → dùng Npgsql EF Core provider + connection string PG. Không restart IIS sau khi chọn.MUSTDBAdmin, ITAdminBRD v4.0 §3.3FR-DB-002SQL Server Auth - Windows SSPI OnlyKhi DatabaseProvider=SqlServer: connection string BẮT BUỘC là Integrated Security=SSPI. KHÔNG cấu hình SQL Login, KHÔNG enable Mixed Mode. SQL Server Authentication Mode = Windows Only. Kiểm tra khi deploy: thử kết nối bằng SQL Login phải thất bại.MUSTDBAdminBRD v4.0 §3.4 Option AFR-DB-003PostgreSQL Auth - Dual MethodKhi DatabaseProvider=PostgreSql: hỗ trợ 2 phương thức. (A) Windows SSPI: cấu hình pg_hba.conf method=sspi + pg_ident.conf map AD user → pg user. (B) Username+Password: cấu hình pg_hba.conf method=scram-sha-256, tạo role ams_user. Admin chọn 1 hoặc cả 2 trong pg_hba.conf.MUSTDBAdminBRD v4.0 §3.4 Option BFR-DB-004EF Core Migration - Dual DBEF Core migrations phải tương thích cả hai provider. Migration scripts dùng ANSI SQL cho các kiểu dữ liệu cơ bản. Các kiểu đặc thù (RowVersion → xmin, NVARCHAR → VARCHAR, NEWSEQUENTIALID() → gen_random_uuid()) được xử lý qua EF Core provider-specific configurations trong ModelBuilder.MUSTDBAdmin, DevLeadBRD v4.0 §7.1FR-DB-005Schema Creation & CollationTạo 5 schemas giống nhau trên cả hai DB: acc, tax, audit, cfg, rpt. SQL Server: collation Vietnamese_CI_AS per column. PostgreSQL: encoding UTF8, database created with TEMPLATE=template0, cột Name/Description dùng collation "vi-x-icu".MUSTDBAdminBRD v4.0 §7.1FR-DB-006Backup & Restore AutomationSQL Server: SQL Server Agent job chạy Full backup 00:00 hàng đêm + Differential hàng giờ. Lưu .bak file, giữ 30 ngày local + archive 10 năm. PostgreSQL: pgAgent job chạy pg_dump -Fc hàng đêm. pg_dump -Fd (directory) hàng giờ cho differential. Verify: pg_restore --list sau mỗi backup. Alert email nếu backup fail.MUSTDBAdminĐ.41 Luật KT + BRD §8.2FR-DB-007Performance Monitoring & IndexSQL Server: Index trên VoucherDate, AccountId, Status, FiscalPeriodId. Sử dụng SQL Server Profiler + Activity Monitor. PostgreSQL: Tương đương index dùng BTREE. Thêm pg_stat_statements extension. EXPLAIN ANALYZE định kỳ cho các query nặng (BCTC, Trial Balance). Cảnh báo nếu query > 2 giây.MUSTDBAdminBRD v4.0 §8.1FR-DB-008Database Health Check EndpointASP.NET Core Health Checks endpoint /api/health/db: trả về status DB (Healthy/Degraded/Unhealthy), thời gian response, version DB engine, số connection active. Hangfire kiểm tra mỗi 5 phút. Gửi email alert nếu Degraded > 3 lần liên tiếp. Endpoint yêu cầu auth ITAdmin/DBAdmin.SHOULDDBAdmin, ITAdmin, System_SchedulerBRD v4.0 §8.1
+
+6. YÊU CẦU PHI CHỨC NĂNG (NFR)
+6.1 NFR Hiệu Năng, Bảo Mật, Usability, Maintainability
+Giữ nguyên từ SRS v1.0 Chương 5.1→5.4. Tham chiếu NFR-P-001→007, NFR-S-001→008, NFR-U-001→007, NFR-M-001→005.
+
+6.2 NFR - Database (MỚI v2.0)
+NFR-IDThuộc tínhYêu cầuChỉ số đo lườngƯu tiênNFR-DB-001DB Connection PoolMỗi provider duy trì connection pool riêng. Min=5, Max=100 connections.Active connections ≤ 100 tại mọi thời điểmMUSTNFR-DB-002SQL Server vs PG - Response ParityCùng query, cùng data volume: thời gian response không chênh lệch >20% giữa 2 provider.P95 < 500ms cho cả haiMUSTNFR-DB-003PG Auth Securitypg_hba.conf: method scram-sha-256 (không dùng md5, trust, password plain).0 plain-text password trong pg_hba.confMUSTNFR-DB-004Backup VerifyMỗi backup file phải verify restore được. Test restore vào DB sandbox hàng tuần.100% backup files verify OKMUSTNFR-DB-005Migration IdempotentEF Core migration chạy 2 lần không gây lỗi (idempotent). Rollback migration không mất dữ liệu.0 error khi re-run migrationMUST
+
+7. DATA DICTIONARY - CÚ PHÁP SONG SONG (SQL SERVER & POSTGRESQL)
+📌 Lưu ý: Cột 'Kiểu DL - SS' = SQL Server syntax. Cột 'Kiểu DL - PG' = PostgreSQL 16 syntax. Tên cột dùng snake_case cho PG (EF Core auto-map), PascalCase cho SS.
+
+7.1 acc.Vouchers / acc.vouchers
+Bảng trung tâm hệ thống - Chứng từ kế toán. Căn cứ: Điều 16-18 Luật Kế toán 2015 + TT 99/2025.
+Cột (Column)Kiểu DL - SSKiểu DL - PGNull?Mô tảRàng buộcVoucherId / voucher_idUNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()UUID DEFAULT gen_random_uuid()NOT NULLPK - định danh CTPKVoucherNo / voucher_noNVARCHAR(25)VARCHAR(25)NOT NULLSố CT: [Loại]-[YYYY]-[MM]-[NNNNN]UNIQUE per FiscalPeriodVoucherType / voucher_typeNVARCHAR(10)VARCHAR(10)NOT NULLPT/PC/BC/BN/HB/HM/NK/XK/PB/KC/BTCHECK constraintVoucherDate / voucher_dateDATEDATENOT NULLNgày chứng từINDEX (cả 2 DB)FiscalPeriodId / fiscal_period_idUNIQUEIDENTIFIERUUIDNOT NULLFK → FiscalPeriodsFK + INDEXDescription / descriptionNVARCHAR(500)VARCHAR(500)NOT NULLDiễn giải nội dungCollation vi-x-icu (PG)Status / statusNVARCHAR(15) DEFAULT 'DRAFT'VARCHAR(15) DEFAULT 'DRAFT'NOT NULLDRAFT/PENDING/APPROVED/POSTED/REVERSEDCHECK + INDEXTotalDebit / total_debitDECIMAL(18,0)NUMERIC(18,0)NOT NULLTổng phát sinh Nợ VNĐ= TotalCredit khi APPROVEDTotalCredit / total_creditDECIMAL(18,0)NUMERIC(18,0)NOT NULLTổng phát sinh Có VNĐ= TotalDebitCurrencyCode / currency_codeCHAR(3) DEFAULT 'VND'CHAR(3) DEFAULT 'VND'NOT NULLLoại tiền gốcExchangeRate / exchange_rateDECIMAL(18,4) DEFAULT 1NUMERIC(18,4) DEFAULT 1NOT NULLTỷ giá quy đổiDEFAULT 1 nếu VNDRowVersion / xminROWVERSION(system column xmin)NOT NULLOptimistic lock - EF CoreSS: RowVersion. PG: IsRowVersion() trên xminCreatedAt / created_atdatetime2 DEFAULT SYSUTCDATETIME()timestamptz DEFAULT now()NOT NULLAudit - thời điểm tạoUTCIsDeleted / is_deletedBIT DEFAULT 0BOOLEAN DEFAULT FALSENOT NULLSoft deleteFilter trong mọi query
+
+7.2 tax.TaxRates / tax.tax_rates
+Tham số thuế suất - KHÔNG hardcode trong code. Dùng chung cú pháp ANSI SQL.
+Cột (Column)Kiểu DL - SSKiểu DL - PGNull?Mô tảRàng buộcTaxRateId / tax_rate_idINT IDENTITY(1,1)SERIAL hoặc GENERATED ALWAYS AS IDENTITYNOT NULLPKPKTaxRateKey / tax_rate_keyNVARCHAR(50)VARCHAR(50)NOT NULLKey: GTGT_STANDARD, CIT_SME...UNIQUE + INDEXTaxType / tax_typeNVARCHAR(20)VARCHAR(20)NOT NULLGTGT/CIT/PIT/EXCISE/WHTRate / rateDECIMAL(5,4)NUMERIC(5,4)NOT NULLThuế suất: 0.08 = 8%CHECK (0 TO 1)EffectiveFrom / effective_fromDATEDATENOT NULLNgày bắt đầu áp dụngINDEXEffectiveTo / effective_toDATEDATENULLNgày hết HLực - NULL = vô hạnLegalBasis / legal_basisNVARCHAR(200)VARCHAR(200)NOT NULLCăn cứ pháp lýBắt buộc nhập khi thay đổi
+7.3 tax.ExciseTaxItems / tax.excise_tax_items
+Hàng hoá chịu TTĐB + lộ trình tăng thuế suất 2027-2031. Căn cứ: Luật TTĐB 2025.
+Cột (Column)Kiểu DL - SSKiểu DL - PGNull?Mô tảRàng buộcExciseItemId / excise_item_idUNIQUEIDENTIFIERUUIDNOT NULLPKPKProductId / product_idUNIQUEIDENTIFIERUUIDNOT NULLFK → ProductsFK UNIQUECurrentRate / current_rateDECIMAL(5,4)NUMERIC(5,4)NOT NULLTS hiện tại: 0.65 = 65%ScheduledRates / scheduled_ratesNVARCHAR(MAX) (JSON string)JSONB (native indexable)NULLLộ trình: [{year:2027,rate:0.70}...]PG: JSONB cho phép query nhanh hơnEffectiveFrom / effective_fromDATEDATENOT NULLNgày áp TS hiện tạiLegalCategory / legal_categoryNVARCHAR(100)VARCHAR(100)NOT NULLBIA/RUOU/THUOCLA/NUOC_CO_DUONG...Luật TTĐB 2025
+7.4 audit.AuditLogs / audit.audit_logs
+Bảng bất biến - append-only. Không có quyền UPDATE/DELETE cho bất kỳ user nào.
+Cột (Column)Kiểu DL - SSKiểu DL - PGNull?Mô tảRàng buộcAuditLogId / audit_log_idBIGINT IDENTITY(1,1)BIGINT GENERATED ALWAYS AS IDENTITYNOT NULLPK - thứ tự thời gianPK - không dùng UUID để đảm bảo sortEventTime / event_timedatetime2(7) DEFAULT SYSUTCDATETIME()timestamptz DEFAULT now() AT TIME ZONE 'UTC'NOT NULLThời điểm sự kiện UTCINDEXUserName / user_nameNVARCHAR(100)VARCHAR(100)NOT NULLWindows AD username (DOMAIN\user)INDEXClientIP / client_ipNVARCHAR(45)VARCHAR(45)NOT NULLIP clientHỗ trợ IPv6TableName / table_nameNVARCHAR(100)VARCHAR(100)NOT NULLTên bảng bị thay đổiINDEXRecordId / record_idNVARCHAR(50)VARCHAR(50)NOT NULLID record (string)INDEXAction / actionNVARCHAR(10)VARCHAR(10)NOT NULLINSERT/UPDATE/DELETE/APPROVE/POST/LOCKOldValues / old_valuesNVARCHAR(MAX)JSONBNULLGiá trị cũ (NULL nếu INSERT)PG: JSONB cho phép query trực tiếpNewValues / new_valuesNVARCHAR(MAX)JSONBNULLGiá trị mới (NULL nếu DELETE)PG: JSONBModule / moduleNVARCHAR(50)VARCHAR(50)NULLCT/TX/SK/BC/DM/SYS/DBINDEX
+
+7.5 cfg.AppSettings / cfg.app_settings
+Cấu hình hệ thống - bao gồm DatabaseProvider switch.
+Cột (Column)Kiểu DL - SSKiểu DL - PGNull?Mô tảRàng buộcSettingKey / setting_keyNVARCHAR(100)VARCHAR(100)NOT NULLKhoá cấu hình - VD: 'DatabaseProvider'UNIQUE PKSettingValue / setting_valueNVARCHAR(500)VARCHAR(500)NOT NULLGiá trị - VD: 'SqlServer' hoặc 'PostgreSql'IsEncrypted / is_encryptedBIT DEFAULT 0BOOLEAN DEFAULT FALSENOT NULL1/true nếu value bị mã hoá AES-256Description / descriptionNVARCHAR(300)VARCHAR(300)NULLMô tả tham sốModifiedAt / modified_atdatetime2timestamptzNOT NULLLần cuối thay đổiAuditModifiedBy / modified_byNVARCHAR(100)VARCHAR(100)NOT NULLNgười thay đổi (AD username)
+
+8. USE CASE DIAGRAM - CẬP NHẬT v2.0
+8.1 UC Map Bổ Sung (Module DB)
+UC-IDModuleTên Use CaseActorƯu tiênFR liên quanUC-DB-001DBCấu hình DatabaseProvider khi cài đặtDBAdmin, ITAdminMUSTFR-DB-001UC-DB-002DBCấu hình SQL Server Windows AuthDBAdminMUSTFR-DB-002UC-DB-003DBCấu hình PostgreSQL Auth (SSPI hoặc pg login)DBAdminMUSTFR-DB-003UC-DB-004DBChạy EF Core Migration (cả 2 DB)DBAdmin, DevLeadMUSTFR-DB-004UC-DB-005DBVận hành Backup & Restore tự độngDBAdmin, System_SchedulerMUSTFR-DB-006UC-DB-006DBMonitoring DB Health & PerformanceDBAdminMUSTFR-DB-007, FR-DB-008UC-DB-007DBVerify backup hàng tuần (test restore)DBAdminMUSTFR-DB-006UC-DB-008DBTroubleshoot PG connection issuesDBAdmin, ITAdminSHOULDFR-DB-003
+
+8.2 Use Case Specification - UC-DB-003 (Brief - PostgreSQL Auth)
+MụcChi tiếtUC-IDUC-DB-003TênCấu hình PostgreSQL Authentication (SSPI hoặc Username+Password)Actor chínhDBAdminActor phụITAdmin (cấp thông tin AD domain)Mức độBrief - xem Use Case Register Excel cho Fully DressedPre-conditionPostgreSQL 16 đã cài, service đang chạy, pg_hba.conf và pg_ident.conf có thể sửaTriggerAdmin đã chọn DatabaseProvider=PostgreSql trong appsettings.jsonMain Flow - Method A (SSPI)1. DBAdmin sửa pg_ident.conf: map DOMAIN\ams_app_user → ams_pg_user 2. Sửa pg_hba.conf: thêm dòng host all ams_pg_user 127.0.0.1/32 sspi include_realm=0 3. Restart PostgreSQL service 4. Test: psql -U ams_pg_user -h localhost (tự động login không cần password) 5. Cập nhật ConnectionStrings trong appsettings.json: thêm Integrated Security=trueMain Flow - Method B (pg login)1. DBAdmin tạo role: CREATE ROLE ams_user LOGIN PASSWORD 'strong_pwd'; 2. Sửa pg_hba.conf: host all ams_user 127.0.0.1/32 scram-sha-256 3. REVOKE login từ PUBLIC trên database ams_db 4. GRANT CONNECT, USAGE trên các schemas cho ams_user 5. Cập nhật ConnectionStrings trong appsettings.json: Username=ams_user;Password=...Alternative FlowMethod A lỗi (AD không cấu hình Kerberos) → tự động fallback sang Method BExceptionpg_hba.conf syntax error → PostgreSQL service không start → xem logs pg_log/Post-conditionApplication kết nối DB thành công. Health Check /api/health/db trả về Healthy.FR liên quanFR-DB-003, NFR-DB-003
+
+8.3 Use Case Specification - UC-DB-005 (Brief - Backup)
+MụcChi tiếtUC-IDUC-DB-005TênVận hành Backup & Restore Tự Động (SQL Server + PostgreSQL)Actor chínhSystem_Scheduler (Hangfire)Actor phụDBAdmin (cấu hình + verify)Pre-conditionDB đang hoạt động, backup directory đã cấu hình với đủ dung lượngSQL Server - Daily FullHangfire trigger 00:00: BACKUP DATABASE AMS_DB TO DISK='...\AMS_full_YYYYMMDD.bak' WITH COMPRESSION, STATS=10 Verify: RESTORE VERIFYONLY FROM DISK='...' Alert email nếu thất bạiSQL Server - Hourly DiffBACKUP DATABASE AMS_DB TO DISK='...\AMS_diff_YYYYMMDD_HH.bak' WITH DIFFERENTIAL, COMPRESSIONPostgreSQL - Daily FullpgAgent job 00:00: pg_dump -Fc -d ams_db -f /backup/ams_full_$(date +%Y%m%d).dump Verify: pg_restore --list file.dump > /dev/null (exit 0 = OK) Alert email nếu thất bạiPostgreSQL - Hourlypg_dump -Fd -j 4 -d ams_db -f /backup/ams_dir_YYYYMMDD_HH/ (parallel directory format)RetentionLocal: giữ 30 ngày. Archive mỗi tháng: giữ 10 năm (Luật KT Điều 41)Weekly Test RestoreDBAdmin chạy: restore vào DB sandbox ams_test, verify Trial Balance, xoá sandboxPost-conditionFile backup tồn tại, verify OK, email xác nhận gửi DBAdminFR liên quanFR-DB-006, NFR-DB-004
+
+9. TRACEABILITY MATRIX - BRD → SRS (CẬP NHẬT v2.0)
+BRD RequirementSRS FR/NFRUse CaseĐã cover?BRD §3.3 - SQL Server 2022 Option AFR-DB-001, FR-DB-002, NFR-DB-001UC-DB-001, UC-DB-002✅BRD §3.4 - PostgreSQL 16 Option BFR-DB-003, FR-DB-004, FR-DB-005UC-DB-003, UC-DB-004✅BRD §3.4 - PG Auth SSPIFR-DB-003 (Method A)UC-DB-003 Main Flow A✅BRD §3.4 - PG Auth pg loginFR-DB-003 (Method B)UC-DB-003 Main Flow B✅BRD §7.1 - EF Core Migration dualFR-DB-004UC-DB-004✅BRD §7.1 - Identical schemasFR-DB-005UC-DB-001✅BRD §8.1 - Backup 30 ngày localFR-DB-006UC-DB-005✅BRD §8.1 - Archive 10 năm (Luật KT)FR-DB-006, NFR-DB-004UC-DB-005✅BRD §8.1 - Performance monitoringFR-DB-007, FR-DB-008, NFR-DB-002UC-DB-006✅BRD §3.1 - Architecture DiagramSRS §2.1 - archImg()Toàn bộ UC✅BRD §4.1 - DBAdmin ActorSRS §2.2 - Actor DBAdminUC-DB-001→008✅Toàn bộ FR kế toán & thuế v1.0FR-DM/CT/QT/CN/HH/TS/CP/DT/SK/BC/TX/SYSUC module tương ứng✅ Giữ nguyên
+
+
+- HẾT TÀI LIỆU SRS v2.0 -
+AMS | IEEE 29148-2018 | SQL Server 2022 OR PostgreSQL 16 | TT 99/2025 | Luật Thuế 2025-2026
+AMS - Software Requirements Specification (SRS) v2.0 | PostgreSQL 16 + Architecture Diagram + .NET 10	1
+
+CONFIDENTIAL | AMS SRS v2.0 (c) 2026 | SQL Server 2022 OR PostgreSQL 16 | TT 99/2025 | Luật Thuế 2025-2026 | .NET 10
+

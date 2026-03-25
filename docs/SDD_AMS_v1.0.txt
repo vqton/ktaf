@@ -1,0 +1,127 @@
+﻿⬛ AMS
+Accounting Management System
+
+SYSTEM DESIGN DOCUMENT
+Tài Liệu Thiết Kế Hệ Thống - SDD v1.0
+High-Level Design (HLD) + Low-Level Design (LLD) | Từ BRD v4.1 + SRS v2.0 | .NET 10
+Thông tinNội dungTài liệuSystem Design Document (SDD) v1.0Vai tròSolution Architect - 20 năm kinh nghiệmNgày lập23/03/2026Dựa trênBRD v4.0 + SRS v2.0 (23/03/2026)Bao gồmHLD (kiến trúc tổng quan) + LLD (chi tiết component) + ERD (xem file Excel kèm theo)Tech Stack
+ASP.NET Core 10 · SQL Server 2022 / PostgreSQL 16 · IIS · Windows AD · Bootstrap 5Nguyên tắc SASeparation of Concerns · SOLID · DRY · YAGNI · Defense in DepthPattern áp dụngClean Architecture · Repository + UoW · CQRS (light) · Domain Events · Outbox Pattern
+
+MỤC LỤC
+MỤC LỤC	2
+CHƯƠNG 1 - HIGH-LEVEL DESIGN (HLD)	3
+1.1 Architectural Principles	3
+1.2 Clean Architecture - Layer Diagram	4
+1.3 Solution Structure - Project Layout	5
+1.4 Component Diagram - Application Services	6
+1.5 Data Flow - Request Lifecycle	7
+1.6 Deployment Diagram	8
+CHƯƠNG 2 - LOW-LEVEL DESIGN (LLD)	9
+2.1 Domain Model - Core Entities	9
+2.2 Repository Pattern & Unit of Work	10
+2.3 Tax Engine - Design Detail	10
+2.4 Voucher State Machine - Implementation	12
+2.5 Database Design - Schema & Key Tables	13
+2.5.1 Schema Organization	13
+2.5.2 Key Design Decisions	13
+2.6 API Design - REST Endpoints Summary	14
+2.6.1 Voucher API	14
+2.6.2 Tax API	14
+2.6.3 Report & Ledger API	15
+2.6.4 System & DB Admin API	15
+2.7 Security Design - Defense in Depth	16
+2.8 Background Jobs - Hangfire Design	17
+2.9 SignalR Real-Time Notification Design	18
+2.10 Caching Strategy	19
+
+
+
+CHƯƠNG 1 - HIGH-LEVEL DESIGN (HLD)
+1.1 Architectural Principles
+Với vai trò Solution Architect, toàn bộ thiết kế AMS tuân thủ các nguyên tắc sau, được áp dụng nhất quán từ tầng presentation xuống tầng data:
+Nguyên tắcÁp dụng trong AMSPattern cụ thểSeparation of ConcernsMỗi layer chỉ biết layer kề nó. UI không truy cập DB trực tiếp.Feature Folders: /Features/CT/Commands, /Features/CT/QueriesSingle ResponsibilityMỗi class/service chỉ làm 1 việc. VoucherService không chứa tax logic.TaxEngine tách riêng khỏi VoucherServiceDependency InversionBusiness layer không phụ thuộc infrastructure. IVoucherRepository interface.IVoucherRepository → SqlServerVoucherRepo / PgVoucherRepoDefense in DepthBảo mật nhiều lớp: Windows Auth + RBAC + HTTPS + AuditLog + DB DENY.5 lớp bảo mật độc lập, 1 lớp fail không ảnh hưởng lớp khácFail FastValidate đầu vào sớm nhất có thể. Không xử lý dữ liệu sai.FluentValidation tại API boundary; DB constraint là lớp cuốiIdempotencyHangfire jobs có thể chạy lại không gây duplicate. SP idempotent.SP_AutoSwitchTaxRates kiểm tra trước khi UPDATEObservabilityMọi exception, slow query, state transition đều có log có thể query.Serilog structured → SQL sink + File. CorrelationId trên mọi requestZero-Trust DBApp không tin tưởng DB sẽ từ chối bad data. Validate ở 3 tầng.FluentValidation → Domain validation → DB constraint
+
+1.2 Clean Architecture - Layer Diagram
+
+📌 Sơ đồ trên thể hiện kiến trúc 5 tầng. Dependency rule: outer layers phụ thuộc inner layers, KHÔNG ngược lại. Domain core hoàn toàn không phụ thuộc infrastructure.
+
+
+1.3 Solution Structure - Project Layout
+Cấu trúc solution theo Clean Architecture với Feature Folders pattern:
+Project / FolderLayerMô tảDependenciesAMS.DomainCoreEntities, Value Objects, Domain Events, Interfaces (IRepository)Không có external dependencyAMS.ApplicationApplicationUse Cases (Commands/Queries), DTOs, Validators (FluentValidation), IServices→ AMS.Domain onlyAMS.InfrastructureInfrastructureEF Core DbContext, Repo implementations, Hangfire jobs, Email, File storage→ AMS.Application + AMS.DomainAMS.WebPresentationASP.NET Core MVC Controllers, Razor Views, API Controllers, SignalR Hub→ AMS.Application (via DI)AMS.TaxEngineDomain (specialized)Tax calculation logic: GTGT, TNDN, TNCN, TTĐB, NTC. Pure functions.→ AMS.Domain onlyAMS.ReportEngineInfrastructure (specialized)SSRS wrapper, RDLC renderer, Excel/PDF export→ AMS.ApplicationAMS.Tests.UnitTestxUnit + Moq - domain + application layer tests→ AMS.Domain, AMS.ApplicationAMS.Tests.IntegrationTestEF Core InMemory / TestContainers - integration tests→ Full stackAMS.Migrations.SqlServerInfrastructureEF Core migrations for SQL Server→ AMS.InfrastructureAMS.Migrations.PostgreSqlInfrastructureEF Core migrations for PostgreSQL→ AMS.Infrastructure
+
+1.4 Component Diagram - Application Services
+Chi tiết các service trong Application Layer và cách chúng tương tác:
+Service / ComponentTrách nhiệmPhụ thuộc vàoPatternVoucherServiceTạo, validate, submit, duyệt, post, reverse CTIVoucherRepo, ILedgerRepo, ITaxEngine, IEventBusCommand/Query, Domain EventsTaxEngineTính thuế: GTGT, TNDN, TNCN, TTĐB, NTC. Pure functions.ITaxRateRepo, IPITBracketRepo, IExciseTaxRepoStrategy Pattern (ITaxCalculator per type)LedgerServicePost CT → ghi LedgerEntries, update TK balanceILedgerRepo, IFiscalPeriodRepoUoW, TransactionInventoryServiceNXK kho, tính giá FIFO/BQGQIInventoryRepo, IProductRepoCQRS: Command = mutate, Query = readAssetServiceTSCĐ: ghi tăng/giảm, khấu haoIAssetRepo, IDepreciationRepoScheduled (Hangfire monthly)ReportServiceTổng hợp BCTC B01-B04, DashboardILedgerRepo, nhiều RepoQuery-only, Caching (IMemoryCache)AuthServiceResolve Windows Identity → User+RolesIUserRepo, AD via LDAPDecorator on HttpContextNotificationServiceGửi SignalR push + EmailIEmailSender (SMTP), ISignalRHubObserver / Event HandlerHangfireJobServiceĐiều phối background jobsMọi Service có liên quanIdempotent JobsAuditInterceptorIntercept mọi DbContext.SaveChanges → ghi AuditLogIAuditLogRepoEF Core Interceptor (ISaveChangesInterceptor)
+
+1.5 Data Flow - Request Lifecycle
+Một HTTP request điển hình đi qua các tầng như sau:
+BướcComponentHành độngGhi chú1IISNhận HTTPS request. Negotiate Windows Auth (Kerberos). TLS terminate.Nếu không authen → 401 Unauthorized2Auth MiddlewareĐọc WindowsIdentity → Map AD Groups → Assign ASP.NET Core Claims/RolesClaims persist trong HttpContext.User3Authorization FilterKiểm tra [Authorize(Roles=...)] hoặc Policy. Fail → 403 + AuditLogFail fast - không vào controller4Controller ActionNhận request, map sang Command/Query DTO, validate sơ bộ (ModelState)Thin controller - không có business logic5FluentValidationValidate Command DTO: required, format, business rules (TK tồn tại, kỳ mở)Fail → 400 Bad Request + error details6Application ServiceXử lý use case. Gọi Domain entities. Orchestrate Repos + TaxEngine.No direct DB access - qua IRepository7Domain EntityValidate domain rules. Raise Domain Events (e.g. VoucherPosted).Pure C# - no EF, no HTTP8Repository (EF Core)Translate to SQL (SS) hoặc PL/pgSQL (PG). Execute via DbContext.Provider-specific SQL gen bởi EF Core9AuditInterceptorTrước SaveChanges: capture Before/After values → insert AuditLog rowChạy trong cùng DB transaction10Domain Event HandlerXử lý VoucherPosted: notify SignalR, queue email, update countersAsync - không block response11ResponseMap entity → DTO. Serialize JSON. Return HTTP 200/201/204.Không expose entity trực tiếp
+
+1.6 Deployment Diagram
+
+📌 Toàn bộ hệ thống chạy trên Windows Server nội bộ. Client kết nối qua LAN. Không có external endpoint trừ các API outbound có kiểm soát (HĐDT, TCT).
+
+
+CHƯƠNG 2 - LOW-LEVEL DESIGN (LLD)
+2.1 Domain Model - Core Entities
+Các Entity chính trong Domain Layer, theo DDD (Domain-Driven Design) lightweight:
+EntityKey PropertiesDomain MethodsInvariants (Business Rules)VoucherId, VoucherNo, Type, Date, Status, TotalDebit, TotalCredit, FiscalPeriodId, Lines[]Submit(), Approve(), Reject(), Post(), Reverse(), AddLine(), RemoveLine()ΣDebit=ΣCredit khi Submit. Status chỉ đi theo chiều tiến. FiscalPeriod phải OPEN.VoucherLineId, VoucherId, AccountId, DebitAmt, CreditAmt, Description, CustomerId?, VendorId?, IsExciseTaxLine, CITAdjFlag-Mỗi dòng: DebitAmt≥0 AND CreditAmt≥0 AND NOT(Debit>0 AND Credit>0). TK phải IsDetailAccount=true.LedgerEntryId, AccountId, VoucherId, Date, DebitAmt, CreditAmt, FiscalPeriodId-Append-only. Không UPDATE/DELETE sau khi ghi.FiscalPeriodId, Year, Month, Status (OPEN/CLOSED/LOCKED)Open(), Close(), Lock()Không Close khi còn Voucher PENDING. Không reopen LOCKED.TaxRateTaxRateKey, TaxType, Rate, EffectiveFrom, EffectiveToGetRateAt(date)Rate trong [0,1]. EffectiveTo > EffectiveFrom.PITBracketBracketNo, FromAmt, ToAmt, TaxRate, QuickDeduction, EffectiveFromGetBracketFor(income, date)5 bậc liên tục không chồng lấp. Bậc cao nhất ToAmt=null.ExciseTaxItemProductId, CurrentRate, ScheduledRates (JSON), EffectiveFromGetRateAt(date), ScheduleNextRate()Rate không âm. ScheduledRates phải là valid JSON array.AuditLogAuditLogId (BIGINT), EventTime, UserName, Action, TableName, RecordId, OldValues, NewValues-Append-only. Không có Update/Delete method.
+
+2.2 Repository Pattern & Unit of Work
+Toàn bộ data access qua Repository interfaces. DbContext được inject qua DI. Provider (SS/PG) trong transparent với Application layer.
+InterfacePhương thức chínhImplementation notesIVoucherRepositoryGetById, GetByPeriod, GetPending, Add, Update (status only)EF Core. Include VoucherLines eagerly. Soft-delete filter global.ILedgerRepositoryGetByAccount(accountId, from, to), GetTrialBalance(period), Add (batch)Batch insert LedgerEntries. No update/delete allowed.ITaxRateRepositoryGetRate(key, date), GetAllActive()Cache 5 phút (IMemoryCache). Invalidate khi TaxRate updated.IPITBracketRepositoryGetBrackets(date)Cache per effective date. 5 brackets only.IInventoryRepositoryGetBalance(productId, warehouseId), AddTransaction, GetNXT(period)FIFO: order by transaction date. BQGQ: run end-of-month SP.IAssetRepositoryGetActive(), GetDepreciationSchedule(assetId)Include DepreciationSchedule. Soft-delete filter.IAuditLogRepositoryAdd (append-only). No Get exposed to UI directly.Direct SQL INSERT. No EF tracking - performance critical.IUnitOfWorkBeginTransaction(), Commit(), Rollback(), SaveChangesAsync()Wraps DbContext. Used when multiple Repos in 1 transaction.
+2.3 Tax Engine - Design Detail
+TaxEngine là component phức tạp nhất, được thiết kế hoàn toàn stateless (pure functions) và tham số hoá 100% từ DB:
+Sub-engineInterfaceThuật toánInput → OutputGTGTCalculatorIVATCalculatorLấy TaxRate theo key + date. DT thông thường: rate=8% (đến 31/12/2026), 10% sau. Xuất khẩu: 0%. Tự switch theo EffectiveFrom/To.(amount, taxRateKey, date) → {taxBase, vatAmount, rate}TNDNCalculatorICITCalculator1. Tổng DT năm → xác định TS (15% hoặc 20%). 2. Lọc CP không được trừ (CITAdjFlag). 3. TNCT = DT - CP_được_trừ. 4. Thuế = TNCT × TS.(revenue, expenses[], fiscalYear) → {taxableIncome, rate, tax}TNCNCalculatorIPITCalculator1. Load PITBrackets theo date. 2. GTGC = self + n×dependent. 3. TNTT = salary - BHXH - GTGC. 4. Biểu lũy tiến 5 bậc với QuickDeduction.(salary, bhxh, selfAllowance, dependents, date) → {taxableIncome, tax, breakdown[]}TTDBCalculatorIExciseTaxCalculator1. Load CurrentRate từ ExciseTaxItems. 2. Giá tính thuế = giá bán / (1 + rate). 3. Thuế = giá tính × rate. 4. Check ScheduledRates cho lộ trình.(salePrice, productId, date) → {taxBase, exciseTax, rate}NTCCalculatorIWHTCalculatorTra bảng loại DV + quốc gia. Apply DTT nếu có. GTGT_NT = DT × rateGTGT. TNDN_NT = DT × rateTNDN.(contractValue, serviceType, countryCode) → {vatNT, citNT}
+Thiết kế key: Strategy Pattern - mỗi loại thuế là một IXxxCalculator riêng. TaxEngine là Facade gọi đúng calculator theo loại. Thêm thuế mới chỉ cần implement interface mới, không sửa code cũ (Open/Closed Principle).
+
+
+2.4 Voucher State Machine - Implementation
+
+📌 Sequence diagram trên mô tả luồng tính khấu trừ TNCN tháng - quy trình phức tạp nhất liên quan Tax Engine, 2 bảng DB tham số, và EF Core batch insert.
+
+State Machine Voucher được implement qua Status enum + Guard Methods trong Voucher entity:
+TransitionMethodGuard ConditionSide EffectsDRAFT → PENDINGvoucher.Submit()Lines.Count ≥ 2. ΣDebit = ΣCredit. FiscalPeriod.Status = OPEN.Raise VoucherSubmittedEvent → SignalR notify KeToanTruongPENDING → APPROVEDvoucher.Approve(approverId)CurrentUser has KeToanTruong role.AuditLog entry. Raise VoucherApprovedEvent.PENDING → DRAFTvoucher.Reject(reason)CurrentUser has KeToanTruong role. Reason not empty.AuditLog. Raise VoucherRejectedEvent → notify KeToanVien.APPROVED → POSTEDvoucher.Post()FiscalPeriod.Status = OPEN. All referenced Accounts IsActive=true.Call LedgerService.Post(). Insert LedgerEntries (batch). Update account balances. AuditLog.POSTED → REVERSEDvoucher.Reverse(reversedById)FiscalPeriod.Status = OPEN.Create new Voucher (reversed lines, DRAFT). Link RelatedVoucherId. AuditLog.
+
+2.5 Database Design - Schema & Key Tables
+Toàn bộ schema dùng chung cho SQL Server và PostgreSQL (cú pháp ANSI SQL). DDL cụ thể từng provider xem tại SRS v2.0 Chương 7.
+2.5.1 Schema Organization
+SchemaMục đíchBảng chính (count)accKế toán: Chứng từ, Sổ cái, Tài khoản, Danh mụcVouchers, VoucherLines, LedgerEntries, ChartOfAccounts, Customers, Vendors, Products, Warehouses, Employees, Banks, ExchangeRates, FixedAssets, DepreciationSchedule, InventoryTransactions, InventoryBalance, FiscalPeriods (~18 tables)taxTham số và dữ liệu thuếTaxRates, PITBrackets, PITAllowances, ExciseTaxItems, ExciseTaxRegister, VATInputRegister, VATOutputRegister, TaxDeclarations, TaxPayments, TaxCalendars, CITAdjustments, CITLossCarryForward, WithholdingTax (~13 tables)auditNhật ký bất biếnAuditLogs (append-only, DENY UPDATE/DELETE)cfgCấu hình hệ thốngAppSettings, NumberSequences, EmailTemplates, ReportTemplates, BackupTestLog (~5 tables)rptCache báo cáoTrialBalanceSnapshots, BSTCSnapshots (optional materialized views)
+2.5.2 Key Design Decisions
+Quyết địnhLý doTrade-offGUID (NEWSEQUENTIALID / gen_random_uuid) cho PK entity chínhCho phép client-side ID generation. Tránh INT overflow khi multi-year data. ID không đoán được (security).Index fragmentation trên SQL Server → dùng NEWSEQUENTIALID() thay NEWID() để giảm fragmentation. PG: gen_random_uuid() là OK.BIGINT IDENTITY cho AuditLogs PKAuditLogs cần thứ tự thời gian tuyệt đối. GUID không đảm bảo sort order. BIGINT đủ cho hàng tỷ rows.AuditLogs không distribute được nếu sau này cần sharding - acceptable vì on-premise.Soft Delete (IsDeleted) cho mọi entity chínhLuật KT yêu cầu bảo quản 10 năm. Hard delete vi phạm. Audit trail không đầy đủ nếu row bị xoá.Query phải thêm WHERE IsDeleted=0 (EF Core Global Query Filter giải quyết tự động).EF Core Global Query Filter cho Soft Delete và FiscalPeriodDeveloper không cần nhớ WHERE IsDeleted=0. DRY principle. Giảm bug.Phải override filter khi cần xem deleted records (admin). HasQueryFilter().IgnoreQueryFilters()JSONB (PG) / NVARCHAR(MAX) (SS) cho ScheduledRatesExciseTaxItems cần lưu lộ trình 5 năm. Relational table sẽ cần join phức tạp. JSON flexible hơn.PG: JSONB có index → query nhanh. SS: JSON không có native index → chỉ query full scan. Acceptable vì table nhỏ.Outbox Pattern cho Domain EventsDomain Events (VoucherPosted) cần đảm bảo reliable delivery tới Hangfire. Nếu dùng memory event bus, crash sau SaveChanges → event lost.Thêm bảng OutboxMessages trong acc schema. Hangfire poller đọc và publish. Eventual consistency nhưng reliable.Optimistic Concurrency (RowVersion/xmin)Prevent lost updates khi 2 user cùng edit Voucher. SS: RowVersion automatic. PG: dùng xmin system column.EF Core handle concurrency exception → return 409 Conflict với message friendly.
+
+2.6 API Design - REST Endpoints Summary
+Chi tiết đầy đủ request/response schema xem tại file SystemDesign_ERD_API_AMS_v1.0.xlsx tab API-Register.
+2.6.1 Voucher API
+MethodEndpointMô tảAuth RequiredGET/api/v1/vouchersDanh sách CT (filter: type, status, date range, accountId). Paginate.KeToanVien+GET/api/v1/vouchers/{id}Chi tiết CT + Lines + AttachmentsKeToanVien+POST/api/v1/vouchersTạo CT mới (status=DRAFT)KeToanVien, ThuQuyPUT/api/v1/vouchers/{id}Cập nhật CT (chỉ khi DRAFT)KeToanVien, ThuQuyPOST/api/v1/vouchers/{id}/submitSubmit CT → PENDINGKeToanVien, ThuQuyPOST/api/v1/vouchers/{id}/approveDuyệt CT → APPROVEDKeToanTruongPOST/api/v1/vouchers/{id}/rejectTừ chối CT → DRAFT kèm lý doKeToanTruongPOST/api/v1/vouchers/{id}/postPost CT → POSTED (ghi sổ cái)KeToanTruongPOST/api/v1/vouchers/{id}/reverseTạo CT đảo ngượcKeToanTruongPOST/api/v1/vouchers/{id}/cloneClone CT → CT mới DRAFTKeToanVienPOST/api/v1/vouchers/importImport hàng loạt từ ExcelKeToanVienDELETE/api/v1/vouchers/{id}Soft-delete CT (chỉ DRAFT)KeToanVien
+2.6.2 Tax API
+MethodEndpointMô tảAuthGET/api/v1/tax/gtgt/input-registerSổ GTGT mua vào theo kỳTaxOfficer, KeToanVienGET/api/v1/tax/gtgt/output-registerSổ GTGT bán ra theo kỳTaxOfficer, KeToanVienPOST/api/v1/tax/gtgt/declarationTạo/cập nhật tờ khai 01/GTGTTaxOfficerGET/api/v1/tax/gtgt/declaration/{period}/xmlXuất XML iTaxViewerTaxOfficer, KeToanTruongGET/api/v1/tax/cit/provisional/{quarter}Tạm tính TNDN theo quýTaxOfficerPOST/api/v1/tax/cit/finalization/{year}Quyết toán TNDN nămTaxOfficer, KeToanTruongGET/api/v1/tax/pit/monthly/{month}Khấu trừ TNCN thángTaxOfficer, KeToanVienPOST/api/v1/tax/pit/finalization/{year}Quyết toán TNCN nămTaxOfficerGET/api/v1/tax/excise/register/{period}Sổ thuế TTĐB theo kỳTaxOfficerPOST/api/v1/tax/excise/declaration/{period}Tờ khai 01/TTĐBTaxOfficerGET/api/v1/tax/calendarLịch khai báo thuế cả nămTaxOfficer, KeToanTruongGET/api/v1/tax/ratesThuế suất hiện tại tất cả loạiTaxOfficer, KeToanTruong
+
+2.6.3 Report & Ledger API
+MethodEndpointMô tảAuthGET/api/v1/reports/trial-balanceBảng cân đối tài khoản theo kỳKeToanVien+GET/api/v1/reports/general-ledger/{accountId}Sổ Cái theo TKKeToanVien+GET/api/v1/reports/bctc/b01/{period}Bảng CĐKT B01-DNKeToanTruong, GiamDocGET/api/v1/reports/bctc/b02/{period}BC KQKD B02-DNKeToanTruong, GiamDocGET/api/v1/reports/bctc/b03/{year}BC LCTT B03-DNKeToanTruongGET/api/v1/reports/dashboardDashboard BI dataKeToanTruong, GiamDoc, TaxOfficerGET/api/v1/ledger/accountsDanh mục TKKT theo TT 99/2025KeToanVien+GET/api/v1/ledger/periodsDanh sách kỳ kế toánKeToanVien+POST/api/v1/ledger/periods/{id}/closeKhoá kỳ tháng (8 bước)KeToanTruongGET/api/v1/reports/{type}/exportExport PDF/Excel/WordKeToanVien+
+2.6.4 System & DB Admin API
+MethodEndpointMô tảAuthGET/api/v1/health/dbDB health check: status, responseMs, connectionsITAdmin, DBAdminGET/api/v1/health/fullFull system healthITAdminGET/api/v1/audit-logsAudit log query (filter: user, table, action, date)ITAdmin, KeToanTruongGET/api/v1/config/tax-ratesDanh sách tham số thuếKeToanTruong, ITAdminPUT/api/v1/config/tax-rates/{key}Cập nhật thuế suất (kèm LegalBasis)KeToanTruong, ITAdminGET/api/v1/config/pit-bracketsBiểu thuế TNCNKeToanTruongPUT/api/v1/config/pit-bracketsCập nhật biểu thuế TNCNKeToanTruong, ITAdminPOST/api/v1/jobs/trigger/{jobName}Trigger Hangfire job thủ côngITAdmin, DBAdminGET/api/v1/jobs/historyLịch sử Hangfire jobsITAdmin, DBAdmin
+
+2.7 Security Design - Defense in Depth
+LayerMechanismImplementationFail behaviourL1 - NetworkHTTPS/TLS 1.2+IIS with AD Certificate Services cert. TLS 1.0/1.1 disabled. HSTS header. HTTP → HTTPS redirect.Plain HTTP → 301 redirect. Downgrade attack → connection refused.L2 - AuthenticationWindows Kerberos/NTLMIIS Windows Authentication enabled. Anonymous disabled. Browser negotiates automatically.No valid Windows token → 401 Unauthorized. Log to AuditLog.L3 - AuthorizationRBAC + ASP.NET Core Policy[Authorize(Roles=...)] on all controllers/actions. Policy-based for fine-grained (e.g. only KeToanTruong can Post).Invalid role → 403 Forbidden. AuditLog entry with attempted action.L4 - Input ValidationFluentValidationAll Commands/Queries validated. Reject invalid data early. SQL injection impossible via EF Core parameterized queries.400 Bad Request with structured error details. No data reaches DB.L5 - DatabaseDeny + AppRoleDENY UPDATE/DELETE on audit.AuditLogs. Minimal DB permissions for app account. SQL Server: Windows SSPI only. PG: scram-sha-256.DB error returned as 500 (internal). Never expose DB error messages to client.L6 - AuditImmutable AuditLogEF Core Interceptor: every SaveChanges → append AuditLog. BIGINT IDENTITY ensures ordering. No delete allowed.AuditLog write failure → rollback entire transaction. Better to fail than lose audit trail.L7 - SessionCSRF + TimeoutASP.NET Core DataProtection Anti-forgery token on all POST. 30-min session timeout. Secure + HttpOnly cookies.CSRF token mismatch → 400. Session expired → redirect to re-auth.
+
+2.8 Background Jobs - Hangfire Design
+Job NameTriggerMô tảIdempotent?RecoverySP_AutoSwitchTaxRatesHàng đêm 00:00 (Cron)Kiểm tra TaxRates.EffectiveFrom = today → activate. Key job: switch GTGT 8%→10% ngày 01/01/2027.YES - kiểm tra trước UPDATE, skip nếu đã done.Retry 3 lần. Alert email nếu fail.MonthlyDepreciationNgày 1 hàng tháng 01:00Tính và tạo CT khấu hao TSCĐ tất cả TS đang active cho tháng trước.YES - check đã có CT KH tháng đó chưa.Retry 3 lần. Manual trigger available.MonthlyPITCalcNgày 25 hàng tháng 02:00Tính khấu trừ TNCN cho toàn bộ NV. Tạo VoucherLines TK3335.YES - delete existing Draft lines trước khi insert.Retry 3 lần. KeToanVien review trước Post.ExciseTaxRateUpdateNgày 1/1 hàng năm 00:30Đọc ScheduledRates JSON → UPDATE CurrentRate. Gửi email DBAdmin.YES - check ScheduledRates.year = current year.Alert email. Manual trigger.TaxDeadlineReminderHàng ngày 08:00Kiểm tra TaxCalendars → DueDate ≤ today+7 → gửi email TaxOfficer.YES - check đã gửi reminder hôm nay chưa.Log error. Continue with next reminder.DatabaseBackupVerifyMỗi thứ 6 09:00Restore backup mới nhất vào sandbox. Run SP_GenTrialBalance. Compare với prod. Alert nếu diff.YES - cleanup sandbox trước khi restore.Alert email DBAdmin. Log result.OutboxMessageProcessorMỗi 30 giâyĐọc OutboxMessages chưa processed → publish Domain Events → mark processed.YES - idempotency key per message.Dead-letter queue sau 5 retries.LDAPSyncMỗi 15 phútSync AD Groups → app Roles. Add mới / disable removed users.YES - upsert based on AD objectGUID.Log warning. Continue with known users.
+
+2.9 SignalR Real-Time Notification Design
+EventNguồn (Producer)Nhận (Consumer)Dữ liệu pushVoucherSubmittedKeToanVien submit CTKeToanTruong (group){ voucherId, voucherNo, submittedBy, voucherType }VoucherApproved / RejectedKeToanTruong actionKeToanVien (specific user){ voucherId, voucherNo, status, message }TaxDeadlineAlertHangfire daily jobTaxOfficer (group){ taxType, dueDate, daysLeft, declarationId }InventoryLowStockHangfire daily checkKeToanTruong (group){ productId, productName, currentStock, minStock }MonthEndJobCompletedHangfire job completeKeToanTruong (specific user){ jobName, status, details }DBHealthDegradedHealth Check backgroundITAdmin, DBAdmin (group){ status, responseMs, errorDetail }TaxRateSwitchedSP_AutoSwitchTaxRatesKeToanTruong, TaxOfficer (all){ taxRateKey, oldRate, newRate, effectiveDate }
+Implementation: SignalR Hub tại /hub/notifications. Authentication qua Windows Identity (tự động). Groups: 'KeToanTruong', 'TaxOfficer', 'ITAdmin', 'DBAdmin'. Specific user: ConnectionId mapped từ UserName. Fallback: Server-Sent Events nếu WebSocket không available.
+
+
+2.10 Caching Strategy
+DataCache TypeTTLInvalidation StrategyTaxRates (tất cả loại)IMemoryCache5 phútExplicit invalidate khi PUT /api/v1/config/tax-rates/{key}PITBracketsIMemoryCache60 phútExplicit invalidate khi update bracketsChartOfAccounts (TKKT)IMemoryCache30 phútExplicit invalidate khi add/modify TKDashboard BI aggregatesIMemoryCache5 phútTTL only - data is near-real-time acceptableTrial Balance snapshotDB (rpt schema)End-of-period snapshotRecreate mỗi khi khoá kỳUser Roles (từ AD)IMemoryCache per user15 phútHangfire LDAP sync invalidate → re-fetchReport RDLC templatesIMemoryCacheKhông expireManual reload qua /api/v1/admin/reload-templates
+
+
+- HẾT TÀI LIỆU SDD v1.0 -
+AMS System Design | Clean Architecture | SOLID | On-Premise | BRD v4.0 + SRS v2.0
+ERD + API Register: xem file SystemDesign_ERD_API_AMS_v1.0.xlsx kèm theo
+AMS - System Design Document (SDD) v1.0 | HLD + LLD	1
+
+CONFIDENTIAL | AMS SDD v1.0 (c) 2026 | Solution Architect View | On-Premise Microsoft + PostgreSQL | .NET 10
+
