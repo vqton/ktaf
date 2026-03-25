@@ -86,4 +86,12 @@ public interface IChartOfAccountsRepository
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves multiple accounts by their identifiers.
+    /// </summary>
+    /// <param name="ids">The collection of account identifiers.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Collection of accounts found.</returns>
+    Task<IEnumerable<ChartOfAccounts>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
 }

@@ -102,4 +102,12 @@ public class ChartOfAccountsRepository : IChartOfAccountsRepository
             account.ModifiedAt = DateTime.UtcNow;
         }
     }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<ChartOfAccounts>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await _context.ChartOfAccounts
+            .Where(a => ids.Contains(a.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -222,6 +222,8 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 26. Added fiscal period validation before reversing (must be Open)
 27. Added fiscal period validation to SubmitAsync, ApproveAsync, RejectAsync (must be Open)
 28. Added FiscalPeriod eager loading in VoucherRepository (GetById, GetByIdWithLines)
+29. Fixed LedgerEntry.AccountCode population when creating from voucher
+30. Added ChartOfAccountsRepository.GetByIdsAsync for bulk account lookup
 23. Added transaction wrapper for posting voucher and creating ledger entries
 
 ## Domain Entities Complete (2026-03-24)

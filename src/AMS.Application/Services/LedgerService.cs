@@ -131,6 +131,10 @@ public class LedgerService : ILedgerService
         if (existingEntries.Any())
             return ServiceResult.Failure("Chứng từ đã được hạch toán.");
 
+        var accountIds = voucher.Lines.Select(l => l.AccountId).Distinct().ToList();
+        var accounts = await _accountRepository.GetByIdsAsync(accountIds, cancellationToken);
+        var accountCodeMap = accounts.ToDictionary(a => a.Id, a => a.Code);
+
         var entries = voucher.Lines.Select(line => new LedgerEntry
         {
             Id = Guid.NewGuid(),
@@ -139,7 +143,7 @@ public class LedgerService : ILedgerService
             VoucherNo = voucher.VoucherNo,
             VoucherDate = voucher.VoucherDate,
             AccountId = line.AccountId,
-            AccountCode = "",
+            AccountCode = accountCodeMap.GetValueOrDefault(line.AccountId, ""),
             DebitAmount = line.DebitAmount,
             CreditAmount = line.CreditAmount,
             Description = line.Description,
