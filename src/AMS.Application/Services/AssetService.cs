@@ -69,7 +69,8 @@ public class AssetService : IAssetService
 
     public DepreciationResultDto CalculateStraightLineDepreciation(decimal originalCost, decimal residualValue, int usefulLifeMonths, decimal accumulatedDepreciation)
     {
-        var depreciableAmount = originalCost - (residualValue ?? 0);
+        var residual = residualValue > 0 ? residualValue : 0;
+        var depreciableAmount = originalCost - residual;
         var monthlyDepreciation = usefulLifeMonths > 0 ? depreciableAmount / usefulLifeMonths : 0;
         var currentBookValue = originalCost - accumulatedDepreciation;
         var remainingMonths = Math.Max(0, usefulLifeMonths - (int)(accumulatedDepreciation / (monthlyDepreciation > 0 ? monthlyDepreciation : 1)));

@@ -98,7 +98,9 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<IEnumerable<InventoryBalance>> GetBalancesAsync(Guid? warehouseId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.InventoryBalances.Where(b => !b.IsDeleted);
+        var query = _context.InventoryBalances
+            .Include(b => b.Product)
+            .Where(b => !b.IsDeleted);
         
         if (warehouseId.HasValue)
             query = query.Where(b => b.WarehouseId == warehouseId.Value);

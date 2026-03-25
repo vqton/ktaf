@@ -184,11 +184,12 @@ public class InventoryService : IInventoryService
         var report = new List<InventoryReportDto>();
         foreach (var balance in balances)
         {
+            var product = await _inventoryRepository.GetProductByIdAsync(balance.ProductId, cancellationToken);
             report.Add(new InventoryReportDto
             {
                 ProductId = balance.ProductId,
-                ProductCode = balance.Product?.ProductCode ?? "",
-                ProductName = balance.Product?.ProductName ?? "",
+                ProductCode = product?.ProductCode ?? "",
+                ProductName = product?.ProductName ?? "",
                 OpeningQuantity = balance.Quantity,
                 OpeningValue = balance.Quantity * balance.UnitCost,
                 ClosingQuantity = balance.Quantity,

@@ -37,4 +37,9 @@ public class InventoryBalance : BaseEntity
     /// Date of the last inventory transaction.
     /// </summary>
     public DateTime LastTransactionDate { get; set; }
+
+    /// <summary>
+    /// Navigation property to the product.
+    /// </summary>
+    public Product? Product { get; set; }
 }

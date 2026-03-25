@@ -1,4 +1,7 @@
+using AMS.Application.Interfaces;
+using AMS.Application.Services;
 using AMS.Domain.Interfaces;
+using AMS.Infrastructure;
 using AMS.Infrastructure.Data;
 using AMS.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +14,26 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AMSDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IChartOfAccountsRepository, ChartOfAccountsRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 builder.Services.AddScoped<ILedgerRepository, LedgerRepository>();
 builder.Services.AddScoped<IFiscalPeriodRepository, FiscalPeriodRepository>();
+builder.Services.AddScoped<ITaxRepository, TaxRepository>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+
+builder.Services.AddScoped<IVoucherService, AMS.Application.Accounting.Vouchers.Services.VoucherService>();
+builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IVendorService, VendorService>();
+builder.Services.AddScoped<ILedgerService, LedgerService>();
+builder.Services.AddScoped<IFiscalPeriodService, FiscalPeriodService>();
+builder.Services.AddScoped<ITaxService, TaxService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IAssetService, AssetService>();
 
 builder.Services.AddControllersWithViews();
 

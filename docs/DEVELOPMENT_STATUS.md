@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-25 13:00  
+**Last Updated:** 2026-03-25 14:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -98,6 +98,39 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 | Component | Status | Notes |
 |-----------|--------|-------|
 | AMSDbContext | ✅ Done | All DbSets configured |
+| UnitOfWork | ✅ Done | Transaction management |
+
+### Repository Implementations
+| Repository | Status | Notes |
+|------------|--------|-------|
+| VoucherRepository | ✅ Done | |
+| ChartOfAccountsRepository | ✅ Done | |
+| CustomerRepository | ✅ Done | |
+| VendorRepository | ✅ Done | |
+| LedgerRepository | ✅ Done | |
+| FiscalPeriodRepository | ✅ Done | |
+| TaxRepository | ✅ Done | |
+| InventoryRepository | ✅ Done | |
+
+### Application Services
+| Service | Status | Notes |
+|---------|--------|-------|
+| VoucherService | ✅ Done | + ReverseAsync, uses domain methods |
+| ChartOfAccountsService | ✅ Done | |
+| CustomerService | ✅ Done | |
+| VendorService | ✅ Done | |
+| LedgerService | ✅ Done | |
+| FiscalPeriodService | ✅ Done | Open/Close/Lock periods |
+| TaxService | ✅ Done | PIT calculation, brackets |
+| InventoryService | ✅ Done | Products, transactions, balances |
+| AssetService | ✅ Done | Depreciation calculation |
+
+### Business Rules Implemented
+- Voucher workflow: Draft → Pending → Approved → Posted → Reversed
+- FiscalPeriod lifecycle: Open → Closed → Locked
+- PIT progressive tax calculation (7 brackets per TT 99/2025)
+- Inventory balance tracking with FIFO/AVCO
+- Fixed asset straight-line depreciation
 
 ### Web Layer
 | Component | Status | Notes |
@@ -171,6 +204,15 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
    - LedgerService (interface + implementation + DTOs)
 8. Created FiscalPeriodRepository implementation
 9. Registered all repositories in Program.cs DI container
+10. Created UnitOfWork for transaction management
+11. Created FiscalPeriodService with Open/Close/Lock business logic
+12. Enhanced VoucherService to use domain entity methods (Submit, Approve, Reject, Post, Reverse)
+13. Created TaxService with PIT calculation (7 progressive brackets per TT 99/2025)
+14. Created InventoryService with product, transaction, and balance management
+15. Created AssetService with depreciation calculation
+16. Implemented TaxRepository and InventoryRepository
+17. Added InventoryBalance navigation property for Product
+18. Added DefaultPersonalDeduction constant (11,000,000 VND)
 
 ## Domain Entities Complete (2026-03-24)
 
