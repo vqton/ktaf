@@ -94,6 +94,31 @@ public class AMSDbContext : DbContext
     public DbSet<Bank> Banks => Set<Bank>();
 
     /// <summary>
+    /// Gets or sets the BankAccounts DbSet.
+    /// </summary>
+    public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+
+    /// <summary>
+    /// Gets or sets the BankTransactions DbSet.
+    /// </summary>
+    public DbSet<BankTransaction> BankTransactions => Set<BankTransaction>();
+
+    /// <summary>
+    /// Gets or sets the CashBooks DbSet.
+    /// </summary>
+    public DbSet<CashBook> CashBooks => Set<CashBook>();
+
+    /// <summary>
+    /// Gets or sets the CashBookEntries DbSet.
+    /// </summary>
+    public DbSet<CashBookEntry> CashBookEntries => Set<CashBookEntry>();
+
+    /// <summary>
+    /// Gets or sets the BankReconciliations DbSet.
+    /// </summary>
+    public DbSet<BankReconciliation> BankReconciliations => Set<BankReconciliation>();
+
+    /// <summary>
     /// Gets or sets the ExchangeRates DbSet.
     /// </summary>
     public DbSet<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
@@ -419,6 +444,137 @@ public class AMSDbContext : DbContext
 
             entity.HasIndex(e => e.EmployeeCode).IsUnique();
             entity.HasIndex(e => e.ADUsername);
+        });
+
+        modelBuilder.Entity<Bank>(entity =>
+        {
+            entity.ToTable("banks");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("bank_id");
+            entity.Property(e => e.Code).HasColumnName("bank_code").HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Name).HasColumnName("bank_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.SwiftCode).HasColumnName("swift_code").HasMaxLength(20);
+            entity.Property(e => e.BranchName).HasColumnName("branch_name").HasMaxLength(255);
+            entity.Property(e => e.Address).HasColumnName("address").HasMaxLength(500);
+            entity.Property(e => e.Phone).HasColumnName("phone").HasMaxLength(20);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<BankAccount>(entity =>
+        {
+            entity.ToTable("bank_accounts");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("bank_account_id");
+            entity.Property(e => e.BankId).HasColumnName("bank_id").IsRequired();
+            entity.Property(e => e.AccountNumber).HasColumnName("account_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.AccountName).HasColumnName("account_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.AccountType).HasColumnName("account_type").HasMaxLength(20);
+            entity.Property(e => e.CurrencyCode).HasColumnName("currency_code").HasMaxLength(3);
+            entity.Property(e => e.OpeningBalance).HasColumnName("opening_balance").HasPrecision(18, 0);
+            entity.Property(e => e.IsPrimary).HasColumnName("is_primary");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.BranchName).HasColumnName("branch_name").HasMaxLength(255);
+            entity.Property(e => e.AccountHolder).HasColumnName("account_holder").HasMaxLength(255);
+
+            entity.HasIndex(e => e.AccountNumber).IsUnique();
+            entity.HasOne(e => e.Bank)
+                .WithMany(b => b.BankAccounts)
+                .HasForeignKey(e => e.BankId);
+        });
+
+        modelBuilder.Entity<BankTransaction>(entity =>
+        {
+            entity.ToTable("bank_transactions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("bank_transaction_id");
+            entity.Property(e => e.BankAccountId).HasColumnName("bank_account_id").IsRequired();
+            entity.Property(e => e.TransactionDate).HasColumnName("transaction_date");
+            entity.Property(e => e.TransactionType).HasColumnName("transaction_type").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.Amount).HasColumnName("amount").HasPrecision(18, 0);
+            entity.Property(e => e.FeeAmount).HasColumnName("fee_amount").HasPrecision(18, 0);
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.ReferenceNumber).HasColumnName("reference_number").HasMaxLength(50);
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.IsReconciled).HasColumnName("is_reconciled");
+            entity.Property(e => e.ReconciledDate).HasColumnName("reconciled_date");
+            entity.Property(e => e.VoucherId).HasColumnName("voucher_id");
+            entity.Property(e => e.PartnerName).HasColumnName("partner_name").HasMaxLength(255);
+            entity.Property(e => e.PartnerAccountNumber).HasColumnName("partner_account_number").HasMaxLength(50);
+
+            entity.HasIndex(e => e.BankAccountId);
+            entity.HasIndex(e => e.TransactionDate);
+            entity.HasOne(e => e.BankAccount)
+                .WithMany(b => b.Transactions)
+                .HasForeignKey(e => e.BankAccountId);
+        });
+
+        modelBuilder.Entity<CashBook>(entity =>
+        {
+            entity.ToTable("cash_books");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("cash_book_id");
+            entity.Property(e => e.Code).HasColumnName("cash_book_code").HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Name).HasColumnName("cash_book_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.IsMain).HasColumnName("is_main");
+            entity.Property(e => e.CurrencyCode).HasColumnName("currency_code").HasMaxLength(3);
+            entity.Property(e => e.OpeningBalance).HasColumnName("opening_balance").HasPrecision(18, 0);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<CashBookEntry>(entity =>
+        {
+            entity.ToTable("cash_book_entries");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("cash_book_entry_id");
+            entity.Property(e => e.CashBookId).HasColumnName("cash_book_id").IsRequired();
+            entity.Property(e => e.FiscalPeriodId).HasColumnName("fiscal_period_id").IsRequired();
+            entity.Property(e => e.EntryDate).HasColumnName("entry_date");
+            entity.Property(e => e.EntryType).HasColumnName("entry_type").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.ReferenceNo).HasColumnName("reference_no").HasMaxLength(50);
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.ReceiptAmount).HasColumnName("receipt_amount").HasPrecision(18, 0);
+            entity.Property(e => e.PaymentAmount).HasColumnName("payment_amount").HasPrecision(18, 0);
+            entity.Property(e => e.Balance).HasColumnName("balance").HasPrecision(18, 0);
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.IsReconciled).HasColumnName("is_reconciled");
+            entity.Property(e => e.VoucherId).HasColumnName("voucher_id");
+            entity.Property(e => e.PartnerName).HasColumnName("partner_name").HasMaxLength(255);
+
+            entity.HasIndex(e => e.CashBookId);
+            entity.HasIndex(e => e.EntryDate);
+            entity.HasOne(e => e.CashBook)
+                .WithMany(c => c.Entries)
+                .HasForeignKey(e => e.CashBookId);
+        });
+
+        modelBuilder.Entity<BankReconciliation>(entity =>
+        {
+            entity.ToTable("bank_reconciliations");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("bank_reconciliation_id");
+            entity.Property(e => e.BankAccountId).HasColumnName("bank_account_id").IsRequired();
+            entity.Property(e => e.Year).HasColumnName("year");
+            entity.Property(e => e.Month).HasColumnName("month");
+            entity.Property(e => e.StatementClosingBalance).HasColumnName("statement_closing_balance").HasPrecision(18, 0);
+            entity.Property(e => e.BookClosingBalance).HasColumnName("book_closing_balance").HasPrecision(18, 0);
+            entity.Property(e => e.InTransitDeposits).HasColumnName("in_transit_deposits").HasPrecision(18, 0);
+            entity.Property(e => e.UnrecordedBankFees).HasColumnName("unrecorded_bank_fees").HasPrecision(18, 0);
+            entity.Property(e => e.UnrecordedInterest).HasColumnName("unrecorded_interest").HasPrecision(18, 0);
+            entity.Property(e => e.ReconciliationDate).HasColumnName("reconciliation_date");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.Notes).HasColumnName("notes").HasMaxLength(1000);
+            entity.Property(e => e.PreparedBy).HasColumnName("prepared_by").HasMaxLength(100);
+            entity.Property(e => e.ApprovedBy).HasColumnName("approved_by").HasMaxLength(100);
+
+            entity.HasIndex(e => new { e.BankAccountId, e.Year, e.Month }).IsUnique();
+            entity.HasOne(e => e.BankAccount)
+                .WithMany()
+                .HasForeignKey(e => e.BankAccountId);
         });
 
         modelBuilder.Entity<Product>(entity =>

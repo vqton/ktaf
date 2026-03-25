@@ -27,6 +27,12 @@ builder.Services.AddScoped<IFiscalPeriodRepository, FiscalPeriodRepository>();
 builder.Services.AddScoped<ITaxRepository, TaxRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>();
+builder.Services.AddScoped<IBankRepository, BankRepository>();
+builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<IBankTransactionRepository, BankTransactionRepository>();
+builder.Services.AddScoped<ICashBookRepository, CashBookRepository>();
+builder.Services.AddScoped<ICashBookEntryRepository, CashBookEntryRepository>();
+builder.Services.AddScoped<IBankReconciliationRepository, BankReconciliationRepository>();
 
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();
@@ -39,6 +45,8 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
 builder.Services.AddScoped<IMonthEndClosingService, MonthEndClosingService>();
+builder.Services.AddScoped<IBankReconciliationService, BankReconciliationService>();
+builder.Services.AddScoped<ICashFlowReportService, CashFlowReportService>();
 
 builder.Services.AddControllersWithViews();
 
