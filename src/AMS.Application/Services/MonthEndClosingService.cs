@@ -6,7 +6,7 @@ using AMS.Domain.Interfaces;
 namespace AMS.Application.Services;
 
 /// <summary>
-/// Service for managing month-end closing process (8 steps per Vietnamese accounting standards).
+/// Service for managing month-end closing process (8 steps per TT 99/2025/TT-BTC).
 /// </summary>
 public class MonthEndClosingService : IMonthEndClosingService
 {

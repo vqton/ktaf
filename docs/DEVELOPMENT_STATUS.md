@@ -226,7 +226,7 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 30. Added ChartOfAccountsRepository.GetByIdsAsync for bulk account lookup
 31. Implemented Account Balance tracking - updates balances on voucher post
 32. Implemented Trial Balance with opening balances from prior periods
-33. Implemented Month-end closing service (8-step process per TT 200)
+33. Implemented Month-end closing service (8-step process per TT 99/2025)
 34. Implemented Opening balance carry-forward from previous periods
 35. Created AccountBalance entity for persistent balance tracking
 36. Created TrialBalanceService (GetTrialBalance, UpdateAccountBalances, CarryForwardBalances)
