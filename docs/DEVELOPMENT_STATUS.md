@@ -226,7 +226,15 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 30. Added ChartOfAccountsRepository.GetByIdsAsync for bulk account lookup
 31. Implemented Account Balance tracking - updates balances on voucher post
 32. Implemented Trial Balance with opening balances from prior periods
-33. Implemented Month-end closing service (8-step process per TT 99/2025)
+33. Implemented Month-end closing service (8-step process per TT 99/2025):
+   - Bước 1: Kiểm tra và hạch toán chứng từ
+   - Bước 2: Tính giá xuất kho
+   - Bước 3: Tính khấu hao TSCĐ
+   - Bước 4: Phân bổ chi phí trả trước
+   - Bước 5: Hoàn nhập doanh thu chưa thực hiện
+   - Bước 6: Kết chuyển doanh thu, chi phí
+   - Bước 7: Lập bảng cân đối thử
+   - Bước 8: Khoá sổ kế toán
 34. Implemented Opening balance carry-forward from previous periods
 35. Created AccountBalance entity for persistent balance tracking
 36. Created TrialBalanceService (GetTrialBalance, UpdateAccountBalances, CarryForwardBalances)

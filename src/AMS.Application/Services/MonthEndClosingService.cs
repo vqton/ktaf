@@ -48,37 +48,37 @@ public class MonthEndClosingService : IMonthEndClosingService
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var step1Result = await Step1_AllocatePrepaidExpensesAsync(fiscalPeriodId, cancellationToken);
+            var step1Result = await Step1_CheckAndPostVouchersAsync(fiscalPeriodId, cancellationToken);
             if (!step1Result.IsSuccess)
-                errors.Add($"Bước 1 - Phân bổ chi phí trả trước: {step1Result.ErrorMessage}");
+                errors.Add($"Bước 1 - Kiểm tra và hạch toán chứng từ: {step1Result.ErrorMessage}");
 
-            var step2Result = await Step2_CalculateDepreciationAsync(fiscalPeriodId, cancellationToken);
+            var step2Result = await Step2_CalculateInventoryCostAsync(fiscalPeriodId, cancellationToken);
             if (!step2Result.IsSuccess)
-                errors.Add($"Bước 2 - Tính khấu hao TSCĐ: {step2Result.ErrorMessage}");
+                errors.Add($"Bước 2 - Tính giá xuất kho: {step2Result.ErrorMessage}");
 
-            var step3Result = await Step3_CalculateInventoryCostAsync(fiscalPeriodId, cancellationToken);
+            var step3Result = await Step3_CalculateDepreciationAsync(fiscalPeriodId, cancellationToken);
             if (!step3Result.IsSuccess)
-                errors.Add($"Bước 3 - Tính giá xuất kho: {step3Result.ErrorMessage}");
+                errors.Add($"Bước 3 - Tính khấu hao TSCĐ: {step3Result.ErrorMessage}");
 
-            var step4Result = await Step4_ReversePrepaidIncomeAsync(fiscalPeriodId, cancellationToken);
+            var step4Result = await Step4_AllocatePrepaidExpensesAsync(fiscalPeriodId, cancellationToken);
             if (!step4Result.IsSuccess)
-                errors.Add($"Bước 4 - Hoàn nhập doanh thu chưa thực hiện: {step4Result.ErrorMessage}");
+                errors.Add($"Bước 4 - Phân bổ chi phí trả trước: {step4Result.ErrorMessage}");
 
-            var step5Result = await Step5_CalculateTaxAsync(fiscalPeriodId, cancellationToken);
+            var step5Result = await Step5_ReversePrepaidIncomeAsync(fiscalPeriodId, cancellationToken);
             if (!step5Result.IsSuccess)
-                errors.Add($"Bước 5 - Tính thuế: {step5Result.ErrorMessage}");
+                errors.Add($"Bước 5 - Hoàn nhập doanh thu chưa thực hiện: {step5Result.ErrorMessage}");
 
-            var step6Result = await Step6_ForeignCurrencyRevaluationAsync(fiscalPeriodId, cancellationToken);
+            var step6Result = await Step6_TransferRevenueExpensesAsync(fiscalPeriodId, cancellationToken);
             if (!step6Result.IsSuccess)
-                errors.Add($"Bước 6 - Đánh giá ngoại tệ: {step6Result.ErrorMessage}");
+                errors.Add($"Bước 6 - Kết chuyển doanh thu, chi phí: {step6Result.ErrorMessage}");
 
-            var step7Result = await Step7_UpdateAccountBalancesAsync(fiscalPeriodId, cancellationToken);
+            var step7Result = await Step7_GenerateTrialBalanceAsync(fiscalPeriodId, cancellationToken);
             if (!step7Result.IsSuccess)
-                errors.Add($"Bước 7 - Cập nhật số dư tài khoản: {step7Result.ErrorMessage}");
+                errors.Add($"Bước 7 - Lập bảng cân đối thử: {step7Result.ErrorMessage}");
 
-            var step8Result = await Step8_GenerateTrialBalanceAsync(fiscalPeriodId, cancellationToken);
+            var step8Result = await Step8_CloseBooksAsync(fiscalPeriodId, cancellationToken);
             if (!step8Result.IsSuccess)
-                errors.Add($"Bước 8 - Lập bảng cân đối thử: {step8Result.ErrorMessage}");
+                errors.Add($"Bước 8 - Khoá sổ kế toán: {step8Result.ErrorMessage}");
 
             if (errors.Any())
             {
@@ -100,42 +100,37 @@ public class MonthEndClosingService : IMonthEndClosingService
         }
     }
 
-    private async Task<ServiceResult> Step1_AllocatePrepaidExpensesAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step1_CheckAndPostVouchersAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         return ServiceResult.Success();
     }
 
-    private async Task<ServiceResult> Step2_CalculateDepreciationAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step2_CalculateInventoryCostAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         return ServiceResult.Success();
     }
 
-    private async Task<ServiceResult> Step3_CalculateInventoryCostAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step3_CalculateDepreciationAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         return ServiceResult.Success();
     }
 
-    private async Task<ServiceResult> Step4_ReversePrepaidIncomeAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step4_AllocatePrepaidExpensesAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         return ServiceResult.Success();
     }
 
-    private async Task<ServiceResult> Step5_CalculateTaxAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step5_ReversePrepaidIncomeAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         return ServiceResult.Success();
     }
 
-    private async Task<ServiceResult> Step6_ForeignCurrencyRevaluationAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step6_TransferRevenueExpensesAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         return ServiceResult.Success();
     }
 
-    private async Task<ServiceResult> Step7_UpdateAccountBalancesAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
-    {
-        return await _trialBalanceService.UpdateAccountBalancesAsync(fiscalPeriodId, cancellationToken);
-    }
-
-    private async Task<ServiceResult> Step8_GenerateTrialBalanceAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    private async Task<ServiceResult> Step7_GenerateTrialBalanceAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
     {
         var trialBalance = await _trialBalanceService.GetTrialBalanceAsync(fiscalPeriodId, cancellationToken);
         if (!trialBalance.Any())
@@ -147,6 +142,11 @@ public class MonthEndClosingService : IMonthEndClosingService
         if (totalDebit != totalCredit)
             return ServiceResult.Failure($"Bảng cân đối không cân bằng. Nợ: {totalDebit:N0}, Có: {totalCredit:N0}");
 
+        return ServiceResult.Success();
+    }
+
+    private async Task<ServiceResult> Step8_CloseBooksAsync(Guid fiscalPeriodId, CancellationToken cancellationToken)
+    {
         return ServiceResult.Success();
     }
 }
