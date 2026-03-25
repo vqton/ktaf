@@ -26,13 +26,16 @@ public class VoucherRepository : IVoucherRepository
     /// <inheritdoc />
     public async Task<Voucher?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Vouchers.FindAsync(new object[] { id }, cancellationToken);
+        return await _context.Vouchers
+            .Include(v => v.FiscalPeriod)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<Voucher?> GetByIdWithLinesAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Vouchers
+            .Include(v => v.FiscalPeriod)
             .Include(v => v.Lines)
             .Include(v => v.Attachments)
             .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);

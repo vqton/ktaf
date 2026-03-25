@@ -124,6 +124,12 @@ public class VoucherService : IVoucherService
         if (voucher == null)
             return ServiceResult<VoucherDto>.Failure("Không tìm thấy chứng từ.");
 
+        if (voucher.FiscalPeriod == null)
+            return ServiceResult<VoucherDto>.Failure("Kỳ kế toán không tồn tại.");
+
+        if (voucher.FiscalPeriod.Status != FiscalPeriodStatus.Open)
+            return ServiceResult<VoucherDto>.Failure($"Kỳ kế toán {voucher.FiscalPeriod.Year}/{voucher.FiscalPeriod.Month} đang đóng, không thể trình duyệt.");
+
         try
         {
             voucher.Submit();
@@ -143,6 +149,12 @@ public class VoucherService : IVoucherService
         if (voucher == null)
             return ServiceResult<VoucherDto>.Failure("Không tìm thấy chứng từ.");
 
+        if (voucher.FiscalPeriod == null)
+            return ServiceResult<VoucherDto>.Failure("Kỳ kế toán không tồn tại.");
+
+        if (voucher.FiscalPeriod.Status != FiscalPeriodStatus.Open)
+            return ServiceResult<VoucherDto>.Failure($"Kỳ kế toán {voucher.FiscalPeriod.Year}/{voucher.FiscalPeriod.Month} đang đóng, không thể duyệt.");
+
         try
         {
             voucher.Approve(approverId);
@@ -161,6 +173,12 @@ public class VoucherService : IVoucherService
         var voucher = await _voucherRepository.GetByIdAsync(id, cancellationToken);
         if (voucher == null)
             return ServiceResult<VoucherDto>.Failure("Không tìm thấy chứng từ.");
+
+        if (voucher.FiscalPeriod == null)
+            return ServiceResult<VoucherDto>.Failure("Kỳ kế toán không tồn tại.");
+
+        if (voucher.FiscalPeriod.Status != FiscalPeriodStatus.Open)
+            return ServiceResult<VoucherDto>.Failure($"Kỳ kế toán {voucher.FiscalPeriod.Year}/{voucher.FiscalPeriod.Month} đang đóng, không thể từ chối.");
 
         try
         {
