@@ -180,7 +180,7 @@ public class InventoryService : IInventoryService
     public async Task<IEnumerable<InventoryReportDto>> GetInventoryReportAsync(Guid warehouseId, DateTime fromDate, DateTime toDate, CancellationToken cancellationToken = default)
     {
         var balances = await _inventoryRepository.GetBalancesAsync(warehouseId, cancellationToken);
-        
+
         var report = new List<InventoryReportDto>();
         foreach (var balance in balances)
         {

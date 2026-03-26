@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-25 18:00  
+**Last Updated:** 2026-03-25 18:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -16,7 +16,7 @@
 | AMS.Infrastructure | ✅ Pass | 0 |
 | AMS.Web | ⚠️ Warning | 1 (Newtonsoft.Json vulnerability) |
 
-**Last Build:** ✅ PASSED - 2026-03-25 17:30 (1 warning, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-25 18:30 (1 warning, 0 errors)
 
 ---
 
@@ -128,6 +128,13 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 | CashBookRepository | ✅ Done | QT Module |
 | CashBookEntryRepository | ✅ Done | QT Module |
 | BankReconciliationRepository | ✅ Done | QT Module |
+| ReceivableRepository | ✅ Done | CN Module |
+| PayableRepository | ✅ Done | CN Module |
+| ReceivablePaymentRepository | ✅ Done | CN Module |
+| PayablePaymentRepository | ✅ Done | CN Module |
+| AgingReportRepository | ✅ Done | CN Module |
+| ProductRepository | ✅ Done | HH Module |
+| WarehouseRepository | ✅ Done | HH Module |
 
 ### Application Services
 | Service | Status | Notes |
@@ -145,6 +152,8 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 | MonthEndClosingService | ✅ Done | Month-end closing (8 steps) |
 | BankReconciliationService | ✅ Done | QT - Bank statement reconciliation |
 | CashFlowReportService | ✅ Done | QT - B03-DN Cash Flow Statement |
+| ReceivablePayableService | ✅ Done | CN - AR/AP management |
+| InventoryReportService | ✅ Done | HH - Inventory reports |
 
 ### Business Rules Implemented
 - Voucher workflow: Draft → Pending → Approved → Posted → Reversed
@@ -327,6 +336,33 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
   - GetUnpaidReceivablesAsync, GetUnpaidPayablesAsync
   - GetReceivableAgingReportAsync, GetPayableAgingReportAsync
   - GenerateAgingReportAsync (Current, 1-30, 31-60, 61-90, Over 90 days)
+
+### DI Registration
+- All repositories and service registered in Program.cs
+
+## HH Module Implementation (2026-03-25)
+
+### Domain Entities
+- Enhanced InventoryTransactionType enum:
+  - PurchaseIn (Nhập mua), SaleOut (Xuất bán), ReturnOut (Xuất trả)
+  - ReturnIn (Nhập trả), Transfer (Chuyển kho), Adjustment (Điều chỉnh)
+  - SampleOut (Xuất mẫu), InternalOut (Xuất nội bộ)
+
+### Repository Interfaces
+- IProductRepository, IWarehouseRepository
+
+### Repository Implementations
+- ProductRepository, WarehouseRepository
+- Added GetTransactionsByDateRangeAsync to IInventoryRepository
+- Added GetAllBalancesAsync to IInventoryRepository
+
+### Application Services
+- IInventoryReportService + InventoryReportService
+  - GetStockBalanceReportAsync (Báo cáo tồn kho)
+  - GetInventoryMovementReportAsync (Báo cáo luân chuyển)
+  - GetInventoryValuationReportAsync (Báo cáo định giá hàng tồn kho)
+  - GetInventoryTurnoverReportAsync (Báo cáo vòng quay hàng tồn kho)
+  - GetInventoryAgingReportAsync (Báo cáo tuổi hàng tồn kho)
 
 ### DI Registration
 - All repositories and service registered in Program.cs

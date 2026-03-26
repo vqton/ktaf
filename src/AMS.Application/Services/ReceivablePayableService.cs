@@ -112,13 +112,13 @@ public class ReceivablePayableService : IReceivablePayableService
         var (receivables, totalCount) = await _receivableRepository.GetAllPagedAsync(page, pageSize);
         var unpaidReceivables = receivables.Where(r => r.RemainingAmount > 0).ToList();
         var dtos = new List<ReceivableDto>();
-        
+
         foreach (var r in unpaidReceivables)
         {
             var customer = await _customerRepository.GetByIdAsync(r.CustomerId);
             dtos.Add(MapToDto(r, customer?.Name ?? ""));
         }
-        
+
         return ServiceResult<List<ReceivableDto>>.Success(dtos);
     }
 
@@ -235,13 +235,13 @@ public class ReceivablePayableService : IReceivablePayableService
         var (payables, totalCount) = await _payableRepository.GetAllPagedAsync(page, pageSize);
         var unpaidPayables = payables.Where(p => p.RemainingAmount > 0).ToList();
         var dtos = new List<PayableDto>();
-        
+
         foreach (var p in unpaidPayables)
         {
             var vendor = await _vendorRepository.GetByIdAsync(p.VendorId);
             dtos.Add(MapToDto(p, vendor?.Name ?? ""));
         }
-        
+
         return ServiceResult<List<PayableDto>>.Success(dtos);
     }
 
@@ -314,7 +314,7 @@ public class ReceivablePayableService : IReceivablePayableService
             {
                 var customer = await _customerRepository.GetByIdAsync(r.CustomerId);
                 var (period, overdueDays) = CalculateAgingPeriod(r.DueDate, reportDate);
-                
+
                 var detail = new AgingReportDetailDto
                 {
                     Id = r.Id,
@@ -353,7 +353,7 @@ public class ReceivablePayableService : IReceivablePayableService
             {
                 var vendor = await _vendorRepository.GetByIdAsync(p.VendorId);
                 var (period, overdueDays) = CalculateAgingPeriod(p.DueDate, reportDate);
-                
+
                 var detail = new AgingReportDetailDto
                 {
                     Id = p.Id,

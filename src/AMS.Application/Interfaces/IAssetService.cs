@@ -13,7 +13,7 @@ public interface IAssetService
     Task<ServiceResult<FixedAssetDto>> UpdateAssetAsync(Guid id, CreateFixedAssetDto dto, CancellationToken cancellationToken = default);
     Task<ServiceResult<FixedAssetDto>> CalculateDepreciationAsync(Guid id, CancellationToken cancellationToken = default);
     Task<ServiceResult> PostDepreciationAsync(Guid id, int year, int month, string voucherNo, CancellationToken cancellationToken = default);
-    
+
     Task<DepreciationResultDto> CalculateMonthlyDepreciationAsync(Guid assetId, CancellationToken cancellationToken = default);
     Task<IEnumerable<DepreciationResultDto>> GenerateDepreciationScheduleAsync(Guid assetId, CancellationToken cancellationToken = default);
 }

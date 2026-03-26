@@ -40,7 +40,7 @@ public class TrialBalanceService : ITrialBalanceService
             return Enumerable.Empty<LedgerSummaryDto>();
 
         var previousPeriod = await _fiscalPeriodRepository.GetByYearMonthAsync(period.Year, period.Month - 1, cancellationToken);
-        
+
         var previousBalances = previousPeriod != null
             ? (await _accountBalanceRepository.GetByPeriodAsync(previousPeriod.Id, cancellationToken)).ToDictionary(b => b.AccountId)
             : new Dictionary<Guid, AccountBalance>();

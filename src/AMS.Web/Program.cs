@@ -42,6 +42,11 @@ builder.Services.AddScoped<IAgingReportRepository, AgingReportRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
 builder.Services.AddScoped<IInventoryReportService, InventoryReportService>();
+builder.Services.AddScoped<ICostCenterRepository, CostCenterRepository>();
+builder.Services.AddScoped<ICostAllocationRepository, CostAllocationRepository>();
+builder.Services.AddScoped<ICostAllocationDetailRepository, CostAllocationDetailRepository>();
+builder.Services.AddScoped<ICostReportRepository, CostReportRepository>();
+builder.Services.AddScoped<ICostAccountingService, CostAccountingService>();
 
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();

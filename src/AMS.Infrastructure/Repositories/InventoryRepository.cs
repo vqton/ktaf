@@ -119,7 +119,7 @@ public class InventoryRepository : IInventoryRepository
         var query = _context.InventoryBalances
             .Include(b => b.Product)
             .Where(b => !b.IsDeleted);
-        
+
         if (warehouseId.HasValue)
             query = query.Where(b => b.WarehouseId == warehouseId.Value);
 

@@ -244,12 +244,12 @@ public class AgingReportRepository : IAgingReportRepository
     public async Task<AgingReport?> GetByPeriodAsync(int year, int month, Guid? customerId, Guid? vendorId, CancellationToken cancellationToken = default)
     {
         var query = _context.AgingReports.Where(r => r.Year == year && r.Month == month);
-        
+
         if (customerId.HasValue)
             query = query.Where(r => r.CustomerId == customerId.Value);
         else if (vendorId.HasValue)
             query = query.Where(r => r.VendorId == vendorId.Value);
-            
+
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 

@@ -149,6 +149,26 @@ public class AMSDbContext : DbContext
     public DbSet<AgingReport> AgingReports => Set<AgingReport>();
 
     /// <summary>
+    /// Gets or sets the CostCenters DbSet (CP module - Cost Accounting).
+    /// </summary>
+    public DbSet<CostCenter> CostCenters => Set<CostCenter>();
+
+    /// <summary>
+    /// Gets or sets the CostAllocations DbSet.
+    /// </summary>
+    public DbSet<CostAllocation> CostAllocations => Set<CostAllocation>();
+
+    /// <summary>
+    /// Gets or sets the CostAllocationDetails DbSet.
+    /// </summary>
+    public DbSet<CostAllocationDetail> CostAllocationDetails => Set<CostAllocationDetail>();
+
+    /// <summary>
+    /// Gets or sets the CostReports DbSet.
+    /// </summary>
+    public DbSet<CostReport> CostReports => Set<CostReport>();
+
+    /// <summary>
     /// Gets or sets the FixedAssets DbSet.
     /// </summary>
     public DbSet<FixedAsset> FixedAssets => Set<FixedAsset>();

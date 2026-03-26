@@ -154,8 +154,8 @@ public class FiscalPeriodService : IFiscalPeriodService
                 Id = Guid.NewGuid(),
                 Year = year,
                 Month = month,
-                Status = month < DateTime.Today.Month && year <= DateTime.Today.Year 
-                    ? FiscalPeriodStatus.Closed 
+                Status = month < DateTime.Today.Month && year <= DateTime.Today.Year
+                    ? FiscalPeriodStatus.Closed
                     : FiscalPeriodStatus.Open,
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "system",

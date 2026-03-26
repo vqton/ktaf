@@ -10,12 +10,12 @@ public interface IInventoryRepository
     Task<IEnumerable<Product>> GetActiveProductsAsync(CancellationToken cancellationToken = default);
     Task AddProductAsync(Product product, CancellationToken cancellationToken = default);
     Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default);
-    
+
     Task<InventoryTransaction?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<(IEnumerable<InventoryTransaction> Transactions, int TotalCount)> GetByProductPagedAsync(Guid productId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<(IEnumerable<InventoryTransaction> Transactions, int TotalCount)> GetByWarehousePagedAsync(Guid warehouseId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task AddTransactionAsync(InventoryTransaction transaction, CancellationToken cancellationToken = default);
-    
+
     Task<IEnumerable<InventoryBalance>> GetBalancesAsync(Guid? warehouseId = null, CancellationToken cancellationToken = default);
     Task<InventoryBalance?> GetProductBalanceAsync(Guid productId, Guid warehouseId, CancellationToken cancellationToken = default);
     Task UpdateBalanceAsync(InventoryBalance balance, CancellationToken cancellationToken = default);

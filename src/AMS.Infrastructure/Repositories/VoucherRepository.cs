@@ -62,7 +62,7 @@ public class VoucherRepository : IVoucherRepository
     {
         var query = _context.Vouchers.AsQueryable();
         var totalCount = await query.CountAsync(cancellationToken);
-        
+
         var vouchers = await query
             .OrderByDescending(v => v.VoucherDate)
             .ThenByDescending(v => v.CreatedAt)

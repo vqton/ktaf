@@ -25,9 +25,9 @@ public class TaxRepository : ITaxRepository
     public async Task<TaxRate?> GetTaxRateByKeyAsync(string taxRateKey, DateTime date, CancellationToken cancellationToken = default)
     {
         return await _context.TaxRates
-            .Where(r => r.TaxRateKey == taxRateKey 
-                && r.IsActive 
-                && r.EffectiveFrom <= date 
+            .Where(r => r.TaxRateKey == taxRateKey
+                && r.IsActive
+                && r.EffectiveFrom <= date
                 && (r.EffectiveTo == null || r.EffectiveTo >= date))
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -67,9 +67,9 @@ public class TaxRepository : ITaxRepository
     public async Task<IEnumerable<PITAllowance>> GetEmployeeAllowancesAsync(Guid employeeId, DateTime date, CancellationToken cancellationToken = default)
     {
         return await _context.PITAllowances
-            .Where(a => a.EmployeeId == employeeId 
-                && a.IsActive 
-                && a.EffectiveFrom <= date 
+            .Where(a => a.EmployeeId == employeeId
+                && a.IsActive
+                && a.EffectiveFrom <= date
                 && (a.EffectiveTo == null || a.EffectiveTo >= date))
             .ToListAsync(cancellationToken);
     }

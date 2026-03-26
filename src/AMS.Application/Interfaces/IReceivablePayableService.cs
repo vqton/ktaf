@@ -10,14 +10,14 @@ public interface IReceivablePayableService
     Task<ServiceResult<List<ReceivableDto>>> GetReceivablesByCustomerAsync(Guid customerId);
     Task<ServiceResult<List<ReceivableDto>>> GetUnpaidReceivablesAsync(int page, int pageSize);
     Task<ServiceResult<ReceivableDto>> RecordReceivablePaymentAsync(Guid receivableId, RecordPaymentDto dto);
-    
+
     Task<ServiceResult<PayableDto>> CreatePayableAsync(CreatePayableDto dto);
     Task<ServiceResult<PayableDto>> UpdatePayableAsync(Guid id, UpdatePayableDto dto);
     Task<ServiceResult<PayableDto>> GetPayableByIdAsync(Guid id);
     Task<ServiceResult<List<PayableDto>>> GetPayablesByVendorAsync(Guid vendorId);
     Task<ServiceResult<List<PayableDto>>> GetUnpaidPayablesAsync(int page, int pageSize);
     Task<ServiceResult<PayableDto>> RecordPayablePaymentAsync(Guid payableId, RecordPaymentDto dto);
-    
+
     Task<ServiceResult<AgingReportDto>> GetReceivableAgingReportAsync(int year, int month, Guid? customerId = null);
     Task<ServiceResult<AgingReportDto>> GetPayableAgingReportAsync(int year, int month, Guid? vendorId = null);
     Task<ServiceResult<AgingReportDto>> GenerateAgingReportAsync(int year, int month, string reportType, Guid? partnerId = null);

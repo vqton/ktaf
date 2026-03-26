@@ -249,14 +249,14 @@ public class InventoryReportService : IInventoryReportService
 
     private static bool IsInTransaction(InventoryTransactionType type)
     {
-        return type == InventoryTransactionType.PurchaseIn || 
+        return type == InventoryTransactionType.PurchaseIn ||
                type == InventoryTransactionType.ReturnIn;
     }
 
     private static bool IsOutTransaction(InventoryTransactionType type)
     {
-        return type == InventoryTransactionType.SaleOut || 
-               type == InventoryTransactionType.ReturnOut || 
+        return type == InventoryTransactionType.SaleOut ||
+               type == InventoryTransactionType.ReturnOut ||
                type == InventoryTransactionType.Transfer ||
                type == InventoryTransactionType.InternalOut ||
                type == InventoryTransactionType.SampleOut;
