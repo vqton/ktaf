@@ -1,0 +1,150 @@
+@model IEnumerable<AMS.Application.DTOs.LedgerSummaryDto>
+
+@{
+    ViewData["Title"] = "Bảng cân đối tài khoản";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Bảng cân đối tài khoản (Trial Balance)</h1>
+    <div class="page-actions">
+        <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
+            <i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>In
+        </button>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="acc-card mb-4">
+        <div class="acc-card-header">
+            <h5>Chọn kỳ kế toán</h5>
+        </div>
+        <div class="acc-card-body">
+            <form id="periodForm" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Năm</label>
+                    <select class="form-select" id="year">
+                        @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 3; y--)
+                        {
+                            <option value="@y" selected="@(y == DateTime.Now.Year)">@y</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tháng</label>
+                    <select class="form-select" id="month">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m" selected="@(m == DateTime.Now.Month)">Tháng @m</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Xem báo cáo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="acc-card">
+        <div class="acc-card-header">
+            <h5>Kết quả</h5>
+        </div>
+        <div class="acc-card-body p-0">
+            <table class="table table-hover mb-0" id="trialBalanceTable">
+                <thead>
+                    <tr>
+                        <th>Mã TK</th>
+                        <th>Tên tài khoản</th>
+                        <th class="text-end">Nợ đầu kỳ</th>
+                        <th class="text-end">Có đầu kỳ</th>
+                        <th class="text-end">Phát sinh Nợ</th>
+                        <th class="text-end">Phát sinh Có</th>
+                        <th class="text-end">Nợ cuối kỳ</th>
+                        <th class="text-end">Có cuối kỳ</th>
+                    </tr>
+                </thead>
+                <tbody id="trialBalanceBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.AccountCode</td>
+                                <td>@item.AccountName</td>
+                                <td class="text-end col-amount">@item.OpeningDebit.ToString("N0")</td>
+                                <td class="text-end col-amount">@item.OpeningCredit.ToString("N0")</td>
+                                <td class="text-end col-amount">@item.DebitTurnover.ToString("N0")</td>
+                                <td class="text-end col-amount">@item.CreditTurnover.ToString("N0")</td>
+                                <td class="text-end col-amount">@item.ClosingDebit.ToString("N0")</td>
+                                <td class="text-end col-amount">@item.ClosingCredit.ToString("N0")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot id="trialBalanceFoot">
+                    @if (Model != null && Model.Any())
+                    {
+                        var totalOpeningDebit = Model.Sum(x => x.OpeningDebit);
+                        var totalOpeningCredit = Model.Sum(x => x.OpeningCredit);
+                        var totalDebitTurnover = Model.Sum(x => x.DebitTurnover);
+                        var totalCreditTurnover = Model.Sum(x => x.CreditTurnover);
+                        var totalClosingDebit = Model.Sum(x => x.ClosingDebit);
+                        var totalClosingCredit = Model.Sum(x => x.ClosingCredit);
+                        
+                        <tr class="table-total-row">
+                            <td colspan="2" class="text-end fw-bold">Tổng cộng:</td>
+                            <td class="text-end col-amount">@totalOpeningDebit.ToString("N0")</td>
+                            <td class="text-end col-amount">@totalOpeningCredit.ToString("N0")</td>
+                            <td class="text-end col-amount">@totalDebitTurnover.ToString("N0")</td>
+                            <td class="text-end col-amount">@totalCreditTurnover.ToString("N0")</td>
+                            <td class="text-end col-amount">@totalClosingDebit.ToString("N0")</td>
+                            <td class="text-end col-amount">@totalClosingCredit.ToString("N0")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="8" class="text-end">
+                                @if (totalClosingDebit == totalClosingCredit)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Cân bằng
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                        Chênh lệch: @((totalClosingDebit - totalClosingCredit).ToString("N0"))
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(function() {
+    $('#periodForm').on('submit', function(e) {
+        e.preventDefault();
+        const year = $('#year').val();
+        const month = $('#month').val();
+        window.location.href = `/Reports/TrialBalance?year=${year}&month=${month}`;
+    });
+
+    $('#btnExportExcel').on('click', function() {
+        const year = $('#year').val();
+        const month = $('#month').val();
+        window.location.href = `/Reports/ExportTrialBalance?year=${year}&month=${month}&format=excel`;
+    });
+});
+</script>
+}

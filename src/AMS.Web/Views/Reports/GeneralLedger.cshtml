@@ -1,0 +1,196 @@
+@{
+    ViewData["Title"] = "Sổ cái - General Ledger";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Sổ cái - General Ledger</h1>
+    <div class="page-actions">
+        <button class="btn btn-sm btn-outline-secondary" id="btnExport">
+            <i class="bi bi-download me-1"></i>Xuất Excel
+        </button>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="acc-card mb-4">
+        <div class="acc-card-header">
+            <h5>Tìm kiếm</h5>
+        </div>
+        <div class="acc-card-body">
+            <form id="searchForm" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tài khoản</label>
+                    <select class="form-select select2-accounts" id="accountId" name="accountId" required>
+                        <option value="">Chọn tài khoản...</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="text" class="form-control date-picker" id="fromDate" name="fromDate" 
+                           value="@DateTime.Now.AddMonths(-1).ToString("dd/MM/yyyy")">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="text" class="form-control date-picker" id="toDate" name="toDate" 
+                           value="@DateTime.Now.ToString("dd/MM/yyyy")">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Tìm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="acc-card">
+        <div class="acc-card-header">
+            <h5 id="ledgerTitle">Chi tiết tài khoản</h5>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" id="btnPrint">
+                    <i class="bi bi-printer me-1"></i>In
+                </button>
+            </div>
+        </div>
+        <div class="acc-card-body p-0">
+            <table class="table table-hover mb-0" id="ledgerTable">
+                <thead>
+                    <tr>
+                        <th>Ngày CT</th>
+                        <th>Số CT</th>
+                        <th>Diễn giải</th>
+                        <th class="text-end">Nợ</th>
+                        <th class="text-end">Có</th>
+                        <th class="text-end">Số dư</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerBody">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Vui lòng chọn tài khoản và khoảng thời gian</td>
+                    </tr>
+                </tbody>
+                <tfoot id="ledgerFoot">
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(function() {
+    let currentBalance = 0;
+    let isDebitPositive = true;
+
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        loadLedger();
+    });
+
+    function loadLedger() {
+        const accountId = $('#accountId').val();
+        const fromDate = $('#fromDate').val();
+        const toDate = $('#toDate').val();
+
+        if (!accountId) {
+            ACC.toast.warning('Vui lòng chọn tài khoản');
+            return;
+        }
+
+        $.get('/Reports/GeneralLedger', {
+            accountId: accountId,
+            fromDate: fromDate,
+            toDate: toDate
+        }, function(data) {
+            renderLedger(data);
+        }).fail(function() {
+            $('#ledgerBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>');
+        });
+    }
+
+    function renderLedger(entries) {
+        if (!entries || entries.length === 0) {
+            $('#ledgerBody').html('<tr><td colspan="6" class="text-center text-muted">Không có dữ liệu</td></tr>');
+            $('#ledgerFoot').empty();
+            return;
+        }
+
+        // Get account info from first entry
+        const accountCode = entries[0]?.accountCode || '';
+        const accountName = entries[0]?.accountName || '';
+        $('#ledgerTitle').text(`Sổ cái: ${accountCode} - ${accountName}`);
+
+        // Assume Asset/Expense has debit positive, Liability/Equity/Revenue has credit positive
+        isDebitPositive = true; // TODO: determine from account type
+
+        let balance = 0;
+        let totalDebit = 0;
+        let totalCredit = 0;
+
+        const rows = entries.map(function(entry) {
+            totalDebit += entry.debitAmount || 0;
+            totalCredit += entry.creditAmount || 0;
+            
+            if (isDebitPositive) {
+                balance += (entry.debitAmount || 0) - (entry.creditAmount || 0);
+            } else {
+                balance += (entry.creditAmount || 0) - (entry.debitAmount || 0);
+            }
+
+            const balanceClass = balance >= 0 ? '' : 'amount-negative';
+            const balanceDisplay = balance >= 0 
+                ? ACC.format.currency(balance) 
+                : `(${ACC.format.currency(Math.abs(balance))})`;
+
+            return `
+                <tr>
+                    <td>${ACC.format.date(entry.voucherDate)}</td>
+                    <td><a href="/Vouchers/Details/${entry.voucherId}">${entry.voucherNo}</a></td>
+                    <td>${entry.description || '—'}</td>
+                    <td class="text-end">${entry.debitAmount ? ACC.format.currency(entry.debitAmount) : '—'}</td>
+                    <td class="text-end">${entry.creditAmount ? ACC.format.currency(entry.creditAmount) : '—'}</td>
+                    <td class="text-end ${balanceClass}">${balanceDisplay}</td>
+                </tr>
+            `;
+        });
+
+        $('#ledgerBody').html(rows.join(''));
+
+        // Footer totals
+        const finalBalance = isDebitPositive 
+            ? totalDebit - totalCredit 
+            : totalCredit - totalDebit;
+        const balanceClass = finalBalance >= 0 ? '' : 'amount-negative';
+        const balanceDisplay = finalBalance >= 0 
+            ? ACC.format.currency(finalBalance) 
+            : `(${ACC.format.currency(Math.abs(finalBalance))})`;
+
+        $('#ledgerFoot').html(`
+            <tr class="table-total-row">
+                <td colspan="3" class="text-end">Tổng cộng:</td>
+                <td class="text-end font-mono">${ACC.format.currency(totalDebit)}</td>
+                <td class="text-end font-mono">${ACC.format.currency(totalCredit)}</td>
+                <td class="text-end font-mono ${balanceClass}">${balanceDisplay}</td>
+            </tr>
+        `);
+    }
+
+    $('#btnExport').on('click', function() {
+        const accountId = $('#accountId').val();
+        const fromDate = $('#fromDate').val();
+        const toDate = $('#toDate').val();
+        
+        if (accountId) {
+            window.location.href = `/Reports/ExportLedger?accountId=${accountId}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&format=excel`;
+        } else {
+            ACC.toast.warning('Vui lòng chọn tài khoản');
+        }
+    });
+
+    $('#btnPrint').on('click', function() {
+        window.print();
+    });
+});
+</script>
+}

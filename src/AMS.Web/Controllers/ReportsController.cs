@@ -11,15 +11,18 @@ public class ReportsController : BaseController
     private readonly IFinancialReportService _financialReportService;
     private readonly ITrialBalanceService _trialBalanceService;
     private readonly ILedgerService _ledgerService;
+    private readonly IFiscalPeriodService _fiscalPeriodService;
 
     public ReportsController(
         IFinancialReportService financialReportService,
         ITrialBalanceService trialBalanceService,
-        ILedgerService ledgerService)
+        ILedgerService ledgerService,
+        IFiscalPeriodService fiscalPeriodService)
     {
         _financialReportService = financialReportService;
         _trialBalanceService = trialBalanceService;
         _ledgerService = ledgerService;
+        _fiscalPeriodService = fiscalPeriodService;
     }
 
     public IActionResult Index()
@@ -27,9 +30,13 @@ public class ReportsController : BaseController
         return View();
     }
 
-    public async Task<IActionResult> TrialBalance(Guid fiscalPeriodId)
+    public async Task<IActionResult> TrialBalance(int year, int month)
     {
-        var result = await _trialBalanceService.GetTrialBalanceAsync(fiscalPeriodId);
+        var fiscalPeriod = await _fiscalPeriodService.GetByYearMonthAsync(year, month);
+        if (fiscalPeriod == null)
+            return NotFound($"Không tìm thấy kỳ kế toán {year}/{month}");
+
+        var result = await _trialBalanceService.GetTrialBalanceAsync(fiscalPeriod.Id);
         return View(result);
     }
 
@@ -163,6 +170,26 @@ public class ReportsController : BaseController
         }
 
         return Failure("Định dạng không hỗ trợ");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportLedger(Guid accountId, string fromDate, string toDate, string format = "excel")
+    {
+        var entries = await _ledgerService.GetByAccountAsync(accountId, CancellationToken.None);
+        
+        if (entries == null || !entries.Any())
+            return Failure("Không có dữ liệu");
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Ngày,Số CT,Diễn giải,Nợ,Có,Số dư");
+        
+        foreach (var item in entries)
+        {
+            sb.AppendLine($"{item.VoucherDate:dd/MM/yyyy},{item.VoucherNo},{item.Description},{item.DebitAmount},{item.CreditAmount},");
+        }
+
+        var fileName = $"GeneralLedger_{accountId}_{DateTime.Now:yyyyMMddHHmmss}.csv";
+        return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv; charset=utf-8", fileName);
     }
 
     private static string ExportToCsv(object data)
