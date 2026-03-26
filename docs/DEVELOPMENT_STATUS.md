@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-25 18:30  
+**Last Updated:** 2026-03-26 12:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -15,8 +15,9 @@
 | AMS.Application | ✅ Pass | 0 |
 | AMS.Infrastructure | ✅ Pass | 0 |
 | AMS.Web | ⚠️ Warning | 1 (Newtonsoft.Json vulnerability) |
+| AMS.Domain.Tests | ✅ Pass | 0 |
 
-**Last Build:** ✅ PASSED - 2026-03-25 18:30 (1 warning, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-26 12:30 (1 warning, 0 errors)
 
 ---
 
@@ -76,6 +77,13 @@
 | CITAdjustment | ✅ Done | Tax/CITAdjustment.cs |
 | CITLossCarryForward | ✅ Done | Tax/CITLossCarryForward.cs |
 | WithholdingTax | ✅ Done | Tax/WithholdingTax.cs |
+| CostCenter | ✅ Done | DM/CostAccounting.cs |
+| CostAllocation | ✅ Done | DM/CostAccounting.cs |
+| CostAllocationDetail | ✅ Done | DM/CostAccounting.cs |
+| CostReport | ✅ Done | DM/CostAccounting.cs |
+| Revenue | ✅ Done | DM/Revenue.cs |
+| RevenueRecognition | ✅ Done | DM/Revenue.cs |
+| RevenueReport | ✅ Done | DM/Revenue.cs |
 
 ### Enums
 All enums defined in `Enums.cs`: VoucherType, VoucherStatus, FiscalPeriodStatus, AccountType, TaxType, ProductType, InventoryTransactionType, PricingMethod, AssetStatus, CITAdjFlag, TransactionType, TaxDeclarationStatus
@@ -135,6 +143,13 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 | AgingReportRepository | ✅ Done | CN Module |
 | ProductRepository | ✅ Done | HH Module |
 | WarehouseRepository | ✅ Done | HH Module |
+| CostCenterRepository | ✅ Done | CP Module |
+| CostAllocationRepository | ✅ Done | CP Module |
+| CostAllocationDetailRepository | ✅ Done | CP Module |
+| CostReportRepository | ✅ Done | CP Module |
+| RevenueRepository | ✅ Done | DT Module |
+| RevenueRecognitionRepository | ✅ Done | DT Module |
+| RevenueReportRepository | ✅ Done | DT Module |
 
 ### Application Services
 | Service | Status | Notes |
@@ -154,6 +169,8 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 | CashFlowReportService | ✅ Done | QT - B03-DN Cash Flow Statement |
 | ReceivablePayableService | ✅ Done | CN - AR/AP management |
 | InventoryReportService | ✅ Done | HH - Inventory reports |
+| CostAccountingService | ✅ Done | CP - Cost accounting |
+| RevenueService | ✅ Done | DT - Revenue/Income |
 
 ### Business Rules Implemented
 - Voucher workflow: Draft → Pending → Approved → Posted → Reversed
@@ -363,6 +380,50 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
   - GetInventoryValuationReportAsync (Báo cáo định giá hàng tồn kho)
   - GetInventoryTurnoverReportAsync (Báo cáo vòng quay hàng tồn kho)
   - GetInventoryAgingReportAsync (Báo cáo tuổi hàng tồn kho)
+
+### DI Registration
+- All repositories and service registered in Program.cs
+
+## CP Module Implementation (2026-03-25)
+
+### Domain Entities
+- CostCenter, CostAllocation, CostAllocationDetail, CostReport entities
+- CostAllocationMethod enum (Direct, Percentage, SquareMeter, etc.)
+
+### Repository Interfaces
+- ICostCenterRepository, ICostAllocationRepository
+- ICostAllocationDetailRepository, ICostReportRepository
+
+### Repository Implementations
+- CostCenterRepository, CostAllocationRepository
+- CostAllocationDetailRepository, CostReportRepository
+
+### Application Services
+- ICostAccountingService + CostAccountingService
+  - Create/Update/Get CostCenter, Create/Approve CostAllocation
+  - GetCostReportAsync, GetCostVarianceReportAsync
+
+### DI Registration
+- All repositories and service registered in Program.cs
+
+## DT Module Implementation (2026-03-25)
+
+### Domain Entities
+- Revenue, RevenueRecognition, RevenueReport entities
+- RevenueType enum (SalesRevenue, ServiceRevenue, etc.)
+
+### Repository Interfaces
+- IRevenueRepository, IRevenueRecognitionRepository
+- IRevenueReportRepository
+
+### Repository Implementations
+- RevenueRepository, RevenueRecognitionRepository
+- RevenueReportRepository
+
+### Application Services
+- IRevenueService + RevenueService
+  - Create/Update/Get Revenue, RecognizeRevenueAsync
+  - GetRevenueSummaryAsync, GenerateRevenueReportAsync
 
 ### DI Registration
 - All repositories and service registered in Program.cs
