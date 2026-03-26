@@ -1,5 +1,6 @@
 using AMS.Domain.Entities;
 using AMS.Domain.Entities.DM;
+using AMS.Domain.Entities.Tax;
 using AMS.Domain.Enums;
 
 namespace AMS.Domain.Tests.Helpers;
@@ -154,5 +155,121 @@ public static class TestDataFactory
         };
         configure?.Invoke(payable);
         return payable;
+    }
+
+    public static User CreateValidUser(Action<User>? configure = null)
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = $"user{++_counter}",
+            DisplayName = $"Test User {++_counter}",
+            Email = $"user{_counter}@test.com",
+            Department = "IT",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "testuser",
+            IsDeleted = false
+        };
+        configure?.Invoke(user);
+        return user;
+    }
+
+    public static Role CreateValidRole(Action<Role>? configure = null)
+    {
+        var role = new Role
+        {
+            Id = Guid.NewGuid(),
+            RoleName = $"ROLE{++_counter}",
+            Description = $"Test Role {++_counter}",
+            IsActive = true,
+            SortOrder = 1,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "testuser",
+            IsDeleted = false
+        };
+        configure?.Invoke(role);
+        return role;
+    }
+
+    public static ADGroup CreateValidADGroup(Action<ADGroup>? configure = null)
+    {
+        var adGroup = new ADGroup
+        {
+            Id = Guid.NewGuid(),
+            GroupName = $"AD_GROUP{++_counter}",
+            DisplayName = $"Test AD Group {++_counter}",
+            Description = "Test AD Group Description",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "testuser",
+            IsDeleted = false
+        };
+        configure?.Invoke(adGroup);
+        return adGroup;
+    }
+
+    public static Permission CreateValidPermission(Action<Permission>? configure = null)
+    {
+        var permission = new Permission
+        {
+            Id = Guid.NewGuid(),
+            PermissionName = $"PERMISSION{++_counter}",
+            Description = $"Test Permission {++_counter}",
+            Module = "TEST",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "testuser",
+            IsDeleted = false
+        };
+        configure?.Invoke(permission);
+        return permission;
+    }
+
+    public static UserRole CreateValidUserRole(Action<UserRole>? configure = null)
+    {
+        var userRole = new UserRole
+        {
+            UserId = Guid.NewGuid(),
+            RoleId = Guid.NewGuid(),
+            AssignedAt = DateTime.UtcNow,
+            AssignedBy = "testuser"
+        };
+        configure?.Invoke(userRole);
+        return userRole;
+    }
+
+    public static UserADGroup CreateValidUserADGroup(Action<UserADGroup>? configure = null)
+    {
+        var userAdGroup = new UserADGroup
+        {
+            UserId = Guid.NewGuid(),
+            ADGroupId = Guid.NewGuid(),
+            SyncedAt = DateTime.UtcNow
+        };
+        configure?.Invoke(userAdGroup);
+        return userAdGroup;
+    }
+
+    public static ADGroupRole CreateValidADGroupRole(Action<ADGroupRole>? configure = null)
+    {
+        var adGroupRole = new ADGroupRole
+        {
+            ADGroupId = Guid.NewGuid(),
+            RoleId = Guid.NewGuid()
+        };
+        configure?.Invoke(adGroupRole);
+        return adGroupRole;
+    }
+
+    public static RolePermission CreateValidRolePermission(Action<RolePermission>? configure = null)
+    {
+        var rolePermission = new RolePermission
+        {
+            RoleId = Guid.NewGuid(),
+            PermissionId = Guid.NewGuid()
+        };
+        configure?.Invoke(rolePermission);
+        return rolePermission;
     }
 }

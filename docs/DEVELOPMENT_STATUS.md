@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-26 14:45  
+**Last Updated:** 2026-03-26 15:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -573,6 +573,7 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
   - Factory pattern for creating test entities
   - Object Mother pattern via static factory methods
   - Supports configuration via Action<T> delegates
+  - Added factory methods for: User, Role, ADGroup, Permission, UserRole, UserADGroup, ADGroupRole, RolePermission
 
 ### Unit Tests Implemented
 | Test Class | Tests | Coverage |
@@ -581,7 +582,7 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
 
 ### Test Results
 ```
-Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 374 ms
+Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
 ```
 
 ### Test Naming Convention (per TEST_STRATEGY.md)
@@ -594,6 +595,22 @@ Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 374 ms
 - Moq for dependency mocking
 - FluentAssertions for readable assertions
 - Parameterized tests with `[Theory]` and `[InlineData]`
+
+### Test Coverage Status
+| Layer | Target | Current | Priority |
+|-------|--------|---------|----------|
+| Domain | 90%+ | ~15% (ChartOfAccountsService only) | Cao nhất |
+| Application | 80%+ | ~5% | Cao |
+| Infrastructure | 70%+ | 0% | Trung bình |
+| Web | 60%+ | 0% | Thấp |
+
+### Pending Test Classes
+- [ ] AuthorizationServiceTests
+- [ ] TaxServiceTests  
+- [ ] VoucherServiceTests
+- [ ] LedgerServiceTests
+- [ ] CustomerServiceTests
+- [ ] VendorServiceTests
 
 ## UI/UX Implementation (2026-03-26)
 
