@@ -309,6 +309,15 @@ public class AMSDbContext : DbContext
     /// </summary>
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<ADGroup> ADGroups => Set<ADGroup>();
+    public DbSet<UserADGroup> UserADGroups => Set<UserADGroup>();
+    public DbSet<ADGroupRole> ADGroupRoles => Set<ADGroupRole>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+
     /// <summary>
     /// Configures the model relationships and constraints using Fluent API.
     /// </summary>
@@ -786,6 +795,108 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.RetryCount).HasColumnName("retry_count");
 
             entity.HasIndex(e => e.ProcessedAt);
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTable("users");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("user_id");
+            entity.Property(e => e.Username).HasColumnName("username").HasMaxLength(100).IsRequired();
+            entity.Property(e => e.DisplayName).HasColumnName("display_name").HasMaxLength(255);
+            entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(100);
+            entity.Property(e => e.Department).HasColumnName("department").HasMaxLength(100);
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.LastLoginDate).HasColumnName("last_login_date");
+
+            entity.HasIndex(e => e.Username).IsUnique();
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("roles");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("role_id");
+            entity.Property(e => e.RoleName).HasColumnName("role_name").HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order");
+
+            entity.HasIndex(e => e.RoleName).IsUnique();
+        });
+
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.ToTable("user_roles");
+            entity.HasKey(e => new { e.UserId, e.RoleId });
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.AssignedAt).HasColumnName("assigned_at");
+            entity.Property(e => e.AssignedBy).HasColumnName("assigned_by").HasMaxLength(100);
+
+            entity.HasOne(e => e.User).WithMany(u => u.UserRoles).HasForeignKey(e => e.UserId);
+            entity.HasOne(e => e.Role).WithMany(r => r.UserRoles).HasForeignKey(e => e.RoleId);
+        });
+
+        modelBuilder.Entity<ADGroup>(entity =>
+        {
+            entity.ToTable("ad_groups");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("ad_group_id");
+            entity.Property(e => e.GroupName).HasColumnName("group_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.DisplayName).HasColumnName("display_name").HasMaxLength(255);
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+
+            entity.HasIndex(e => e.GroupName).IsUnique();
+        });
+
+        modelBuilder.Entity<UserADGroup>(entity =>
+        {
+            entity.ToTable("user_ad_groups");
+            entity.HasKey(e => new { e.UserId, e.ADGroupId });
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ADGroupId).HasColumnName("ad_group_id");
+            entity.Property(e => e.SyncedAt).HasColumnName("synced_at");
+
+            entity.HasOne(e => e.User).WithMany(u => u.UserADGroups).HasForeignKey(e => e.UserId);
+            entity.HasOne(e => e.ADGroup).WithMany(g => g.UserADGroups).HasForeignKey(e => e.ADGroupId);
+        });
+
+        modelBuilder.Entity<ADGroupRole>(entity =>
+        {
+            entity.ToTable("ad_group_roles");
+            entity.HasKey(e => new { e.ADGroupId, e.RoleId });
+            entity.Property(e => e.ADGroupId).HasColumnName("ad_group_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+
+            entity.HasOne(e => e.ADGroup).WithMany(g => g.ADGroupRoles).HasForeignKey(e => e.ADGroupId);
+            entity.HasOne(e => e.Role).WithMany(r => r.ADGroupRoles).HasForeignKey(e => e.RoleId);
+        });
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.ToTable("permissions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("permission_id");
+            entity.Property(e => e.PermissionName).HasColumnName("permission_name").HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.Module).HasColumnName("module").HasMaxLength(50);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+
+            entity.HasIndex(e => e.PermissionName).IsUnique();
+        });
+
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            entity.ToTable("role_permissions");
+            entity.HasKey(e => new { e.RoleId, e.PermissionId });
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.PermissionId).HasColumnName("permission_id");
+
+            entity.HasOne(e => e.Role).WithMany(r => r.RolePermissions).HasForeignKey(e => e.RoleId);
+            entity.HasOne(e => e.Permission).WithMany(p => p.RolePermissions).HasForeignKey(e => e.PermissionId);
         });
     }
 }

@@ -69,6 +69,16 @@ builder.Services.AddScoped<IBankReconciliationService, BankReconciliationService
 builder.Services.AddScoped<ICashFlowReportService, CashFlowReportService>();
 builder.Services.AddScoped<IReceivablePayableService, ReceivablePayableService>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IADGroupRepository, ADGroupRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IUserADGroupRepository, UserADGroupRepository>();
+builder.Services.AddScoped<IADGroupRoleRepository, ADGroupRoleRepository>();
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

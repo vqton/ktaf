@@ -1,0 +1,68 @@
+@model IEnumerable<AMS.Application.DTOs.TaxDeclarationDto>
+@{
+    ViewData["Title"] = "Kê khai thuế TNDN";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Kê khai thuế thu nhập doanh nghiệp (TNDN)</h4>
+                    <button class="btn btn-primary btn-sm" onclick="createDeclaration()">Tạo mới khai báo</button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Kỳ tính thuế</th>
+                                <th>Năm</th>
+                                <th>Tháng</th>
+                                <th>Tổng thuế phải nộp</th>
+                                <th>Đã nộp</th>
+                                <th>Chênh lệch</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày nộp</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.TaxType</td>
+                                    <td>@item.PeriodYear</td>
+                                    <td>@item.PeriodMonth.ToString("D2")</td>
+                                    <td class="text-end">@item.TotalTaxDue?.ToString("N0")</td>
+                                    <td class="text-end">@item.TotalTaxPaid?.ToString("N0")</td>
+                                    <td class="text-end">@item.TaxDifference?.ToString("N0")</td>
+                                    <td>
+                                        <span class="badge bg-@(item.Status == "Submitted" ? "success" : "secondary")">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td>@item.SubmittedDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (item.Status == "Draft")
+                                        {
+                                            <button class="btn btn-success btn-sm" onclick="submitDeclaration('@item.Id')">Nộp</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function createDeclaration() {
+    alert('Create declaration - Implementation pending');
+}
+function submitDeclaration(id) {
+    alert('Submit declaration: ' + id);
+}
+</script>

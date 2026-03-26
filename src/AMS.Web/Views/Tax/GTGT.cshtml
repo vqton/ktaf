@@ -1,0 +1,113 @@
+@model AMS.Web.Controllers.GTGTViewModel
+@{
+    ViewData["Title"] = "Kê khai thuế GTGT";
+    var totalInputVat = Model.VATInputs.Sum(v => v.VatAmount);
+    var totalOutputVat = Model.VATOutputs.Sum(v => v.VatAmount);
+    var vatDifference = totalOutputVat - totalInputVat;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Kê khai thuế GTGT</h4>
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="exportGTGT('excel')">Xuất Excel</button>
+                        <button class="btn btn-danger btn-sm" onclick="exportGTGT('pdf')">Xuất PDF</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h6>Thuế GTGT vào</h6>
+                                    <h3>@totalInputVat.ToString("N0")</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h6>Thuế GTGT ra</h6>
+                                    <h3>@totalOutputVat.ToString("N0")</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card @(vatDifference >= 0 ? "bg-warning" : "bg-info") text-white">
+                                <div class="card-body">
+                                    <h6>Chênh lệch</h6>
+                                    <h3>@vatDifference.ToString("N0")</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5>Hóa đơn mua vào</h5>
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hóa đơn</th>
+                                <th>Ngày hóa đơn</th>
+                                <th>Giá trị trước thuế</th>
+                                <th>Thuế GTGT</th>
+                                <th>Thuế suất</th>
+                                <th>Đã khấu trừ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.VATInputs.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@Model.VATInputs[i].InvoiceNo</td>
+                                    <td>@Model.VATInputs[i].InvoiceDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@Model.VATInputs[i].GoodsAmount.ToString("N0")</td>
+                                    <td class="text-end">@Model.VATInputs[i].VatAmount.ToString("N0")</td>
+                                    <td class="text-center">@((Model.VATInputs[i].VatRate * 100).ToString("F0"))%</td>
+                                    <td class="text-center">@(Model.VATInputs[i].IsClaimed ? "✓" : "")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <h5 class="mt-4">Hóa đơn bán ra</h5>
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hóa đơn</th>
+                                <th>Ngày hóa đơn</th>
+                                <th>Giá trị trước thuế</th>
+                                <th>Thuế GTGT</th>
+                                <th>Thuế suất</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.VATOutputs.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@Model.VATOutputs[i].InvoiceNo</td>
+                                    <td>@Model.VATOutputs[i].InvoiceDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@Model.VATOutputs[i].GoodsAmount.ToString("N0")</td>
+                                    <td class="text-end">@Model.VATOutputs[i].VatAmount.ToString("N0")</td>
+                                    <td class="text-center">@((Model.VATOutputs[i].VatRate * 100).ToString("F0"))%</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportGTGT(format) {
+    alert('Export to ' + format + ' - Implementation pending');
+}
+</script>

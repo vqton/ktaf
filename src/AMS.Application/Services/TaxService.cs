@@ -3,6 +3,7 @@ using AMS.Application.Common.Results;
 using AMS.Application.DTOs;
 using AMS.Application.Interfaces;
 using AMS.Domain.Entities.Tax;
+using AMS.Domain.Enums;
 using AMS.Domain.Interfaces;
 
 namespace AMS.Application.Services;
@@ -208,5 +209,128 @@ public class TaxService : ITaxService
         EffectiveTo = entity.EffectiveTo,
         LegalBasis = entity.LegalBasis,
         IsActive = entity.IsActive
+    };
+
+    public async Task<ServiceResult<TaxDeclarationDto>> CreateTaxDeclarationAsync(CreateTaxDeclarationDto dto, CancellationToken cancellationToken = default)
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(dto.TaxType))
+            errors.Add("Loại thuế không được để trống.");
+
+        if (dto.PeriodYear < 2000 || dto.PeriodYear > 2100)
+            errors.Add("Năm không hợp lệ.");
+
+        if (dto.PeriodMonth < 1 || dto.PeriodMonth > 12)
+            errors.Add("Tháng không hợp lệ.");
+
+        if (errors.Any())
+            return ServiceResult<TaxDeclarationDto>.Failure(errors);
+
+        var declaration = new TaxDeclaration
+        {
+            Id = Guid.NewGuid(),
+            TaxType = dto.TaxType,
+            PeriodYear = dto.PeriodYear,
+            PeriodMonth = dto.PeriodMonth,
+            PeriodType = dto.PeriodType,
+            Status = TaxDeclarationStatus.Draft,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "system"
+        };
+
+        await _taxRepository.AddTaxDeclarationAsync(declaration, cancellationToken);
+
+        return ServiceResult<TaxDeclarationDto>.Success(MapToTaxDeclarationDto(declaration));
+    }
+
+    public async Task<ServiceResult<TaxDeclarationDto>> SubmitTaxDeclarationAsync(Guid declarationId, string submittedBy, CancellationToken cancellationToken = default)
+    {
+        var declaration = await _taxRepository.GetTaxDeclarationByIdAsync(declarationId, cancellationToken);
+        if (declaration == null)
+            return ServiceResult<TaxDeclarationDto>.Failure("Khai báo thuế không tìm thấy.");
+
+        if (declaration.Status != TaxDeclarationStatus.Draft)
+            return ServiceResult<TaxDeclarationDto>.Failure("Chỉ được nộp khai báo thuế ở trạng thái nháp.");
+
+        declaration.Status = TaxDeclarationStatus.Submitted;
+        declaration.SubmittedDate = DateTime.UtcNow;
+        declaration.SubmittedBy = submittedBy;
+
+        await _taxRepository.UpdateTaxDeclarationAsync(declaration, cancellationToken);
+
+        return ServiceResult<TaxDeclarationDto>.Success(MapToTaxDeclarationDto(declaration));
+    }
+
+    public async Task<IEnumerable<TaxDeclarationDto>> GetTaxDeclarationsAsync(string? taxType, int? year, CancellationToken cancellationToken = default)
+    {
+        var declarations = await _taxRepository.GetTaxDeclarationsAsync(taxType, year, cancellationToken);
+        return declarations.Select(MapToTaxDeclarationDto);
+    }
+
+    public async Task<TaxDeclarationDto?> GetTaxDeclarationByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var declaration = await _taxRepository.GetTaxDeclarationByIdAsync(id, cancellationToken);
+        return declaration == null ? null : MapToTaxDeclarationDto(declaration);
+    }
+
+    public async Task<IEnumerable<VATRegisterDto>> GetVATInputRegisterAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default)
+    {
+        var registers = await _taxRepository.GetVATInputRegisterAsync(fiscalPeriodId, cancellationToken);
+        return registers.Select(MapToVATInputRegisterDto);
+    }
+
+    public async Task<IEnumerable<VATRegisterDto>> GetVATOutputRegisterAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default)
+    {
+        var registers = await _taxRepository.GetVATOutputRegisterAsync(fiscalPeriodId, cancellationToken);
+        return registers.Select(MapToVATOutputRegisterDto);
+    }
+
+    private static TaxDeclarationDto MapToTaxDeclarationDto(TaxDeclaration entity) => new()
+    {
+        Id = entity.Id,
+        TaxType = entity.TaxType,
+        PeriodYear = entity.PeriodYear,
+        PeriodMonth = entity.PeriodMonth,
+        PeriodType = entity.PeriodType,
+        Status = entity.Status.ToString(),
+        TotalTaxDue = entity.TotalTaxDue,
+        TotalTaxPaid = entity.TotalTaxPaid,
+        TaxDifference = entity.TaxDifference,
+        SubmittedDate = entity.SubmittedDate,
+        AcceptedDate = entity.AcceptedDate,
+        Note = entity.Note,
+        SubmittedBy = entity.SubmittedBy,
+        ApprovedBy = entity.ApprovedBy
+    };
+
+    private static VATRegisterDto MapToVATInputRegisterDto(VATInputRegister entity) => new()
+    {
+        Id = entity.Id,
+        VoucherId = entity.VoucherId,
+        VendorId = entity.VendorId,
+        InvoiceNo = entity.InvoiceNo,
+        InvoiceDate = entity.InvoiceDate,
+        TotalAmount = entity.TotalAmount,
+        VatAmount = entity.VatAmount,
+        VatRate = entity.VatRate,
+        GoodsAmount = entity.GoodsAmount,
+        IsClaimed = entity.IsClaimed,
+        ClaimedDate = entity.ClaimedDate
+    };
+
+    private static VATRegisterDto MapToVATOutputRegisterDto(VATOutputRegister entity) => new()
+    {
+        Id = entity.Id,
+        VoucherId = entity.VoucherId,
+        VendorId = entity.CustomerId,
+        InvoiceNo = entity.InvoiceNo,
+        InvoiceDate = entity.InvoiceDate,
+        TotalAmount = entity.TotalAmount,
+        VatAmount = entity.VatAmount,
+        VatRate = entity.VatRate,
+        GoodsAmount = entity.GoodsAmount,
+        IsClaimed = entity.IsCreditNote,
+        ClaimedDate = null
     };
 }

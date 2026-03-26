@@ -1,0 +1,66 @@
+@model IEnumerable<AMS.Application.DTOs.PITBracketDto>
+@{
+    ViewData["Title"] = "Biểu thuế TNCN";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Biểu thuế thu nhập cá nhân (TNCN) - Lũy tiến từng phần</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Áp dụng từ ngày 01/07/2024 theo Luật sửa đổi Luật thuế TNCN</p>
+                    
+                    <table class="table table-bordered table-striped">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th class="text-center">Bậc</th>
+                                <th class="text-center">Thu nhập tính thuế (VNĐ)</th>
+                                <th class="text-center">Thuế suất</th>
+                                <th class="text-center">Số thuế phải nộp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var bracket in Model.OrderBy(b => b.BracketNo))
+                            {
+                                <tr>
+                                    <td class="text-center">@bracket.BracketNo</td>
+                                    <td class="text-center">
+                                        @bracket.FromAmount.ToString("N0") 
+                                        @if (bracket.ToAmount.HasValue)
+                                        {
+                                            <text> - @bracket.ToAmount.Value.ToString("N0")</text>
+                                        }
+                                        else
+                                        {
+                                            <text> trở lên</text>
+                                        }
+                                    </td>
+                                    <td class="text-center">@((bracket.TaxRate * 100).ToString("F0"))%</td>
+                                    <td class="text-center">
+                                        @if (bracket.BracketNo == 1)
+                                        {
+                                            <text>Thu nhập x @bracket.TaxRate.ToString("F2")</text>
+                                        }
+                                        else
+                                        {
+                                            <text>Thu nhập x @bracket.TaxRate.ToString("F2") - @bracket.QuickDeduction.ToString("N0")</text>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-info mt-3">
+                        <h5>Cách tính thuế TNCN:</h5>
+                        <p>Thuế TNCN được tính theo phương pháp lũy tiến từng phần, theo đó thu nhập tính thuế được chia thành các bậc, mỗi bậc có thuế suất tương ứng.</p>
+                        <p>Công thức: <strong>Số thuế phải nộp = Thu nhập tính thuế x Thuế suất bậc - Khấu trừ</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

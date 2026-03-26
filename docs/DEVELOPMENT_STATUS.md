@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-26 12:30  
+**Last Updated:** 2026-03-26 14:45  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -17,7 +17,7 @@
 | AMS.Web | ⚠️ Warning | 1 (Newtonsoft.Json vulnerability) |
 | AMS.Domain.Tests | ✅ Pass | 0 |
 
-**Last Build:** ✅ PASSED - 2026-03-26 12:30 (1 warning, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-26 14:45 (16 warnings, 0 errors)
 
 ---
 
@@ -179,6 +179,62 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 - PIT progressive tax calculation (7 brackets per TT 99/2025)
 - Inventory balance tracking with FIFO/AVCO
 - Fixed asset straight-line depreciation
+
+### P0 Implementations (2026-03-26)
+
+#### 1. Authorization (RBAC) - AD Security Groups Mapping
+| Component | Status | Notes |
+|-----------|--------|-------|
+| User Entity | ✅ Done | Security/User.cs |
+| Role Entity | ✅ Done | Security/Role.cs |
+| Permission Entity | ✅ Done | Security/Permission.cs |
+| ADGroup Entity | ✅ Done | Security/ADGroup.cs |
+| UserRole Entity | ✅ Done | Many-to-many User-Role |
+| ADGroupRole Entity | ✅ Done | Many-to-many ADGroup-Role |
+| UserADGroup Entity | ✅ Done | Many-to-many User-ADGroup |
+| RolePermission Entity | ✅ Done | Many-to-many Role-Permission |
+| IUserRepository | ✅ Done | Security/ISecurityRepository.cs |
+| IRoleRepository | ✅ Done | |
+| IADGroupRepository | ✅ Done | |
+| IPermissionRepository | ✅ Done | |
+| IUserRoleRepository | ✅ Done | |
+| IUserADGroupRepository | ✅ Done | |
+| IADGroupRoleRepository | ✅ Done | |
+| IRolePermissionRepository | ✅ Done | |
+| UserRepository | ✅ Done | Infrastructure/Repositories/SecurityRepository.cs |
+| RoleRepository | ✅ Done | |
+| ADGroupRepository | ✅ Done | |
+| PermissionRepository | ✅ Done | |
+| UserRoleRepository | ✅ Done | |
+| UserADGroupRepository | ✅ Done | |
+| ADGroupRoleRepository | ✅ Done | |
+| RolePermissionRepository | ✅ Done | |
+| IAuthorizationService | ✅ Done | Application/Interfaces/IAuthorizationService.cs |
+| AuthorizationService | ✅ Done | Application/Services/AuthorizationService.cs |
+| SecurityDto | ✅ Done | Application/DTOs/SecurityDto.cs |
+| DbContext Config | ✅ Done | User, Role, ADGroup, Permission entities |
+
+#### 2. Tax Module UI
+| Component | Status | Notes |
+|-----------|--------|-------|
+| TaxController | ✅ Done | Web/Controllers/TaxController.cs |
+| Index.cshtml | ✅ Done | Views/Tax/Index.cshtml |
+| GTGT.cshtml | ✅ Done | Views/Tax/GTGT.cshtml |
+| TNDN.cshtml | ✅ Done | Views/Tax/TNDN.cshtml |
+| TNCN.cshtml | ✅ Done | Views/Tax/TNCN.cshtml |
+| ITaxService Extensions | ✅ Done | Declaration CRUD, VAT registers |
+| TaxService Extensions | ✅ Done | Implementation |
+| TaxDeclarationDto | ✅ Done | DTOs/TaxDto.cs |
+| CreateTaxDeclarationDto | ✅ Done | |
+| VATRegisterDto | ✅ Done | |
+
+#### 3. Report Export (Excel/PDF)
+| Component | Status | Notes |
+|-----------|--------|-------|
+| ExportTrialBalance | ✅ Done | CSV export for Trial Balance |
+| ExportBalanceSheet | ✅ Done | CSV export for Balance Sheet |
+| ExportIncomeStatement | ✅ Done | CSV export for Income Statement |
+| ExportCashFlowStatement | ✅ Done | CSV export for Cash Flow Statement |
 
 ### Web Layer
 | Component | Status | Notes |
@@ -490,6 +546,15 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
 - Application Constants: `<summary>` for class and constants
 - **Infrastructure layer (2026-03-25):** Added `<summary>` to AMSDbContext, DbContextFactory, UnitOfWork, and all 8 Repositories
 - **Web layer (2026-03-25):** Added `<summary>` to Controllers, BaseController, GlobalExceptionFilter, Program.cs
+- **P0 Implementations (2026-03-26):** Added XML documentation to:
+  - AuthorizationService (class, constructor, methods, private methods)
+  - IAuthorizationService (interface, all methods)
+  - SecurityDto (all DTOs and properties)
+  - ISecurityRepository (all interfaces and methods)
+  - SecurityRepository (all repository classes and methods)
+  - TaxController (class, constructor, all action methods, view model)
+  - ITaxService (interface, all methods)
+  - TaxDto (all DTOs and properties)
 
 ## Test Infrastructure (2026-03-26)
 

@@ -12,4 +12,12 @@ public interface ITaxRepository
     Task AddPITBracketAsync(PITBracket bracket, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<PITAllowance>> GetEmployeeAllowancesAsync(Guid employeeId, DateTime date, CancellationToken cancellationToken = default);
+
+    Task<TaxDeclaration?> GetTaxDeclarationByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TaxDeclaration>> GetTaxDeclarationsAsync(string? taxType, int? year, CancellationToken cancellationToken = default);
+    Task AddTaxDeclarationAsync(TaxDeclaration declaration, CancellationToken cancellationToken = default);
+    Task UpdateTaxDeclarationAsync(TaxDeclaration declaration, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<VATInputRegister>> GetVATInputRegisterAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<VATOutputRegister>> GetVATOutputRegisterAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default);
 }

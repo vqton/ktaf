@@ -73,4 +73,47 @@ public class TaxRepository : ITaxRepository
                 && (a.EffectiveTo == null || a.EffectiveTo >= date))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<TaxDeclaration?> GetTaxDeclarationByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.TaxDeclarations.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    public async Task<IEnumerable<TaxDeclaration>> GetTaxDeclarationsAsync(string? taxType, int? year, CancellationToken cancellationToken = default)
+    {
+        var query = _context.TaxDeclarations.AsQueryable();
+
+        if (!string.IsNullOrEmpty(taxType))
+            query = query.Where(d => d.TaxType == taxType);
+
+        if (year.HasValue)
+            query = query.Where(d => d.PeriodYear == year.Value);
+
+        return await query.OrderByDescending(d => d.PeriodYear).ThenByDescending(d => d.PeriodMonth).ToListAsync(cancellationToken);
+    }
+
+    public async Task AddTaxDeclarationAsync(TaxDeclaration declaration, CancellationToken cancellationToken = default)
+    {
+        await _context.TaxDeclarations.AddAsync(declaration, cancellationToken);
+    }
+
+    public async Task UpdateTaxDeclarationAsync(TaxDeclaration declaration, CancellationToken cancellationToken = default)
+    {
+        _context.TaxDeclarations.Update(declaration);
+        await Task.CompletedTask;
+    }
+
+    public async Task<IEnumerable<VATInputRegister>> GetVATInputRegisterAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default)
+    {
+        return await _context.VATInputRegisters
+            .Where(v => v.FiscalPeriodId == fiscalPeriodId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<VATOutputRegister>> GetVATOutputRegisterAsync(Guid fiscalPeriodId, CancellationToken cancellationToken = default)
+    {
+        return await _context.VATOutputRegisters
+            .Where(v => v.FiscalPeriodId == fiscalPeriodId)
+            .ToListAsync(cancellationToken);
+    }
 }
