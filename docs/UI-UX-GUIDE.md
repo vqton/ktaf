@@ -1,6 +1,6 @@
 # UI/UX Design Guidelines for AMS ERP Web Application
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Status:** Foundation Document  
 **Last Updated:** March 2026
 
@@ -14,10 +14,14 @@
 4. [User Interface Structure](#4-user-interface-structure)
 5. [Core User Workflows](#5-core-user-workflows)
 6. [Component Library](#6-component-library)
-7. [Accessibility Requirements](#7-accessibility-requirements)
-8. [Responsive Strategy](#8-responsive-strategy)
-9. [Performance Standards](#9-performance-standards)
-10. [Implementation Priorities](#10-implementation-priorities)
+7. [Error Handling](#7-error-handling)
+8. [Localization](#8-localization)
+9. [Security UX](#9-security-ux)
+10. [Accessibility Requirements](#10-accessibility-requirements)
+11. [Responsive Strategy](#11-responsive-strategy)
+12. [Performance Standards](#12-performance-standards)
+13. [Testing Requirements](#13-testing-requirements)
+14. [Implementation Priorities](#14-implementation-priorities)
 
 ---
 
@@ -92,6 +96,7 @@ AMS (Accounting Management System) is an enterprise ERP web application for Viet
 - ❌ Modal windows for critical workflows
 - ❌ Dense tables that require scrolling horizontally
 - ❌ Generic error messages
+- ❌ Without clear error recovery paths
 
 ---
 
@@ -243,8 +248,8 @@ Base unit: 4px
 │            │  CONTENT AREA                                   │
 │  - Home    │  - Page Title                                   │
 │  - Voucher │  - Action Bar (Create, Filter)                  │
-│  - Ledger  │  - Main Content (Tables, Forms, Cards)          │
-│  - Report  │  - Pagination/Stats                             │
+│  - Ledger  │  - Main Content (Tables, Forms, Cards)         │
+│  - Report  │  - Pagination/Stats                            │
 │  - Settings│                                                 │
 │            │                                                 │
 ├────────────┴─────────────────────────────────────────────────┤
@@ -368,7 +373,7 @@ FLOW:
        │                                       │
        ▼                                       ▼
 ┌─────────────┐                       ┌─────────────┐
-│ 8. Done     │ ◀──── 7. Save & New    │ 6. Confirm │
+│ 8. Done     │ ◀──── 7. Save & New  │ 6. Confirm │
 │ Success Msg │     or 7b. Save & Close │ (Optional)  │
 └─────────────┘                       └─────────────┘
 
@@ -431,7 +436,7 @@ REQUIREMENTS:
 | Charts | ApexCharts or Chart.js | Latest | |
 | Date Picker | Flatpickr | Latest | |
 | Select | Select2 | 4.x | For dropdowns with search |
-| Icons | Tabler Icons | 2.x | Better than Font Awesome |
+| Icons | **Bootstrap Icons** | 1.11.x | MIT license, matches Bootstrap stack |
 | Toast | Noty or SweetAlert2 | Latest | |
 | Validation | jQuery Validate | Latest | |
 
@@ -455,6 +460,10 @@ All are Bootstrap-based and work with ASP.NET Core.
 | `ActionMenu` | Row actions dropdown | Default, Open |
 | `ConfirmDialog` | Delete confirmation | Default |
 | `Toast` | Success/Error notification | Success, Error, Warning |
+| `Pagination` | List navigation | Default, Active, Disabled |
+| `EmptyState` | No data display | Default, Custom message |
+| `LoadingSpinner` | Async operation | Default, With message |
+| `LoadingSkeleton` | Content placeholder | Animated |
 
 ### 6.3 Component API Standards
 
@@ -467,13 +476,358 @@ Every component must have:
 
 ---
 
-## 7. Accessibility Requirements
+## 7. Error Handling
 
-### 7.1 Compliance Target
+### 7.1 Error Types & Responses
+
+| Error Type | User Message | Technical Details | Recovery Action |
+|------------|--------------|-------------------|-----------------|
+| **Validation** | "Số tiền phải lớn hơn 0" | Field + Rule violated | Highlight field, show hint |
+| **Business Rule** | "Không thể xóa chứng từ đã duyệt" | Rule code | Show what prevents action |
+| **Not Found** | "Không tìm thấy dữ liệu" | Resource type, ID | Link to list |
+| **Unauthorized** | "Bạn không có quyền thực hiện" | Permission needed | Contact admin |
+| **Server Error** | "Đã xảy ra lỗi hệ thống" | Error ID (for support) | Retry button |
+| **Network Error** | "Mất kết nối mạng" | Connection status | Retry button |
+| **Timeout** | "Yêu cầu quá thời gian chờ" | Operation type | Retry button |
+
+### 7.2 Validation Rules
+
+#### Voucher Validation
+```
+- Số chứng từ: Required, unique, format [A-Z]{2}[0-9]{4}
+- Ngày chứng từ: Required, <= today, >= period start
+- Số tiền: Required, > 0, max 15 digits
+- Tổng Nợ = Tổng Có: Must match
+- Ít nhất 1 dòng hạch toán: Required
+- Mã tài khoản: Required, exists in system
+```
+
+#### Product Validation
+```
+- Mã sản phẩm: Required, unique, max 20 chars
+- Tên sản phẩm: Required, max 200 chars
+- Giá bán: >= 0, <= 999,999,999,999
+- Số lượng tồn: >= 0
+```
+
+### 7.3 Form Error Display
+
+```html
+<!-- Field Error -->
+<div class="form-group has-error">
+    <label for="amount">Số tiền</label>
+    <input type="text" id="amount" class="form-control is-invalid" 
+           aria-describedby="amount-error" value="0">
+    <span id="amount-error" class="error-message" role="alert">
+        Số tiền phải lớn hơn 0
+    </span>
+</div>
+
+<!-- Form-level Error -->
+<div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>Lỗi:</strong> Không thể lưu chứng từ. Vui lòng kiểm tra lại.
+    <ul>
+        <li>Tổng Nợ và Tổng Có không bằng nhau</li>
+    </ul>
+</div>
+```
+
+### 7.4 Error Message Standards
+
+| Rule | Example |
+|------|---------|
+| Use Vietnamese | "Vui lòng nhập số tiền" (not "Please enter amount") |
+| Be specific | "Mã chứng từ CT001 đã tồn tại" |
+| Suggest fix | "Vui lòng nhập ngày theo định dd/MM/yyyy" |
+| No technical jargon | "Database error" → "Đã xảy ra lỗi" |
+| Show error code for support | "Mã lỗi: #AMS-2026-001" |
+
+### 7.5 Retry & Recovery
+
+```javascript
+// Automatic retry for transient errors
+async function saveVoucher(data) {
+    const maxRetries = 3;
+    const retryDelay = 1000;
+    
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await api.post('/api/vouchers', data);
+        } catch (error) {
+            if (!error.retryable || i === maxRetries - 1) {
+                throw error;
+            }
+            await delay(retryDelay * Math.pow(2, i));
+        }
+    }
+}
+
+// Offline handling
+window.addEventListener('online', () => {
+    showToast('Kết nối đã khôi phục. Đang đồng bộ dữ liệu...');
+    syncPendingOperations();
+});
+```
+
+### 7.6 Confirmation Dialogs
+
+| Severity | Icon | Use Case | Button Labels |
+|----------|------|----------|----------------|
+| **Danger** | `bi bi-exclamation-triangle-fill text-danger` | Delete, Cancel approved | [Hủy bỏ], [Xác nhận xóa] |
+| **Warning** | `bi bi-exclamation-triangle-fill text-warning` | Reject, Rollback | [Hủy], [Xác nhận] |
+| **Info** | `bi bi-question-circle-fill text-info` | Bulk operations | [Hủy], [Tiếp tục] |
+
+```html
+<!-- Delete Confirmation -->
+<div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa chứng từ <strong>CT001</strong>?</p>
+                <p class="text-muted">Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    Hủy bỏ
+                </button>
+                <button type="button" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+---
+
+## 8. Localization
+
+### 8.1 Supported Locales
+
+| Locale | Language | Number Format | Date Format |
+|--------|----------|---------------|-------------|
+| vi-VN | Vietnamese (Primary) | 1.234.567,89 ₫ | dd/MM/yyyy |
+| en-US | English (Secondary) | $1,234,567.89 | MM/dd/yyyy |
+
+### 8.2 Currency Formatting (VND)
+
+```javascript
+// Vietnamese Dong - no decimals, thousand separator
+const formatVND = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+};
+
+// Examples: 5,000,000 ₫
+```
+
+### 8.3 Date Formatting
+
+| Display | Format | Example |
+|---------|--------|---------|
+| Short Date | dd/MM/yyyy | 26/03/2026 |
+| Long Date | "dd" MMMM "năm" yyyy | 26 tháng 3 năm 2026 |
+| DateTime | dd/MM/yyyy HH:mm | 26/03/2026 14:30 |
+| Month-Year | MM/yyyy | 03/2026 |
+| Quarter | "Q"Q yyyy | Q1 2026 |
+
+```javascript
+const formatDate = (date) => {
+    return new Intl.DateTimeFormat('vi-VN').format(date);
+    // "26/03/2026"
+};
+
+const formatDateLong = (date) => {
+    return new Intl.DateTimeFormat('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }).format(date);
+    // "26 tháng 3 năm 2026"
+};
+```
+
+### 8.4 Number Formatting
+
+| Type | Format | Example |
+|------|--------|---------|
+| Amount (VND) | #.### | 5.000.000 |
+| Quantity | #.## | 1,234 |
+| Percentage | ##% | 15% |
+| Decimal | #.#### | 3.1416 |
+
+### 8.5 UI Text Standards
+
+| Rule | Example |
+|------|---------|
+| Buttons: Verb + Object | [Lưu], [Hủy bỏ], [Xóa] |
+| Labels: Noun | Số chứng từ, Ngày, Số tiền |
+| Messages: Complete sentences | "Chứng từ đã được lưu thành công" |
+| Errors: Specific | "Mã chứng từ đã tồn tại" |
+| Confirmations: Question | "Bạn có muốn xóa chứng từ này?" |
+
+### 8.6 Vietnamese Character Handling
+
+```css
+/* Ensure proper Vietnamese character rendering */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Vietnamese diacritics */
+.unicode-word {
+    unicode-bidi: plaintext; /* Prevents word-break issues */
+}
+```
+
+---
+
+## 9. Security UX
+
+### 9.1 Authentication
+
+#### Login Form
+```html
+<form id="login-form">
+    <div class="form-group">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" id="username" autocomplete="username" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" autocomplete="current-password" required>
+    </div>
+    <div class="form-check">
+        <input type="checkbox" id="remember-me">
+        <label for="remember-me">Ghi nhớ đăng nhập</label>
+    </div>
+    <button type="submit">Đăng nhập</button>
+</form>
+```
+
+#### Password Requirements Display
+```
+Mật khẩu cần:
+☑ Ít nhất 8 ký tự
+☑ Ít nhất 1 chữ hoa
+☑ Ít nhất 1 chữ thường
+☑ Ít nhất 1 số
+☑ Ít nhất 1 ký tự đặc biệt
+```
+
+### 9.2 Session Management
+
+| Scenario | Behavior |
+|----------|----------|
+| **Idle Warning** | Show modal after 25 min: "Phiên sẽ hết sau 5 phút" |
+| **Session Timeout** | Redirect to login with message "Phiên đã hết. Vui lòng đăng nhập lại" |
+| **Auto Logout** | Logout after 30 min inactivity |
+| **Concurrent Login** | Warn user, option to force logout other sessions |
+
+```javascript
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+const WARNING_BEFORE = 5 * 60 * 1000; // 5 minutes
+
+let sessionTimer;
+
+function resetSessionTimer() {
+    clearTimeout(sessionTimer);
+    sessionTimer = setTimeout(() => {
+        showSessionWarning();
+    }, SESSION_TIMEOUT - WARNING_BEFORE);
+}
+
+function showSessionWarning() {
+    showModal({
+        title: 'Cảnh báo phiên',
+        message: 'Phiên làm việc sẽ hết sau 5 phút. Bạn có muốn tiếp tục?',
+        buttons: [
+            { label: 'Đăng xuất', action: logout },
+            { label: 'Tiếp tục', action: resetSessionTimer }
+        ]
+    });
+}
+```
+
+### 9.3 Authorization UI
+
+| Scenario | Display |
+|----------|---------|
+| **No Permission** | Hide action button entirely |
+| **View Only** | Show disabled with tooltip "Bạn không có quyền" |
+| **Access Denied** | Show 403 page with contact admin option |
+
+```html
+<!-- Conditional rendering based on permission -->
+<a href="/vouchers/edit/1" class="btn btn-sm btn-primary"
+   data-permission="voucher:edit">
+    <i class="bi bi-pencil"></i> Sửa
+</a>
+
+<!-- Without permission: element is hidden or shows disabled state -->
+```
+
+### 9.4 Audit Trail Display
+
+```html
+<div class="audit-trail card">
+    <h4><i class="bi bi-clock-history"></i> Lịch sử thao tác</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Thời gian</th>
+                <th>Người thực hiện</th>
+                <th>Hành động</th>
+                <th>Chi tiết</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>26/03/2026 14:30</td>
+                <td>Nguyễn Văn A</td>
+                <td><span class="badge bg-success">Tạo mới</span></td>
+                <td>Tạo chứng từ CT001</td>
+            </tr>
+            <tr>
+                <td>26/03/2026 15:00</td>
+                <td>Trần Thị B</td>
+                <td><span class="badge bg-primary">Duyệt</span></td>
+                <td>Duyệt chứng từ CT001</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+```
+
+### 9.5 Sensitive Data Masking
+
+| Data Type | Display | Reveal Action |
+|-----------|---------|----------------|
+| Password | `••••••••` | Click eye icon |
+| Salary | `•••.•••.•••` | Hover or click |
+| Bank Account | `••••••••1234` | Click to copy |
+| Tax ID | `••••••••••••` | Click to reveal |
+
+---
+
+## 10. Accessibility Requirements
+
+### 10.1 Compliance Target
 
 **WCAG 2.1 Level AA** - Minimum required
 
-### 7.2 Specific Requirements
+### 10.2 Specific Requirements
 
 | Requirement | Implementation |
 |-------------|----------------|
@@ -484,7 +838,7 @@ Every component must have:
 | Error identification | Error messages linked to fields with aria-describedby |
 | Resize support | Works up to 200% zoom without horizontal scroll |
 
-### 7.3 Testing Requirements
+### 10.3 Testing Requirements
 
 - [ ] Keyboard-only navigation test
 - [ ] Screen reader test (NVDA/VoiceOver)
@@ -494,9 +848,9 @@ Every component must have:
 
 ---
 
-## 8. Responsive Strategy
+## 11. Responsive Strategy
 
-### 8.1 Device Personas
+### 11.1 Device Personas
 
 | Device | User | Use Case | Priority |
 |--------|------|----------|----------|
@@ -505,7 +859,7 @@ Every component must have:
 | Tablet 768px | Manager | Review, Approve | Should have |
 | Mobile 375px | Field | Quick lookup | Nice to have |
 
-### 8.2 Responsive Priorities
+### 11.2 Responsive Priorities
 
 **Desktop (Must Work)**
 - All features fully functional
@@ -522,15 +876,15 @@ Every component must have:
 - Simple list views
 - No complex forms
 
-### 8.3 Mobile Considerations
+### 11.3 Mobile Considerations
 
 Given this is an accounting app, mobile is NOT primary. Focus desktop experience first. Tablet is useful for managers doing approval work.
 
 ---
 
-## 9. Performance Standards
+## 12. Performance Standards
 
-### 9.1 Targets
+### 12.1 Targets
 
 | Metric | Target | Measurement |
 |--------|--------|-------------|
@@ -541,7 +895,7 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 | Search response | <300ms | Network |
 | Save operation | <500ms | Network |
 
-### 9.2 Strategies
+### 12.2 Strategies
 
 - Server-side rendering (Razor) - good for initial load
 - Lazy load sidebar, modals
@@ -551,7 +905,7 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 - Browser caching for static assets
 - Compression (gzip/brotli)
 
-### 9.3 Budget
+### 12.3 Budget
 
 - JavaScript: <200KB gzipped
 - CSS: <50KB gzipped
@@ -560,7 +914,89 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 
 ---
 
-## 10. Implementation Priorities
+## 13. Testing Requirements
+
+### 13.1 UX Testing Types
+
+| Type | When | Who | Tools |
+|------|------|-----|-------|
+| **Usability Testing** | Before dev, After major changes | Real users | UserZoom, Maze |
+| **A/B Testing** | Continuous | % of users | Google Optimize, Optimizely |
+| **Accessibility Audit** | Before release | QA + Tools | AXE, WAVE |
+| **Performance Testing** | Pre-release | DevOps | Lighthouse, k6 |
+| **Visual Regression** | After UI changes | CI Pipeline | Percy, Chromatic |
+
+### 13.2 Usability Test Scenarios
+
+```
+TASK 1: Tạo chứng từ mới
+- Thời gian mục tiêu: < 60 giây
+- Thành công: 90% users
+- Đánh giá độ khó: Dễ / Trung bình / Khó
+
+TASK 2: Tìm kiếm chứng từ theo ngày
+- Thời gian mục tiêu: < 30 giây  
+- Thành công: 95% users
+- Đánh giá độ khó: Dễ / Trung bình / Khó
+
+TASK 3: Duyệt chứng từ (Manager)
+- Thời gian mục tiêu: < 20 giây
+- Thành công: 95% users
+- Đánh giá độ khó: Dễ / Trung bình / Khó
+```
+
+### 13.3 Feedback Collection
+
+```html
+<!-- In-app feedback widget -->
+<div id="feedback-widget" class="feedback-button">
+    <i class="bi bi-chat-dots"></i> Góp ý
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal" id="feedback-modal">
+    <div class="modal-header">
+        <h5>Góp ý về hệ thống</h5>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label>Loại góp ý</label>
+            <select class="form-select">
+                <option>Báo lỗi</option>
+                <option>Gợi ý cải thiện</option>
+                <option>Khác</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Mô tả</label>
+            <textarea class="form-control" rows="4" 
+                      placeholder="Mô tả chi tiết vấn đề hoặc đề xuất..."></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Ảnh chụp màn hình (nếu có)</label>
+            <input type="file" accept="image/*" multiple>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-secondary">Hủy</button>
+        <button class="btn btn-primary">Gửi góp ý</button>
+    </div>
+</div>
+```
+
+### 13.4 Success Metrics (NPS-style)
+
+| Metric | Target |
+|--------|--------|
+| Task Completion Rate | > 90% |
+| Time on Task | < Target time |
+| Error Rate | < 5% |
+| User Satisfaction | > 4/5 |
+| System Usability Scale (SUS) | > 70 |
+
+---
+
+## 14. Implementation Priorities
 
 ### Phase 1: Foundation (Week 1-2)
 
@@ -581,6 +1017,8 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 | Validation UI | Medium | Must |
 | Toast notifications | Low | Should |
 | Loading states | Low | Should |
+| Error display patterns | Medium | Must |
+| Empty state designs | Low | Should |
 
 ### Phase 3: Business Components (Week 5-6)
 
@@ -591,16 +1029,22 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 | Amount input with formatting | Medium | Must |
 | Status badges | Low | Must |
 | Dashboard KPIs | Medium | Should |
+| Pagination | Medium | Must |
+| Confirmation dialogs | Medium | Must |
 
-### Phase 4: Refinement (Week 7-8)
+### Phase 4: Advanced Features (Week 7-8)
 
 | Task | Effort | Priority |
 |------|--------|----------|
+| Session management | Medium | Must |
+| Security UI patterns | High | Must |
 | Keyboard shortcuts | Medium | Should |
+| Localization | Medium | Must |
 | Accessibility audit | High | Must |
 | Performance optimization | Medium | Should |
 | Cross-browser testing | Medium | Must |
-| Mobile adjustments | Medium | Should |
+| Usability testing | High | Must |
+| User feedback system | Medium | Should |
 
 ---
 
@@ -692,6 +1136,8 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 | Enter | Confirm (in forms) |
 | Tab | Next field |
 | Shift+Tab | Previous field |
+| Ctrl+D | Duplicate (voucher) |
+| F5 | Refresh |
 
 ---
 
@@ -706,9 +1152,103 @@ Given this is an accounting app, mobile is NOT primary. Focus desktop experience
 - [ ] Forms prevent submission with errors
 - [ ] Loading states shown for async operations
 - [ ] Responsive down to 768px functional
+- [ ] Session timeout warning at 25 min
+- [ ] Currency formatted as VND (1.234.567)
+- [ ] Date formatted as DD/MM/yyyy
+- [ ] Error messages in Vietnamese
+- [ ] Confirmation dialogs for destructive actions
+- [ ] Empty states for all list views
 
 ---
 
-**Document Status:** Foundation - Requires Validation  
-**Next Review:** After Phase 1 implementation  
+## Appendix D: Icon Reference (Bootstrap Icons)
+
+### Integration
+
+```html
+<!-- Add to <head> in _Layout.cshtml -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+```
+
+### Common Icons by Category
+
+#### Navigation
+| Use Case | Icon Class |
+|----------|------------|
+| Dashboard | `bi bi-grid-1x2` |
+| Home | `bi bi-house-door` |
+| Menu | `bi bi-list` |
+| Back | `bi bi-arrow-left` |
+| Forward | `bi bi-arrow-right` |
+
+#### Accounting / Vouchers
+| Use Case | Icon Class |
+|----------|------------|
+| Voucher | `bi bi-receipt` |
+| Invoice | `bi bi-file-earmark-text` |
+| Money | `bi bi-cash` |
+| Bank | `bi bi-bank` |
+| Credit Card | `bi bi-credit-card` |
+| Graph | `bi bi-graph-up-arrow` |
+| Calculator | `bi bi-calculator` |
+
+#### Actions
+| Use Case | Icon Class |
+|----------|------------|
+| Create | `bi bi-plus-lg` |
+| Edit | `bi bi-pencil` |
+| Delete | `bi bi-trash` |
+| Save | `bi bi-save` |
+| Search | `bi bi-search` |
+| Filter | `bi bi-funnel` |
+| Export | `bi bi-download` |
+| Print | `bi bi-printer` |
+| Refresh | `bi bi-arrow-clockwise` |
+| Settings | `bi bi-gear` |
+
+#### Status
+| Use Case | Icon Class |
+|----------|------------|
+| Success | `bi bi-check-circle-fill` |
+| Warning | `bi bi-exclamation-triangle-fill` |
+| Error | `bi bi-x-circle-fill` |
+| Info | `bi bi-info-circle-fill` |
+| Pending | `bi bi-clock` |
+| Approved | `bi bi-check2-all` |
+| Rejected | `bi bi-x-lg` |
+
+### Sidebar Navigation Icon Mapping
+
+```
+📊 Dashboard          → bi-grid-1x2
+📝 Accounting
+   ├─ Chứng Từ       → bi-receipt
+   ├─ Sổ Cái          → bi-book
+   ├─ Thử Nghiệm     → bi-calculator
+   └─ Báo Cáo        → bi-bar-chart-line
+📦 Inventory
+   ├─ Danh Mục       → bi-box-seam
+   ├─ Kho            → bi-building
+   └─ Chuyển Kho     → bi-arrow-left-right
+⚙️ System
+   ├─ Người Dùng     → bi-people
+   ├─ Phân Quyền    → bi-shield-lock
+   └─ Cấu Hình      → bi-gear
+```
+
+### Usage Guidelines
+
+1. **Always pair icon with text** for primary navigation
+2. **Icon-only acceptable** for toolbar actions with tooltips
+3. **Consistent sizing**: 
+   - Nav: 1.25rem (20px)
+   - Buttons: inherit
+   - Headers: 1.5-2rem
+4. **Color**: Use `text-primary`, `text-muted`, or semantic colors
+5. **Spacing**: Use `me-1` (margin-end) between icon and text
+
+---
+
+**Document Status:** v2.0 - Enhanced  
+**Next Review:** After Phase 2 implementation  
 **Owner:** Development Team

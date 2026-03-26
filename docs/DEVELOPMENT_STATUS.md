@@ -171,6 +171,7 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 | InventoryReportService | ✅ Done | HH - Inventory reports |
 | CostAccountingService | ✅ Done | CP - Cost accounting |
 | RevenueService | ✅ Done | DT - Revenue/Income |
+| FinancialReportService | ✅ Done | BC - Financial Reports (B01-DN, B02-DN, B03-DN) |
 
 ### Business Rules Implemented
 - Voucher workflow: Draft → Pending → Approved → Posted → Reversed
@@ -424,6 +425,31 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 - IRevenueService + RevenueService
   - Create/Update/Get Revenue, RecognizeRevenueAsync
   - GetRevenueSummaryAsync, GenerateRevenueReportAsync
+
+### DI Registration
+- All repositories and service registered in Program.cs
+
+## BC Module Implementation (2026-03-25)
+
+### Domain Entities
+- BalanceSheet entity (Bảng cân đối kế toán - B01-DN)
+- IncomeStatement entity (Báo cáo kết quả KD - B02-DN)
+- CashFlowStatement entity (Báo cáo lưu chuyển tiền tệ - B03-DN)
+- FinancialReport entity (Báo cáo tài chính)
+
+### Repository Interfaces
+- IFinancialReportRepository
+
+### Repository Implementations
+- FinancialReportRepository
+
+### Application Services
+- IFinancialReportService + FinancialReportService
+  - GetBalanceSheetAsync (B01-DN)
+  - GetIncomeStatementAsync (B02-DN)
+  - GetCashFlowStatementAsync (B03-DN)
+  - Generate methods for all reports
+  - GetAllReportsAsync
 
 ### DI Registration
 - All repositories and service registered in Program.cs
