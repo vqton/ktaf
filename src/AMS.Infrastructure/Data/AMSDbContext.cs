@@ -8,6 +8,7 @@ using AMS.Domain.Entities.Assets;
 using AMS.Domain.Entities.Tax;
 using AMS.Domain.Entities.Audit;
 using AMS.Domain.Entities.Cfg;
+using AMS.Domain.Entities.Report;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
@@ -182,6 +183,26 @@ public class AMSDbContext : DbContext
     /// Gets or sets the RevenueReports DbSet.
     /// </summary>
     public DbSet<RevenueReport> RevenueReports => Set<RevenueReport>();
+
+    /// <summary>
+    /// Gets or sets the BalanceSheets DbSet (BC module - Financial Reports).
+    /// </summary>
+    public DbSet<BalanceSheet> BalanceSheets => Set<BalanceSheet>();
+
+    /// <summary>
+    /// Gets or sets the IncomeStatements DbSet.
+    /// </summary>
+    public DbSet<IncomeStatement> IncomeStatements => Set<IncomeStatement>();
+
+    /// <summary>
+    /// Gets or sets the CashFlowStatements DbSet.
+    /// </summary>
+    public DbSet<CashFlowStatement> CashFlowStatements => Set<CashFlowStatement>();
+
+    /// <summary>
+    /// Gets or sets the FinancialReports DbSet.
+    /// </summary>
+    public DbSet<FinancialReport> FinancialReports => Set<FinancialReport>();
 
     /// <summary>
     /// Gets or sets the FixedAssets DbSet.

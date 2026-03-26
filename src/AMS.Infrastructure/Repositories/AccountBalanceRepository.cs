@@ -55,6 +55,12 @@ public class AccountBalanceRepository : IAccountBalanceRepository
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<AccountBalance>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.AccountBalances.ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task AddAsync(AccountBalance balance, CancellationToken cancellationToken = default)
     {
         await _context.AccountBalances.AddAsync(balance, cancellationToken);

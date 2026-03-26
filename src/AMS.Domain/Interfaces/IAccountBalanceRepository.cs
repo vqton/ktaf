@@ -28,6 +28,11 @@ public interface IAccountBalanceRepository
     Task<AccountBalance?> GetLatestByAccountAsync(Guid accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets all account balances.
+    /// </summary>
+    Task<IEnumerable<AccountBalance>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Adds a new account balance.
     /// </summary>
     Task AddAsync(AccountBalance balance, CancellationToken cancellationToken = default);
