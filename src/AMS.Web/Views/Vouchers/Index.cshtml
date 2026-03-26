@@ -1,56 +1,175 @@
 @{
-    ViewData["Title"] = "Danh Sách Chứng Từ";
+    ViewData["Title"] = "Danh sách chứng từ";
 }
 
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">Danh Sách Chứng Từ</h5>
+<div class="page-header">
+    <h1 class="page-title">Chứng từ kế toán</h1>
+    <div class="page-actions">
+        <button class="btn btn-sm btn-outline-secondary" id="btnExport">
+            <i class="bi bi-download me-1"></i>Xuất Excel
+        </button>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Tạo chứng từ
+        </a>
     </div>
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <a asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Tạo Chứng Từ Mới
-                </a>
-            </div>
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchInput">
-                    <button class="btn btn-outline-secondary" type="button">Tìm</button>
-                </div>
+</div>
+
+<div class="page-body">
+    <div class="table-wrapper">
+        <div class="table-toolbar">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <input type="search" class="form-control form-control-sm search-input" 
+                       id="voucherSearch" placeholder="Tìm số CT, mô tả...">
+                <select class="form-select form-select-sm select2-basic" id="filterType" style="width:120px">
+                    <option value="">Tất cả loại</option>
+                    <option value="PT">Phiếu thu</option>
+                    <option value="PC">Phiếu chi</option>
+                    <option value="BC">Biên bản</option>
+                    <option value="BN">Báo Nợ</option>
+                    <option value="HB">Hóa đơn bán</option>
+                </select>
+                <select class="form-select form-select-sm select2-basic" id="filterStatus" style="width:120px">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Draft">Nháp</option>
+                    <option value="Pending">Chờ duyệt</option>
+                    <option value="Approved">Đã duyệt</option>
+                    <option value="Posted">Đã ghi sổ</option>
+                    <option value="Reversed">Đã đảo</option>
+                </select>
+                <input type="text" class="form-control form-control-sm date-range-picker" 
+                       style="width:180px" placeholder="Ngày CT..." id="filterDate">
+                <button class="btn btn-sm btn-link text-muted" id="btnClearFilters">Xóa lọc</button>
             </div>
         </div>
-        <table class="table table-striped table-hover" id="vouchersTable">
+        <table id="vouchersTable" class="table table-hover w-100">
             <thead>
                 <tr>
-                    <th><i class="bi bi-hash"></i> Số CT</th>
-                    <th><i class="bi bi-calendar3"></i> Ngày</th>
-                    <th><i class="bi bi-tag"></i> Loại</th>
-                    <th><i class="bi bi-text-left"></i> Diễn giải</th>
-                    <th><i class="bi bi-currency-dollar"></i> Tổng tiền</th>
-                    <th><i class="bi bi-info-circle"></i> Trạng thái</th>
-                    <th><i class="bi bi-gear"></i> Thao tác</th>
+                    <th>Số CT</th>
+                    <th>Ngày</th>
+                    <th>Loại</th>
+                    <th>Diễn giải</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody id="vouchersTableBody">
-                <tr>
-                    <td colspan="7" class="text-center">Dữ liệu đang tải...</td>
-                </tr>
-            </tbody>
         </table>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            loadVouchers();
-        });
+<script>
+$(function() {
+    const dt = ACC.initDataTable('#vouchersTable', {
+        ajax: {
+            url: '/api/vouchers/datatable',
+            type: 'POST'
+        },
+        columns: [
+            { data: 'voucherNo', 
+              render: (d, t, row) => `<a href="/Vouchers/Details/${row.id}" class="fw-semibold">${d}</a>` },
+            { data: 'voucherDate', render: (d) => ACC.format.date(d) },
+            { data: 'voucherType' },
+            { data: 'description' },
+            { data: 'totalDebit', className: 'col-amount', render: (d) => ACC.format.currency(d) },
+            { data: 'status',
+              render: (d) => {
+                const map = {
+                  'Draft': 'badge-draft',
+                  'Pending': 'badge-pending',
+                  'Approved': 'badge-approved',
+                  'Posted': 'badge-paid',
+                  'Reversed': 'badge-voided'
+                };
+                return `<span class="status-badge ${map[d] || ''}">${d}</span>`;
+              }
+            },
+            { data: null, orderable: false,
+              render: (d, t, row) => `
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-ghost dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/Vouchers/Details/${row.id}">
+                      <i class="bi bi-eye me-2"></i>Xem</a></li>
+                    ${row.status === 'Draft' ? `
+                    <li><a class="dropdown-item" href="/Vouchers/Edit/${row.id}">
+                      <i class="bi bi-pencil me-2"></i>Sửa</a></li>` : ''}
+                    ${row.status === 'Draft' ? `
+                    <li><button class="dropdown-item text-primary" onclick="submitVoucher('${row.id}')">
+                      <i class="bi bi-send me-2"></i>Gửi duyệt</button></li>` : ''}
+                    ${row.status === 'Pending' ? `
+                    <li><button class="dropdown-item text-success" onclick="approveVoucher('${row.id}')">
+                      <i class="bi bi-check-circle me-2"></i>Duyệt</button></li>
+                    <li><button class="dropdown-item text-danger" onclick="rejectVoucher('${row.id}')">
+                      <i class="bi bi-x-circle me-2"></i>Từ chối</button></li>` : ''}
+                    ${row.status === 'Approved' ? `
+                    <li><button class="dropdown-item text-primary" onclick="postVoucher('${row.id}')">
+                      <i class="bi bi-bookmark-check me-2"></i>Ghi sổ</button></li>` : ''}
+                  </ul>
+                </div>`
+            }
+        ]
+    });
 
-        function loadVouchers() {
-            $('#vouchersTableBody').html('<tr><td colspan="7" class="text-center">Dữ liệu đang tải...</td></tr>');
-            // TODO: Call API to load vouchers
+    $('#voucherSearch').on('input', _.debounce(function() {
+        dt.search($(this).val()).draw();
+    }, 300));
+
+    $('#filterType, #filterStatus, #filterDate').on('change', () => dt.ajax.reload());
+    $('#btnClearFilters').on('click', () => {
+        $('#filterType, #filterStatus').val('').trigger('change');
+        $('#filterDate').val('');
+        dt.ajax.reload();
+    });
+});
+
+function submitVoucher(id) {
+    $.post(`/Vouchers/Submit?id=${id}`, function(res) {
+        if (res.success) {
+            ACC.toast.success('Đã gửi duyệt');
+            location.reload();
+        } else {
+            ACC.toast.error(res.message || 'Lỗi');
         }
-    </script>
+    });
+}
+
+function approveVoucher(id) {
+    $.post(`/Vouchers/Approve?id=${id}`, function(res) {
+        if (res.success) {
+            ACC.toast.success('Đã duyệt');
+            location.reload();
+        } else {
+            ACC.toast.error(res.message || 'Lỗi');
+        }
+    });
+}
+
+function rejectVoucher(id) {
+    const reason = prompt('Lý do từ chối:');
+    if (reason) {
+        $.post(`/Vouchers/Reject?id=${id}&reason=${encodeURIComponent(reason)}`, function(res) {
+            if (res.success) {
+                ACC.toast.success('Đã từ chối');
+                location.reload();
+            } else {
+                ACC.toast.error(res.message || 'Lỗi');
+            }
+        });
+    }
+}
+
+function postVoucher(id) {
+    $.post(`/Vouchers/Post?id=${id}`, function(res) {
+        if (res.success) {
+            ACC.toast.success('Đã ghi sổ');
+            location.reload();
+        } else {
+            ACC.toast.error(res.message || 'Lỗi');
+        }
+    });
+}
+</script>
 }

@@ -1,0 +1,87 @@
+@{
+    ViewData["Title"] = "Danh sách hàng hóa";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Hàng hóa</h1>
+    <div class="page-actions">
+        <a asp-action="Balances" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-archive me-1"></i>Tồn kho
+        </a>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Thêm hàng hóa
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="table-wrapper">
+        <div class="table-toolbar">
+            <input type="search" class="form-control form-control-sm search-input" 
+                   id="productSearch" placeholder="Tìm mã, tên hàng hóa...">
+            <select class="form-select form-select-sm" id="filterType" style="width:150px">
+                <option value="">Tất cả loại</option>
+                <option value="Goods">Hàng hóa</option>
+                <option value="Service">Dịch vụ</option>
+                <option value="RawMaterial">Nguyên vật liệu</option>
+                <option value="FixedAsset">Tài sản</option>
+            </select>
+        </div>
+        <table id="productsTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Mã HH</th>
+                    <th>Tên hàng hóa</th>
+                    <th>Nhóm</th>
+                    <th>Loại</th>
+                    <th>Đơn vị</th>
+                    <th class="text-end">Giá bán</th>
+                    <th>Thuế suất</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(function() {
+    const dt = ACC.initDataTable('#productsTable', {
+        ajax: {
+            url: '/api/products/datatable',
+            type: 'POST'
+        },
+        columns: [
+            { data: 'productCode', render: (d) => `<span class="fw-semibold">${d}</span>` },
+            { data: 'productName' },
+            { data: 'productGroupName' },
+            { data: 'type' },
+            { data: 'unitOfMeasure' },
+            { data: 'unitPrice', className: 'col-amount', render: (d) => d ? ACC.format.currency(d) : '—' },
+            { data: 'vatRate', render: (d) => d ? `${(d * 100).toFixed(0)}%` : '—' },
+            { data: null, orderable: false,
+                render: (d, t, row) => `
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-ghost dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/Products/Details/${row.id}">
+                                <i class="bi bi-eye me-2"></i>Xem</a></li>
+                            <li><a class="dropdown-item" href="/Products/Edit/${row.id}">
+                                <i class="bi bi-pencil me-2"></i>Sửa</a></li>
+                            <li><a class="dropdown-item" href="/Products/Transactions/${row.id}">
+                                <i class="bi bi-arrow-left-right me-2"></i>Lịch sử</a></li>
+                        </ul>
+                    </div>`
+            }
+        ]
+    });
+
+    $('#productSearch').on('input', _.debounce(function() {
+        dt.search($(this).val()).draw();
+    }, 300));
+});
+</script>
+}

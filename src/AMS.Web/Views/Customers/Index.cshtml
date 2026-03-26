@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Danh sách khách hàng";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Khách hàng</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Thêm khách hàng
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="table-wrapper">
+        <div class="table-toolbar">
+            <input type="search" class="form-control form-control-sm search-input" 
+                   id="customerSearch" placeholder="Tìm mã, tên, MST...">
+            <select class="form-select form-select-sm" id="filterStatus" style="width:150px">
+                <option value="">Tất cả trạng thái</option>
+                <option value="true">Hoạt động</option>
+                <option value="false">Ngừng</option>
+            </select>
+        </div>
+        <table id="customersTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Tên khách hàng</th>
+                    <th>Mã số thuế</th>
+                    <th>Điện thoại</th>
+                    <th>Email</th>
+                    <th>Hạn mức nợ</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(function() {
+    const dt = ACC.initDataTable('#customersTable', {
+        ajax: {
+            url: '/api/customers/datatable',
+            type: 'POST'
+        },
+        columns: [
+            { data: 'code', render: (d) => `<span class="fw-semibold">${d}</span>` },
+            { data: 'name' },
+            { data: 'taxCode' },
+            { data: 'phone' },
+            { data: 'email' },
+            { data: 'creditLimit', className: 'col-amount', render: (d) => ACC.format.currency(d) },
+            { data: 'isActive', render: (d) => d 
+                ? '<span class="badge bg-success">Hoạt động</span>' 
+                : '<span class="badge bg-secondary">Ngừng</span>' },
+            { data: null, orderable: false,
+                render: (d, t, row) => `
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-ghost dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/Customers/Details/${row.id}">
+                                <i class="bi bi-eye me-2"></i>Xem</a></li>
+                            <li><a class="dropdown-item" href="/Customers/Edit/${row.id}">
+                                <i class="bi bi-pencil me-2"></i>Sửa</a></li>
+                        </ul>
+                    </div>`
+            }
+        ]
+    });
+
+    $('#customerSearch').on('input', _.debounce(function() {
+        dt.search($(this).val()).draw();
+    }, 300));
+});
+</script>
+}
