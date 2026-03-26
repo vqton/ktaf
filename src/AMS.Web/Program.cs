@@ -22,6 +22,7 @@ builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IChartOfAccountsRepository, ChartOfAccountsRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
+builder.Services.AddScoped<IFixedAssetRepository, FixedAssetRepository>();
 builder.Services.AddScoped<ILedgerRepository, LedgerRepository>();
 builder.Services.AddScoped<IFiscalPeriodRepository, FiscalPeriodRepository>();
 builder.Services.AddScoped<ITaxRepository, TaxRepository>();

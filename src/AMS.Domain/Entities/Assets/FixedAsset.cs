@@ -98,4 +98,9 @@ public class FixedAsset : BaseAuditEntity
     /// Navigation property to depreciation schedules.
     /// </summary>
     public ICollection<DepreciationSchedule> DepreciationSchedules { get; set; } = new List<DepreciationSchedule>();
+
+    /// <summary>
+    /// Navigation property to asset group.
+    /// </summary>
+    public AssetGroup? AssetGroup { get; set; }
 }
