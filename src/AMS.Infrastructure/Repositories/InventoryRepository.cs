@@ -145,4 +145,29 @@ public class InventoryRepository : IInventoryRepository
     {
         await _context.InventoryBalances.AddAsync(balance, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<InventoryTransaction>> GetTransactionsByDateRangeAsync(DateTime fromDate, DateTime toDate, Guid? warehouseId = null, Guid? productId = null, CancellationToken cancellationToken = default)
+    {
+        var query = _context.InventoryTransactions
+            .Where(t => t.TransactionDate >= fromDate && t.TransactionDate <= toDate && !t.IsDeleted);
+
+        if (warehouseId.HasValue)
+            query = query.Where(t => t.WarehouseId == warehouseId.Value);
+        if (productId.HasValue)
+            query = query.Where(t => t.ProductId == productId.Value);
+
+        return await query.OrderBy(t => t.TransactionDate).ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<InventoryBalance>> GetAllBalancesAsync(Guid? warehouseId = null, CancellationToken cancellationToken = default)
+    {
+        var query = _context.InventoryBalances.Where(b => !b.IsDeleted && b.Quantity > 0);
+
+        if (warehouseId.HasValue)
+            query = query.Where(b => b.WarehouseId == warehouseId.Value);
+
+        return await query.ToListAsync(cancellationToken);
+    }
 }

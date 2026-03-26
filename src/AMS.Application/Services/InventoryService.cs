@@ -210,7 +210,7 @@ public class InventoryService : IInventoryService
             {
                 ProductId = productId,
                 WarehouseId = warehouseId,
-                Quantity = transactionType == InventoryTransactionType.IN ? quantity : -quantity,
+                Quantity = transactionType == InventoryTransactionType.PurchaseIn ? quantity : -quantity,
                 UnitCost = unitCost,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false
@@ -219,7 +219,7 @@ public class InventoryService : IInventoryService
         }
         else
         {
-            if (transactionType == InventoryTransactionType.IN)
+            if (transactionType == InventoryTransactionType.PurchaseIn || transactionType == InventoryTransactionType.ReturnIn)
             {
                 var totalValue = balance.Quantity * balance.UnitCost + quantity * unitCost;
                 var totalQty = balance.Quantity + quantity;

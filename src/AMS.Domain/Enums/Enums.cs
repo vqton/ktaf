@@ -111,12 +111,22 @@ public enum ProductType
 /// </summary>
 public enum InventoryTransactionType
 {
-    /// <summary>Nhập kho - Goods receipt into warehouse</summary>
-    IN,
-    /// <summary>Xuất kho - Goods issue from warehouse</summary>
-    OUT,
-    /// <summary>Điều chỉnh - Inventory adjustment</summary>
-    ADJ
+    /// <summary>Nhập mua - Purchase receipt</summary>
+    PurchaseIn,
+    /// <summary>Xuất bán - Sales delivery</summary>
+    SaleOut,
+    /// <summary>Xuất trả - Return to vendor</summary>
+    ReturnOut,
+    /// <summary>Nhập trả - Return from customer</summary>
+    ReturnIn,
+    /// <summary>Chuyển kho - Transfer between warehouses</summary>
+    Transfer,
+    /// <summary>Kiểm kê - Inventory count adjustment</summary>
+    Adjustment,
+    /// <summary>Xuất mẫu - Sample output</summary>
+    SampleOut,
+    /// <summary>Xuất sử dụng nội bộ - Internal use</summary>
+    InternalOut
 }
 
 /// <summary>

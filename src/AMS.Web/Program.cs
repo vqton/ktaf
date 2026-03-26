@@ -38,6 +38,9 @@ builder.Services.AddScoped<IPayableRepository, PayableRepository>();
 builder.Services.AddScoped<IReceivablePaymentRepository, ReceivablePaymentRepository>();
 builder.Services.AddScoped<IPayablePaymentRepository, PayablePaymentRepository>();
 builder.Services.AddScoped<IAgingReportRepository, AgingReportRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+builder.Services.AddScoped<IInventoryReportService, InventoryReportService>();
 
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();

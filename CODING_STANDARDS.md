@@ -12,7 +12,9 @@
    2.4. [Tài liệu (Documentation)](#24-tài-liệu-documentation)
 3. [Error Handling & Logging](#3-error-handling--logging)
 4. [Security & Performance](#4-security--performance)
-5. [Checklist Setup Dự Án Mới](#5-checklist-setup-dự-án-mới)
+5. [Development Practices](#5-development-practices)
+   5.1. [Quy trình phát triển](#51-quy-trình-phát-triển)
+   5.2. [Checklist Setup Dự Án Mới](#52-checklist-setup-dự-án-mới)
 
 ---
 
@@ -421,7 +423,29 @@ public IEnumerable<Department> GetDepartments()
 
 ---
 
-## 5. Checklist Setup Dự Án Mới
+## 5. Development Practices
+
+### 5.1 Quy trình phát triển
+
+**Cập nhật trạng thái công việc:**
+
+- Sau khi hoàn thành task, cập nhật trạng thái trong hệ thống quản lý công việc (Jira, Trello, Azure DevOps, v.v.)
+- Đánh dấu task đã hoàn thành, thêm thông tin cần thiết (mã commit, thời gian hoàn thành)
+
+**Commit và Push:**
+
+- Commit thường xuyên với message rõ ràng, mô tả những gì đã làm
+- Push code lên remote repository ngay sau khi commit
+- Tuân thủ branch strategy đã quy định
+
+```bash
+# Ví dụ workflow
+git add .
+git commit -m "Add purchase order approval feature"
+git push origin feature/purchase-order-approval
+```
+
+### 5.2 Checklist Setup Dự Án Mới
 
 | # | Hạng mục | Việc cần làm | Done |
 |---|----------|-------------|------|

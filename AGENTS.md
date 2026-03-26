@@ -165,6 +165,7 @@ AMS.sln
 ## 5. References
 
 - [CODING_STANDARDS.md](CODING_STANDARDS.md) - Primary coding standards document
+- [TEST_STRATEGY.md](TEST_STRATEGY.md) - Test strategy, patterns, and conventions
 - [AMS.sln](AMS.sln) - Solution file
 - Individual project files in src/ directory for specific project configurations
 

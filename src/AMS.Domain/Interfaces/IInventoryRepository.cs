@@ -20,4 +20,6 @@ public interface IInventoryRepository
     Task<InventoryBalance?> GetProductBalanceAsync(Guid productId, Guid warehouseId, CancellationToken cancellationToken = default);
     Task UpdateBalanceAsync(InventoryBalance balance, CancellationToken cancellationToken = default);
     Task AddBalanceAsync(InventoryBalance balance, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryTransaction>> GetTransactionsByDateRangeAsync(DateTime fromDate, DateTime toDate, Guid? warehouseId = null, Guid? productId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryBalance>> GetAllBalancesAsync(Guid? warehouseId = null, CancellationToken cancellationToken = default);
 }
