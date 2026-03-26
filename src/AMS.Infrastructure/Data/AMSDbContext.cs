@@ -169,6 +169,21 @@ public class AMSDbContext : DbContext
     public DbSet<CostReport> CostReports => Set<CostReport>();
 
     /// <summary>
+    /// Gets or sets the Revenues DbSet (DT module - Revenue/Income).
+    /// </summary>
+    public DbSet<Revenue> Revenues => Set<Revenue>();
+
+    /// <summary>
+    /// Gets or sets the RevenueRecognitions DbSet.
+    /// </summary>
+    public DbSet<RevenueRecognition> RevenueRecognitions => Set<RevenueRecognition>();
+
+    /// <summary>
+    /// Gets or sets the RevenueReports DbSet.
+    /// </summary>
+    public DbSet<RevenueReport> RevenueReports => Set<RevenueReport>();
+
+    /// <summary>
     /// Gets or sets the FixedAssets DbSet.
     /// </summary>
     public DbSet<FixedAsset> FixedAssets => Set<FixedAsset>();

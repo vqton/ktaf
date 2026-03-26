@@ -47,6 +47,10 @@ builder.Services.AddScoped<ICostAllocationRepository, CostAllocationRepository>(
 builder.Services.AddScoped<ICostAllocationDetailRepository, CostAllocationDetailRepository>();
 builder.Services.AddScoped<ICostReportRepository, CostReportRepository>();
 builder.Services.AddScoped<ICostAccountingService, CostAccountingService>();
+builder.Services.AddScoped<IRevenueRepository, RevenueRepository>();
+builder.Services.AddScoped<IRevenueRecognitionRepository, RevenueRecognitionRepository>();
+builder.Services.AddScoped<IRevenueReportRepository, RevenueReportRepository>();
+builder.Services.AddScoped<IRevenueService, RevenueService>();
 
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();
