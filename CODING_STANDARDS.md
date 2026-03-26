@@ -9,6 +9,7 @@
 
 1. [Architecture & Structure](#1-architecture--structure)
 2. [Naming & Coding Convention](#2-naming--coding-convention)
+   2.4. [Tài liệu (Documentation)](#24-tài-liệu-documentation)
 3. [Error Handling & Logging](#3-error-handling--logging)
 4. [Security & Performance](#4-security--performance)
 5. [Checklist Setup Dự Án Mới](#5-checklist-setup-dự-án-mới)
@@ -148,6 +149,54 @@ public void ReconcileInventory() { }   // Đối chiếu tồn kho
 - Phương thức không dài quá **50 dòng** — nếu dài hơn, tách ra
 - Không dùng **magic number** — đặt hằng số có tên rõ ràng
 - Comment giải thích **tại sao**, không giải thích **cái gì** (code tự nói được)
+
+### 2.4 Tài liệu (Documentation)
+
+**Bắt buộc viết docstring bằng tiếng Việt** cho tất cả các thành phần công khai (public class, public method, public property). Mục tiêu là giúp các thành viên trong team dễ dàng đọc hiểu và tra cứu.
+
+**Cấu trúc docstring:**
+
+```csharp
+/// <summary>
+/// Mô tả ngắn gọn về chức năng của phương thức/class.
+/// </summary>
+/// <param name="parameterName">Mô tả tham số (nếu có).</param>
+/// <returns>Mô tả giá trị trả về (nếu có).</returns>
+public class PurchaseOrderService
+{
+    /// <summary>
+    /// Tạo đơn mua hàng mới từ thông tin được cung cấp.
+    /// </summary>
+    /// <param name="dto">Thông tin đơn mua hàng.</param>
+    /// <returns>Kết quả với đơn hàng vừa tạo hoặc lỗi nếu không thành công.</returns>
+    public ServiceResult<PurchaseOrder> Create(CreatePurchaseOrderDto dto) { }
+}
+```
+
+**Quy tắc viết docstring:**
+
+| Thành phần | Yêu cầu |
+|------------|---------|
+| Class/Interface | Mô tả ngắn gọn (1-2 câu) về mục đích sử dụng |
+| Public Method | Mô tả chức năng, tham số, giá trị trả về, ngoại lệ (nếu có) |
+| Property | Mô tả ý nghĩa của property |
+| DTO | Mô tả mục đích sử dụng DTO này |
+
+**Ví dụ:**
+
+```csharp
+/// <summary>
+/// Dịch vụ quản lý đơn mua hàng, xử lý các nghiệp vụ liên quan đến tạo, duyệt, hủy đơn.
+/// </summary>
+public interface IPurchaseOrderService { }
+
+/// <summary>
+/// Ngưỡng tiền duyệt tự động. Nếu tổng tiền vượt quá ngưỡng này cần duyệt thủ công.
+/// </summary>
+public decimal AutoApprovalThreshold { get; set; }
+```
+
+> ✅ Docstring tiếng Việt giúp team dễ maintain, onboarding member mới nhanh hơn, và giảm thiểu hiểu nhầm về business logic.
 
 ```csharp
 // ❌ Magic number

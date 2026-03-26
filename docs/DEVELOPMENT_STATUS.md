@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-25 17:30  
+**Last Updated:** 2026-03-25 18:00  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -56,6 +56,11 @@
 | CashBook | ✅ Done | DM/CashBook.cs |
 | CashBookEntry | ✅ Done | DM/CashBook.cs |
 | BankReconciliation | ✅ Done | Entities/BankReconciliation.cs |
+| Receivable | ✅ Done | DM/ReceivablePayable.cs |
+| Payable | ✅ Done | DM/ReceivablePayable.cs |
+| ReceivablePayment | ✅ Done | DM/ReceivablePayable.cs |
+| PayablePayment | ✅ Done | DM/ReceivablePayable.cs |
+| AgingReport | ✅ Done | DM/ReceivablePayable.cs |
 | InventoryTransaction | ✅ Done | Inventory/InventoryTransaction.cs |
 | InventoryBalance | ✅ Done | Inventory/InventoryBalance.cs |
 | NumberSequence | ✅ Done | Cfg/NumberSequence.cs |
@@ -291,6 +296,40 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 
 ### DI Registration
 - All repositories and services registered in Program.cs
+
+## CN Module Implementation (2026-03-25)
+
+### Domain Entities
+- Receivable entity (Phải thu khách hàng - 131)
+- Payable entity (Phải trả người bán - 331)
+- ReceivablePayment entity (Phiếu thu)
+- PayablePayment entity (Phiếu chi)
+- AgingReport entity (Báo cáo công nợ)
+- ReceivableType enum (TradeReceivable, AdvancePayment, OtherReceivable)
+- PayableType enum (TradePayable, AdvancePayment, OtherPayable)
+
+### Repository Interfaces
+- IReceivableRepository, IPayableRepository
+- IReceivablePaymentRepository, IPayablePaymentRepository
+- IAgingReportRepository
+
+### Repository Implementations
+- ReceivableRepository, PayableRepository
+- ReceivablePaymentRepository, PayablePaymentRepository
+- AgingReportRepository
+
+### Application Services
+- IReceivablePayableService + ReceivablePayableService
+  - CreateReceivableAsync, UpdateReceivableAsync, GetReceivableByIdAsync
+  - CreatePayableAsync, UpdatePayableAsync, GetPayableByIdAsync
+  - RecordReceivablePaymentAsync, RecordPayablePaymentAsync
+  - GetReceivablesByCustomerAsync, GetPayablesByVendorAsync
+  - GetUnpaidReceivablesAsync, GetUnpaidPayablesAsync
+  - GetReceivableAgingReportAsync, GetPayableAgingReportAsync
+  - GenerateAgingReportAsync (Current, 1-30, 31-60, 61-90, Over 90 days)
+
+### DI Registration
+- All repositories and service registered in Program.cs
 
 ## Domain Entities Complete (2026-03-24)
 

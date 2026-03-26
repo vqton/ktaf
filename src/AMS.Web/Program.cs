@@ -33,6 +33,11 @@ builder.Services.AddScoped<IBankTransactionRepository, BankTransactionRepository
 builder.Services.AddScoped<ICashBookRepository, CashBookRepository>();
 builder.Services.AddScoped<ICashBookEntryRepository, CashBookEntryRepository>();
 builder.Services.AddScoped<IBankReconciliationRepository, BankReconciliationRepository>();
+builder.Services.AddScoped<IReceivableRepository, ReceivableRepository>();
+builder.Services.AddScoped<IPayableRepository, PayableRepository>();
+builder.Services.AddScoped<IReceivablePaymentRepository, ReceivablePaymentRepository>();
+builder.Services.AddScoped<IPayablePaymentRepository, PayablePaymentRepository>();
+builder.Services.AddScoped<IAgingReportRepository, AgingReportRepository>();
 
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();
@@ -47,6 +52,7 @@ builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
 builder.Services.AddScoped<IMonthEndClosingService, MonthEndClosingService>();
 builder.Services.AddScoped<IBankReconciliationService, BankReconciliationService>();
 builder.Services.AddScoped<ICashFlowReportService, CashFlowReportService>();
+builder.Services.AddScoped<IReceivablePayableService, ReceivablePayableService>();
 
 builder.Services.AddControllersWithViews();
 

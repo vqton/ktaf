@@ -124,6 +124,31 @@ public class AMSDbContext : DbContext
     public DbSet<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
 
     /// <summary>
+    /// Gets or sets the Receivables DbSet (CN module - Accounts Receivable).
+    /// </summary>
+    public DbSet<Receivable> Receivables => Set<Receivable>();
+
+    /// <summary>
+    /// Gets or sets the Payables DbSet (CN module - Accounts Payable).
+    /// </summary>
+    public DbSet<Payable> Payables => Set<Payable>();
+
+    /// <summary>
+    /// Gets or sets the ReceivablePayments DbSet.
+    /// </summary>
+    public DbSet<ReceivablePayment> ReceivablePayments => Set<ReceivablePayment>();
+
+    /// <summary>
+    /// Gets or sets the PayablePayments DbSet.
+    /// </summary>
+    public DbSet<PayablePayment> PayablePayments => Set<PayablePayment>();
+
+    /// <summary>
+    /// Gets or sets the AgingReports DbSet.
+    /// </summary>
+    public DbSet<AgingReport> AgingReports => Set<AgingReport>();
+
+    /// <summary>
     /// Gets or sets the FixedAssets DbSet.
     /// </summary>
     public DbSet<FixedAsset> FixedAssets => Set<FixedAsset>();
