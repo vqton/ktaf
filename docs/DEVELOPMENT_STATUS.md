@@ -464,3 +464,42 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
 - Application Constants: `<summary>` for class and constants
 - **Infrastructure layer (2026-03-25):** Added `<summary>` to AMSDbContext, DbContextFactory, UnitOfWork, and all 8 Repositories
 - **Web layer (2026-03-25):** Added `<summary>` to Controllers, BaseController, GlobalExceptionFilter, Program.cs
+
+## Test Infrastructure (2026-03-26)
+
+### Test Projects Created
+- `tests/AMS.Domain.Tests/AMS.Domain.Tests.csproj` - Unit test project for Domain and Application layers
+
+### Test Frameworks & Packages
+- xUnit 2.6.2 - Test framework
+- Moq 4.20.70 - Mocking library
+- FluentAssertions 6.12.0 - Assertion library
+- coverlet.collector 6.0.0 - Code coverage
+- Microsoft.NET.Test.Sdk 17.8.0
+
+### Test Data Management
+- Created `TestDataFactory` helper class following TEST_STRATEGY.md patterns:
+  - Factory pattern for creating test entities
+  - Object Mother pattern via static factory methods
+  - Supports configuration via Action<T> delegates
+
+### Unit Tests Implemented
+| Test Class | Tests | Coverage |
+|------------|-------|----------|
+| ChartOfAccountsServiceTests | 25 | CRUD operations, validation, hierarchy |
+
+### Test Results
+```
+Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 374 ms
+```
+
+### Test Naming Convention (per TEST_STRATEGY.md)
+- `[MethodName]_[Scenario]_[ExpectedResult]`
+- Example: `CreateAsync_WithValidData_ReturnsSuccess`
+- Class naming: `[ClassName]Tests`
+
+### Test Patterns Implemented
+- Arrange-Act-Assert pattern
+- Moq for dependency mocking
+- FluentAssertions for readable assertions
+- Parameterized tests with `[Theory]` and `[InlineData]`
