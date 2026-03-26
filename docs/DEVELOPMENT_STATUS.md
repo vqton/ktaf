@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-26 15:30  
+**Last Updated:** 2026-03-26 15:45  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -600,12 +600,12 @@ Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
 | Layer | Target | Current | Priority |
 |-------|--------|---------|----------|
 | Domain | 90%+ | ~15% (ChartOfAccountsService only) | Cao nhất |
-| Application | 80%+ | ~5% | Cao |
+| Application | 80%+ | ~8% | Cao |
 | Infrastructure | 70%+ | 0% | Trung bình |
 | Web | 60%+ | 0% | Thấp |
 
 ### Pending Test Classes
-- [ ] AuthorizationServiceTests
+- [x] AuthorizationServiceTests
 - [ ] TaxServiceTests  
 - [ ] VoucherServiceTests
 - [ ] LedgerServiceTests
