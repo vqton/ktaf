@@ -639,8 +639,8 @@ Passed! - Failed: 0, Passed: 35, Skipped: 0, Total: 35, Duration: 450 ms
 ### Test Coverage Status
 | Layer | Target | Current | Priority |
 |-------|--------|---------|----------|
-| Domain | 90%+ | ~15% (ChartOfAccountsService only) | Cao nhất |
-| Application | 80%+ | ~12% | Cao |
+| Domain | 90%+ | ~18% (ChartOfAccountsService + AuthorizationService) | Cao nhất |
+| Application | 80%+ | ~15% (ChartOfAccountsService + AuthorizationService) | Cao |
 | Infrastructure | 70%+ | 0% | Trung bình |
 | Web | 60%+ | 0% | Thấp |
 
