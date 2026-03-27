@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-26 15:45  
+**Last Updated:** 2026-03-27 10:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -600,7 +600,7 @@ Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
 | Layer | Target | Current | Priority |
 |-------|--------|---------|----------|
 | Domain | 90%+ | ~15% (ChartOfAccountsService only) | Cao nhất |
-| Application | 80%+ | ~8% | Cao |
+| Application | 80%+ | ~12% | Cao |
 | Infrastructure | 70%+ | 0% | Trung bình |
 | Web | 60%+ | 0% | Thấp |
 
@@ -654,9 +654,9 @@ Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
 ## Next Steps (2026-03-26)
 
 ### Priority 1 - Missing Controllers
-- FiscalPeriodsController - Period management
-- BankAccountsController - Bank/Cash management
-- WarehousesController - Inventory locations
+- [x] FiscalPeriodsController - Period management
+- [x] BankAccountsController - Bank/Cash management
+- [x] WarehousesController - Inventory locations
 
 ### Priority 2 - Views Needed
 - Details views for all entities
