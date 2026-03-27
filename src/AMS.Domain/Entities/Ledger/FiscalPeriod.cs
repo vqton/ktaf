@@ -24,6 +24,16 @@ public class FiscalPeriod : BaseAuditEntity
     public FiscalPeriodStatus Status { get; set; } = FiscalPeriodStatus.Open;
 
     /// <summary>
+    /// Timestamp when the period was closed.
+    /// </summary>
+    public DateTime? ClosedAt { get; set; }
+
+    /// <summary>
+    /// Username who closed the period.
+    /// </summary>
+    public string? ClosedBy { get; set; }
+
+    /// <summary>
     /// Collection of vouchers in this period.
     /// </summary>
     public ICollection<Voucher> Vouchers { get; set; } = new List<Voucher>();

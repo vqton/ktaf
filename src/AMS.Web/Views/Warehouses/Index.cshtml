@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Danh sách kho";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Kho hàng</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Thêm kho
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="table-wrapper">
+        <div class="table-toolbar">
+            <input type="search" class="form-control form-control-sm search-input" 
+                   id="warehouseSearch" placeholder="Tìm mã, tên kho...">
+        </div>
+        <table id="warehousesTable" class="table table-hover w-100">
+            <thead>
+                <tr>
+                    <th>Mã kho</th>
+                    <th>Tên kho</th>
+                    <th>Địa chỉ</th>
+                    <th>Quản lý</th>
+                    <th>Phương pháp tính giá</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(function() {
+    const dt = ACC.initDataTable('#warehousesTable', {
+        ajax: {
+            url: '/api/warehouses/datatable',
+            type: 'POST'
+        },
+        columns: [
+            { data: 'warehouseCode', render: (d) => `<span class="fw-semibold">${d}</span>` },
+            { data: 'warehouseName' },
+            { data: 'address' },
+            { data: 'manager' },
+            { data: 'pricingMethod' },
+            { data: 'isActive', render: (d) => d ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-secondary">Ngừng</span>' },
+            { data: null, orderable: false,
+              render: (d, t, row) => `
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-ghost dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/Warehouses/Details/${row.id}">
+                      <i class="bi bi-eye me-2"></i>Xem</a></li>
+                    <li><a class="dropdown-item" href="/Warehouses/Edit/${row.id}">
+                      <i class="bi bi-pencil me-2"></i>Sửa</a></li>
+                  </ul>
+                </div>`
+            }
+        ]
+    });
+
+    $('#warehouseSearch').on('input', _.debounce(function() {
+        dt.search($(this).val()).draw();
+    }, 300));
+});
+</script>
+}

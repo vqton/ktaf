@@ -412,6 +412,13 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.Year).HasColumnName("year").IsRequired();
             entity.Property(e => e.Month).HasColumnName("month").IsRequired();
             entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(15).HasConversion<string>();
+            entity.Property(e => e.ClosedAt).HasColumnName("closed_at");
+            entity.Property(e => e.ClosedBy).HasColumnName("closed_by").HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
 
             entity.HasIndex(e => new { e.Year, e.Month }).IsUnique();
         });
@@ -452,6 +459,11 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.PeriodCredit).HasColumnName("period_credit").HasPrecision(18, 0);
             entity.Property(e => e.ClosingDebit).HasColumnName("closing_debit").HasPrecision(18, 0);
             entity.Property(e => e.ClosingCredit).HasColumnName("closing_credit").HasPrecision(18, 0);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
 
             entity.HasIndex(e => new { e.FiscalPeriodId, e.AccountId }).IsUnique();
             entity.HasIndex(e => e.FiscalPeriodId);
@@ -479,6 +491,24 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.IsDetail).HasColumnName("is_detail_account");
             entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.AllowEntry).HasColumnName("allow_entry");
+            entity.Property(e => e.TaxCategory).HasColumnName("tax_category").HasMaxLength(50);
+            entity.Property(e => e.BankAccount).HasColumnName("bank_account").HasMaxLength(50);
+            entity.Property(e => e.BankName).HasColumnName("bank_name").HasMaxLength(255);
+            entity.Property(e => e.OpeningBalance).HasColumnName("opening_balance").HasMaxLength(50);
+            entity.Property(e => e.CurrencyCode).HasColumnName("currency_code").HasMaxLength(3);
+            entity.Property(e => e.IsBankAccount).HasColumnName("is_bank_account");
+            entity.Property(e => e.IsTaxAccount).HasColumnName("is_tax_account");
+            entity.Property(e => e.IsVatAccount).HasColumnName("is_vat_account");
+            entity.Property(e => e.VatRateCode).HasColumnName("vat_rate_code").HasMaxLength(20);
+            entity.Property(e => e.IsRevenueSharing).HasColumnName("is_revenue_sharing");
+            entity.Property(e => e.RevenueSharingPercentage).HasColumnName("revenue_sharing_percentage").HasMaxLength(20);
+            entity.Property(e => e.ReconciliationAccount).HasColumnName("reconciliation_account").HasMaxLength(50);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
 
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => e.ParentId);
@@ -500,6 +530,22 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.Phone).HasColumnName("phone").HasMaxLength(20);
             entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(100);
             entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.CreditLimit).HasColumnName("credit_limit").HasPrecision(18, 0);
+            entity.Property(e => e.PaymentTermDays).HasColumnName("payment_term_days");
+            entity.Property(e => e.IsVatPayer).HasColumnName("is_vat_payer");
+            entity.Property(e => e.InvoiceType).HasColumnName("invoice_type").HasMaxLength(100);
+            entity.Property(e => e.Province).HasColumnName("province").HasMaxLength(100);
+            entity.Property(e => e.District).HasColumnName("district").HasMaxLength(100);
+            entity.Property(e => e.Ward).HasColumnName("ward").HasMaxLength(100);
+            entity.Property(e => e.BankAccount).HasColumnName("bank_account").HasMaxLength(50);
+            entity.Property(e => e.BankName).HasColumnName("bank_name").HasMaxLength(255);
+            entity.Property(e => e.ContactPerson).HasColumnName("contact_person").HasMaxLength(255);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
 
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => e.TaxCode);
@@ -517,6 +563,22 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.Phone).HasColumnName("phone").HasMaxLength(20);
             entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(100);
             entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.CreditLimit).HasColumnName("credit_limit").HasPrecision(18, 0);
+            entity.Property(e => e.PaymentTermDays).HasColumnName("payment_term_days");
+            entity.Property(e => e.IsVatPayer).HasColumnName("is_vat_payer");
+            entity.Property(e => e.InvoiceType).HasColumnName("invoice_type").HasMaxLength(100);
+            entity.Property(e => e.Province).HasColumnName("province").HasMaxLength(100);
+            entity.Property(e => e.District).HasColumnName("district").HasMaxLength(100);
+            entity.Property(e => e.Ward).HasColumnName("ward").HasMaxLength(100);
+            entity.Property(e => e.BankAccount).HasColumnName("bank_account").HasMaxLength(50);
+            entity.Property(e => e.BankName).HasColumnName("bank_name").HasMaxLength(255);
+            entity.Property(e => e.ContactPerson).HasColumnName("contact_person").HasMaxLength(255);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
 
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => e.TaxCode);
@@ -675,8 +737,24 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("product_id");
             entity.Property(e => e.ProductCode).HasColumnName("product_code").HasMaxLength(20).IsRequired();
             entity.Property(e => e.ProductName).HasColumnName("product_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.ProductNameEn).HasColumnName("product_name_en").HasMaxLength(255);
+            entity.Property(e => e.ProductGroupId).HasColumnName("product_group_id");
             entity.Property(e => e.Type).HasColumnName("product_type").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.UnitOfMeasure).HasColumnName("unit_of_measure").HasMaxLength(50);
+            entity.Property(e => e.UnitPrice).HasColumnName("unit_price").HasPrecision(18, 2);
+            entity.Property(e => e.CurrencyCode).HasColumnName("currency_code").HasMaxLength(3);
+            entity.Property(e => e.VatRate).HasColumnName("vat_rate").HasPrecision(5, 4);
+            entity.Property(e => e.IsExciseTaxItem).HasColumnName("is_excise_tax_item");
             entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.TaxCode).HasColumnName("tax_code").HasMaxLength(20);
+            entity.Property(e => e.WarehouseId).HasColumnName("warehouse_id");
+            entity.Property(e => e.Specification).HasColumnName("specification").HasMaxLength(500);
+            entity.Property(e => e.Origin).HasColumnName("origin").HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
 
             entity.HasIndex(e => e.ProductCode).IsUnique();
         });
@@ -688,7 +766,15 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("warehouse_id");
             entity.Property(e => e.WarehouseCode).HasColumnName("warehouse_code").HasMaxLength(20).IsRequired();
             entity.Property(e => e.WarehouseName).HasColumnName("warehouse_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Address).HasColumnName("address").HasMaxLength(500);
+            entity.Property(e => e.Manager).HasColumnName("manager").HasMaxLength(100);
+            entity.Property(e => e.PricingMethod).HasColumnName("pricing_method").HasMaxLength(20);
             entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
 
             entity.HasIndex(e => e.WarehouseCode).IsUnique();
         });

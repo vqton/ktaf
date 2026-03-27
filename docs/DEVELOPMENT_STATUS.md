@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-27 16:30  
+**Last Updated:** 2026-03-27 16:15  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -17,8 +17,47 @@
 | AMS.Web | ✅ Pass | 0 |
 | AMS.Domain.Tests | ✅ Pass | 0 |
 
-**Last Build:** ✅ PASSED - 2026-03-27 16:30 (4 warnings, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-27 16:15 (4 warnings, 0 errors)
 - Warnings: Package version constraints (ClosedXML requires DocumentFormat.OpenXml 2.x, resolved 3.x)
+
+---
+
+## Core Voucher Logic (2026-03-27)
+
+### Implemented Features
+1. **Voucher Workflow** - Full lifecycle: Draft → Pending → Approved → Posted → Reversed
+2. **Voucher Validation** - Minimum 2 lines, Total Debit = Total Credit (ΣNợ = ΣCó)
+3. **Ledger Posting** - Creates ledger entries when voucher is posted
+4. **Account Balance Tracking** - Updates balances on voucher post
+5. **FiscalPeriod Management** - Open/Close/Lock methods
+
+### Working Pages
+| Page | Status | Notes |
+|------|--------|-------|
+| Vouchers | ✅ HTTP 200 | Full workflow: Create → Submit → Approve → Post → Ledger |
+| Customers | ✅ HTTP 200 | CRUD operations |
+| ChartOfAccounts | ✅ HTTP 200 | Account listing |
+| Products | ✅ HTTP 200 | Product management |
+| Warehouses | ✅ HTTP 200 | CRUD operations |
+| FiscalPeriods | ❌ HTTP 404 | Missing Controller/View |
+
+### Database Updates
+- Added FiscalPeriod.ClosedAt, ClosedBy properties
+- Added AccountBalance audit columns (IsDeleted, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy)
+- Updated DbCreate to include all entity properties
+- Added PIT Brackets (5 bậc: 5%/10%/20%/30%/35% từ 01/01/2026)
+- Added PIT Allowances (Giảm trừ bản thân 15.5tr, người phụ thuộc 6.2tr)
+- Added Tax Rates (GTGT 8%/10%, CIT 15%/20%, EXCISE)
+- Added Sample Chart of Accounts (TT 99/2025: 111, 112, 131, 141, 152, 211, 331, 333, 411, 511, 632, 641, 642)
+
+---
+
+## Recommended Next Steps (Priority Order)
+
+1. **Fix Warehouses View** - ✅ DONE - Created Views/Warehouses/Index.cshtml
+2. **Seed Tax Rates** - ✅ DONE - Inserted GTGT, TNDN, TNCN, EXCISE rates into tax.tax_rates
+3. **Create FiscalPeriods View** - ⏳ PENDING - Views/FiscalPeriods/Index.cshtml needed
+4. **Add Sample Chart of Accounts** - ✅ DONE - Seeded TT 99/2025 account structure (13 accounts)
 
 ---
 

@@ -71,6 +71,7 @@ builder.Services.AddScoped<ILedgerService, LedgerService>();
 builder.Services.AddScoped<IFiscalPeriodService, FiscalPeriodService>();
 builder.Services.AddScoped<ITaxService, TaxService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IWarehouseService, WarehouseService>();
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
 builder.Services.AddScoped<IMonthEndClosingService, MonthEndClosingService>();
@@ -134,6 +135,13 @@ builder.Services.AddSingleton<INotificationService, SignalRNotificationService>(
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+
+// Ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AMSDbContext>();
+    dbContext.Database.EnsureCreated();
+}
 
 if (!app.Environment.IsDevelopment())
 {
