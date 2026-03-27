@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-27 14:30  
+**Last Updated:** 2026-03-27 16:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -17,8 +17,50 @@
 | AMS.Web | ✅ Pass | 0 |
 | AMS.Domain.Tests | ✅ Pass | 0 |
 
-**Last Build:** ✅ PASSED - 2026-03-27 14:30 (4 warnings, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-27 16:30 (4 warnings, 0 errors)
 - Warnings: Package version constraints (ClosedXML requires DocumentFormat.OpenXml 2.x, resolved 3.x)
+
+---
+
+## Database Schema Fixes (2026-03-27)
+
+### Issues Resolved
+1. **`chart_of_accounts.account_number` column missing**
+   - Root cause: Entity had `AccountNumber` property but database script didn't include it
+   - Fix: Added `account_number INT` column and additional ChartOfAccounts columns to DbCreate script
+
+2. **`vouchers.RowVersion` column mapping issue**
+   - Root cause: Entity had `RowVersion` property, database had `row_version`, but DbContext didn't map it
+   - Fix: Added `entity.Property(e => e.RowVersion).HasColumnName("row_version").IsConcurrencyToken()` to Voucher configuration
+
+3. **`fixed_assets` table missing**
+   - Root cause: Table was not created in database script
+   - Fix: Added complete `fixed_assets` table creation to DbCreate script
+
+4. **`vat_input_registers` table missing**
+   - Root cause: Table was not created and DbContext had no configuration for VATInputRegister
+   - Fix: Added table creation to DbCreate script and full entity configuration to DbContext
+
+### Changes Made
+- `tools/dbcreate/DbCreate/Program.cs`:
+  - Added database drop/recreate functionality
+  - Added `account_number` and additional columns to `chart_of_accounts`
+  - Added `fixed_assets` table with all columns
+  - Added `vat_input_registers` table with all columns
+- `src/AMS.Infrastructure/Data/AMSDbContext.cs`:
+  - Added `RowVersion` mapping for Voucher entity
+  - Added complete `VATInputRegister` entity configuration
+  - Enhanced `FixedAsset` entity configuration with all property mappings
+
+### Database Recreation
+The database was dropped and recreated with all schema fixes applied:
+```
+✓ Database 'ams_db' dropped
+✓ Database 'ams_db' created
+✓ Schemas: acc, tax, audit, cfg, rpt
+✓ Tables: fiscal_periods, chart_of_accounts, vouchers, voucher_lines, fixed_assets, vat_input_registers, audit_logs
+✓ Indexes: voucher_no, voucher_date, status, fiscal_period, voucher_line relations
+```
 
 ---
 
@@ -280,7 +322,12 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 1. ~~**VoucherStatus Ambiguity**~~ - ✅ FIXED
 2. ~~**IsActive Hide Warnings**~~ - ✅ FIXED (by updating DbContext to use correct property names)
 3. **Newtonsoft.Json Vulnerability** - Need to upgrade to 13.x in Web project
-4. **Missing Entity Properties** - DbContext updated to match entity definitions
+4. ~~**Missing Entity Properties**~~ - ✅ FIXED (DbContext updated to match entity definitions)
+5. ~~**Database Schema Mismatches**~~ - ✅ FIXED (2026-03-27)
+   - `chart_of_accounts.account_number` column added
+   - `vouchers.row_version` column mapping fixed
+   - `fixed_assets` table created
+   - `vat_input_registers` table created with DbContext configuration
 
 ---
 

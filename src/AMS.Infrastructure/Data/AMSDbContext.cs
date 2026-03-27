@@ -343,6 +343,7 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.TotalCredit).HasColumnName("total_credit").HasPrecision(18, 0);
             entity.Property(e => e.CurrencyCode).HasColumnName("currency_code").HasMaxLength(3);
             entity.Property(e => e.ExchangeRate).HasColumnName("exchange_rate").HasPrecision(18, 4);
+            entity.Property(e => e.RowVersion).HasColumnName("row_version").IsConcurrencyToken();
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
             entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
@@ -699,7 +700,26 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("asset_id");
             entity.Property(e => e.AssetCode).HasColumnName("asset_code").HasMaxLength(20).IsRequired();
             entity.Property(e => e.AssetName).HasColumnName("asset_name").HasMaxLength(255).IsRequired();
+            entity.Property(e => e.AssetGroupId).HasColumnName("asset_group_id");
+            entity.Property(e => e.SerialNumber).HasColumnName("serial_number").HasMaxLength(100);
+            entity.Property(e => e.Model).HasColumnName("model").HasMaxLength(100);
+            entity.Property(e => e.AccountId).HasColumnName("account_id");
+            entity.Property(e => e.OriginalCost).HasColumnName("original_cost").HasPrecision(18, 0);
+            entity.Property(e => e.ResidualValue).HasColumnName("residual_value").HasPrecision(18, 0);
+            entity.Property(e => e.UsefulLifeMonths).HasColumnName("useful_life_months");
+            entity.Property(e => e.AcquisitionDate).HasColumnName("acquisition_date");
+            entity.Property(e => e.DepreciationStartDate).HasColumnName("depreciation_start_date");
             entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.DepreciationMethod).HasColumnName("depreciation_method").HasMaxLength(50);
+            entity.Property(e => e.AccumulatedDepreciation).HasColumnName("accumulated_depreciation").HasPrecision(18, 0);
+            entity.Property(e => e.BookValue).HasColumnName("book_value").HasPrecision(18, 0);
+            entity.Property(e => e.DepartmentCode).HasColumnName("department_code").HasMaxLength(20);
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
 
             entity.HasIndex(e => e.AssetCode).IsUnique();
         });
@@ -758,6 +778,33 @@ public class AMSDbContext : DbContext
             entity.Property(e => e.TotalTaxDue).HasColumnName("total_tax_due").HasPrecision(18, 0);
 
             entity.HasIndex(e => new { e.TaxType, e.PeriodYear, e.PeriodMonth }).IsUnique();
+        });
+
+        modelBuilder.Entity<VATInputRegister>(entity =>
+        {
+            entity.ToTable("vat_input_registers");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.VoucherId).HasColumnName("voucher_id").IsRequired();
+            entity.Property(e => e.VendorId).HasColumnName("vendor_id").IsRequired();
+            entity.Property(e => e.FiscalPeriodId).HasColumnName("fiscal_period_id").IsRequired();
+            entity.Property(e => e.InvoiceNo).HasColumnName("invoice_no").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.InvoiceDate).HasColumnName("invoice_date").IsRequired();
+            entity.Property(e => e.TotalAmount).HasColumnName("total_amount").HasPrecision(18, 0);
+            entity.Property(e => e.VatAmount).HasColumnName("vat_amount").HasPrecision(18, 0);
+            entity.Property(e => e.VatRate).HasColumnName("vat_rate").HasPrecision(5, 4);
+            entity.Property(e => e.GoodsAmount).HasColumnName("goods_amount").HasPrecision(18, 0);
+            entity.Property(e => e.IsClaimed).HasColumnName("is_claimed");
+            entity.Property(e => e.ClaimedDate).HasColumnName("claimed_date");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(100);
+            entity.Property(e => e.ModifiedAt).HasColumnName("modified_at");
+            entity.Property(e => e.ModifiedBy).HasColumnName("modified_by").HasMaxLength(100);
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+
+            entity.HasIndex(e => e.VoucherId);
+            entity.HasIndex(e => e.FiscalPeriodId);
+            entity.HasIndex(e => e.InvoiceDate);
         });
 
         modelBuilder.Entity<NumberSequence>(entity =>
