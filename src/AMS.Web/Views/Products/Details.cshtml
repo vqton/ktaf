@@ -1,0 +1,106 @@
+@model AMS.Application.DTOs.ProductDto
+
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Chi tiết sản phẩm</h1>
+    <div class="page-actions">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+            <i class="bi bi-pencil me-1"></i>Sửa
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="acc-card mb-4">
+                <div class="acc-card-header">
+                    <h5>Thông tin sản phẩm</h5>
+                </div>
+                <div class="acc-card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Mã sản phẩm</dt>
+                        <dd class="col-sm-8 font-mono fw-semibold">@Model.ProductCode</dd>
+                        
+                        <dt class="col-sm-4">Tên sản phẩm</dt>
+                        <dd class="col-sm-8">@Model.ProductName</dd>
+                        
+                        <dt class="col-sm-4">Tên tiếng Anh</dt>
+                        <dd class="col-sm-8">@(Model.ProductNameEn ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Nhóm sản phẩm</dt>
+                        <dd class="col-sm-8">@(Model.ProductGroupName ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Loại</dt>
+                        <dd class="col-sm-8">@Model.Type</dd>
+                        
+                        <dt class="col-sm-4">Đơn vị tính</dt>
+                        <dd class="col-sm-8">@(Model.UnitOfMeasure ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Đơn giá</dt>
+                        <dd class="col-sm-8 font-mono">@(Model.UnitPrice?.ToString("N0") ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Ngoại tệ</dt>
+                        <dd class="col-sm-8">@(Model.CurrencyCode ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Thuế VAT</dt>
+                        <dd class="col-sm-8">@(Model.VatRate?.ToString("N0") ?? "—")%</dd>
+                        
+                        <dt class="col-sm-4">Thuế tiêu thụ đặc biệt</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsExciseTaxItem)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="acc-card mb-4">
+                <div class="acc-card-header">
+                    <h5>Thông tin bổ sung</h5>
+                </div>
+                <div class="acc-card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Mã thuế</dt>
+                        <dd class="col-sm-8">@(Model.TaxCode ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Kho mặc định</dt>
+                        <dd class="col-sm-8">@(Model.WarehouseId?.ToString() ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Qui cách</dt>
+                        <dd class="col-sm-8">@(Model.Specification ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Xuất xứ</dt>
+                        <dd class="col-sm-8">@(Model.Origin ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Ngừng</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

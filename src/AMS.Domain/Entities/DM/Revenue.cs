@@ -59,6 +59,7 @@ public class RevenueReport : BaseAuditEntity
 
 public class RevenueReportDetail
 {
+    public Guid Id { get; set; }
     public Guid CustomerId { get; set; }
     public string CustomerCode { get; set; } = string.Empty;
     public string CustomerName { get; set; } = string.Empty;

@@ -71,14 +71,31 @@ public class WarehouseRepository : IWarehouseRepository
         return await _context.Warehouses.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    public async Task<Warehouse?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+    {
+        return await _context.Warehouses.FirstOrDefaultAsync(w => w.WarehouseCode == code, cancellationToken);
+    }
+
     public async Task<IEnumerable<Warehouse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Warehouses.Where(w => !w.IsDeleted).ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Warehouse>> GetActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Warehouse>> GetAllActiveAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Warehouses.Where(w => !w.IsDeleted && w.IsActive).ToListAsync(cancellationToken);
+    }
+
+    public async Task<(IEnumerable<Warehouse> Warehouses, int TotalCount)> GetAllPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Warehouses.Where(w => !w.IsDeleted);
+        var totalCount = await query.CountAsync(cancellationToken);
+        var warehouses = await query
+            .OrderBy(w => w.WarehouseCode)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return (warehouses, totalCount);
     }
 
     public async Task AddAsync(Warehouse warehouse, CancellationToken cancellationToken = default)

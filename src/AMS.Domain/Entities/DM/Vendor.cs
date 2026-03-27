@@ -62,11 +62,6 @@ public class Vendor : BaseLookupEntity
     public string? InvoiceType { get; set; }
 
     /// <summary>
-    /// Indicates if the vendor is active.
-    /// </summary>
-    public bool IsActive { get; set; } = true;
-
-    /// <summary>
     /// Province/State location.
     /// </summary>
     public string? Province { get; set; }

@@ -53,16 +53,6 @@ public class DepreciationSchedule : BaseEntity
     public Guid? VoucherId { get; set; }
 
     /// <summary>
-    /// Timestamp when the record was created.
-    /// </summary>
-    public DateTime? CreatedAt { get; set; }
-
-    /// <summary>
-    /// Username of the creator.
-    /// </summary>
-    public string? CreatedBy { get; set; }
-
-    /// <summary>
     /// Navigation property to the fixed asset.
     /// </summary>
     public FixedAsset? Asset { get; set; }

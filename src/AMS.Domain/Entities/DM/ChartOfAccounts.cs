@@ -29,11 +29,6 @@ public class ChartOfAccounts : BaseLookupEntity
     public bool IsDetail { get; set; } = true;
 
     /// <summary>
-    /// Indicates if the account is active and available for use.
-    /// </summary>
-    public bool IsActive { get; set; } = true;
-
-    /// <summary>
     /// Indicates if journal entries can be posted to this account.
     /// </summary>
     public bool AllowEntry { get; set; } = true;

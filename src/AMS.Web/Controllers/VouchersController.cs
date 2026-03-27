@@ -112,4 +112,63 @@ public class VouchersController : BaseController
         var result = await _voucherService.PostAsync(id);
         return FromResult(result);
     }
+
+    /// <summary>
+    /// Displays the edit voucher form.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        var voucher = await _voucherService.GetByIdAsync(id);
+        if (voucher == null)
+            return NotFound();
+
+        return View(voucher);
+    }
+
+    /// <summary>
+    /// Updates an existing voucher.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit([FromForm] VoucherDto voucherDto)
+    {
+        if (!ModelState.IsValid)
+            return View(voucherDto);
+
+        var result = await _voucherService.UpdateAsync(voucherDto.Id, voucherDto);
+
+        if (!result.IsSuccess)
+        {
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Lỗi khi cập nhật chứng từ.");
+            return View(voucherDto);
+        }
+
+        return RedirectToAction(nameof(Details), new { id = voucherDto.Id });
+    }
+
+    /// <summary>
+    /// Deletes a voucher.
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _voucherService.DeleteAsync(id);
+        if (!result.IsSuccess)
+            return Failure(result.ErrorMessage ?? "Lỗi khi xóa chứng từ.");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// Reverses a posted voucher.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Reverse(Guid id)
+    {
+        var userId = User.Identity?.Name ?? "system";
+        var result = await _voucherService.ReverseAsync(id, userId);
+        return FromResult(result);
+    }
 }

@@ -122,7 +122,7 @@ public class VendorsController : BaseController
     public async Task<IActionResult> Search(string term)
     {
         var vendors = await _vendorService.GetAllActiveAsync();
-        var filtered = vendors.Where(v => 
+        var filtered = vendors.Where(v =>
             v.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
             v.Code.Contains(term, StringComparison.OrdinalIgnoreCase) ||
             v.TaxCode.Contains(term, StringComparison.OrdinalIgnoreCase));

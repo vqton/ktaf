@@ -107,7 +107,7 @@ public class ReportsController : BaseController
     public async Task<IActionResult> ExportTrialBalance(Guid fiscalPeriodId, string format)
     {
         var data = await _trialBalanceService.GetTrialBalanceAsync(fiscalPeriodId);
-        
+
         if (data == null || !data.Any())
             return Failure("Không có dữ liệu");
 
@@ -133,7 +133,7 @@ public class ReportsController : BaseController
 
         if (format.ToLower() == "excel")
         {
-            var csv = ExportToCsv(result.Data);
+            var csv = ExportToCsv(result.Data!);
             return File(Encoding.UTF8.GetBytes(csv), "text/csv", $"BalanceSheet_{year}_{month}.csv");
         }
 
@@ -149,7 +149,7 @@ public class ReportsController : BaseController
 
         if (format.ToLower() == "excel")
         {
-            var csv = ExportToCsv(result.Data);
+            var csv = ExportToCsv(result.Data!);
             return File(Encoding.UTF8.GetBytes(csv), "text/csv", $"IncomeStatement_{year}_{month}.csv");
         }
 
@@ -165,7 +165,7 @@ public class ReportsController : BaseController
 
         if (format.ToLower() == "excel")
         {
-            var csv = ExportToCsv(result.Data);
+            var csv = ExportToCsv(result.Data!);
             return File(Encoding.UTF8.GetBytes(csv), "text/csv", $"CashFlowStatement_{year}_{month}.csv");
         }
 
@@ -176,13 +176,13 @@ public class ReportsController : BaseController
     public async Task<IActionResult> ExportLedger(Guid accountId, string fromDate, string toDate, string format = "excel")
     {
         var entries = await _ledgerService.GetByAccountAsync(accountId, CancellationToken.None);
-        
+
         if (entries == null || !entries.Any())
             return Failure("Không có dữ liệu");
 
         var sb = new StringBuilder();
         sb.AppendLine("Ngày,Số CT,Diễn giải,Nợ,Có,Số dư");
-        
+
         foreach (var item in entries)
         {
             sb.AppendLine($"{item.VoucherDate:dd/MM/yyyy},{item.VoucherNo},{item.Description},{item.DebitAmount},{item.CreditAmount},");
@@ -196,10 +196,10 @@ public class ReportsController : BaseController
     {
         var sb = new StringBuilder();
         sb.AppendLine("AccountCode,AccountName,Debit,Credit");
-        
+
         var type = data.GetType();
         var properties = type.GetProperties();
-        
+
         foreach (var prop in properties)
         {
             var value = prop.GetValue(data);
@@ -213,7 +213,7 @@ public class ReportsController : BaseController
     {
         var sb = new StringBuilder();
         sb.AppendLine("AccountCode,AccountName,OpeningDebit,OpeningCredit,DebitTurnover,CreditTurnover,ClosingDebit,ClosingCredit");
-        
+
         foreach (var item in data)
         {
             sb.AppendLine($"{item.AccountCode},{item.AccountName},{item.OpeningDebit},{item.OpeningCredit},{item.DebitTurnover},{item.CreditTurnover},{item.ClosingDebit},{item.ClosingCredit}");

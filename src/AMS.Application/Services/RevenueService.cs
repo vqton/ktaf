@@ -101,13 +101,13 @@ public class RevenueService : IRevenueService
     {
         var revenues = await _revenueRepository.GetByPeriodAsync(year, month);
         var dtos = new List<RevenueDto>();
-        
+
         foreach (var r in revenues)
         {
             var customer = await _customerRepository.GetByIdAsync(r.CustomerId);
             dtos.Add(MapToDto(r, customer?.Name ?? ""));
         }
-        
+
         return ServiceResult<List<RevenueDto>>.Success(dtos);
     }
 
@@ -116,13 +116,13 @@ public class RevenueService : IRevenueService
         var (revenues, totalCount) = await _revenueRepository.GetAllPagedAsync(page, pageSize);
         var unrecognized = revenues.Where(r => !r.IsRecognized).ToList();
         var dtos = new List<RevenueDto>();
-        
+
         foreach (var r in unrecognized)
         {
             var customer = await _customerRepository.GetByIdAsync(r.CustomerId);
             dtos.Add(MapToDto(r, customer?.Name ?? ""));
         }
-        
+
         return ServiceResult<List<RevenueDto>>.Success(dtos);
     }
 

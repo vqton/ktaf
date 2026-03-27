@@ -166,6 +166,10 @@ AMS.sln
 
 - [CODING_STANDARDS.md](CODING_STANDARDS.md) - Primary coding standards document
 - [TEST_STRATEGY.md](TEST_STRATEGY.md) - Test strategy, patterns, and conventions
+- [docs/UI-UX-GUIDE.md](docs/UI-UX-GUIDE.md) - UI/UX design guidelines, design system, component standards
+- [docs/USER_PERSONAS.md](docs/USER_PERSONAS.md) - User personas for AMS ERP
+- [docs/USER_JOURNEY.md](docs/USER_JOURNEY.md) - User journey maps
+- [docs/USE_CASES.md](docs/USE_CASES.md) - Use case definitions
 - [AMS.sln](AMS.sln) - Solution file
 - Individual project files in src/ directory for specific project configurations
 

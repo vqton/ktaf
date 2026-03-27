@@ -122,7 +122,7 @@ public class CustomersController : BaseController
     public async Task<IActionResult> Search(string term)
     {
         var customers = await _customerService.GetAllActiveAsync();
-        var filtered = customers.Where(c => 
+        var filtered = customers.Where(c =>
             c.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
             c.Code.Contains(term, StringComparison.OrdinalIgnoreCase) ||
             c.TaxCode.Contains(term, StringComparison.OrdinalIgnoreCase));

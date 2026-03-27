@@ -1,0 +1,161 @@
+@model AMS.Application.DTOs.UpdateVendorDto
+
+@{
+    ViewData["Title"] = "Sửa nhà cung cấp";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Sửa nhà cung cấp</h1>
+    <div class="page-actions">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+        <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-eye me-1"></i>Xem chi tiết
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Mã nhà cung cấp <span class="required">*</span></label>
+                <input asp-for="Code" class="form-control font-mono" required>
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tên nhà cung cấp <span class="required">*</span></label>
+                <input asp-for="Name" class="form-control" required>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Mã số thuế <span class="required">*</span></label>
+                <input asp-for="TaxCode" class="form-control font-mono" required>
+                <span asp-validation-for="TaxCode" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check form-switch mt-4">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Hoạt động</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Địa chỉ</label>
+                <input asp-for="Address" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Điện thoại</label>
+                <input asp-for="Phone" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Email</label>
+                <input asp-for="Email" type="email" class="form-control">
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Người liên hệ</label>
+                <input asp-for="ContactPerson" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tỉnh/TP</label>
+                <input asp-for="Province" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Quận/Huyện</label>
+                <input asp-for="District" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Phường/Xã</label>
+                <input asp-for="Ward" class="form-control">
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Hạn mức nợ</label>
+                <input asp-for="CreditLimit" type="number" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Hạn thanh toán (ngày)</label>
+                <input asp-for="PaymentTermDays" type="number" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">TK ngân hàng</label>
+                <input asp-for="BankAccount" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tên ngân hàng</label>
+                <input asp-for="BankName" class="form-control">
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="form-check form-switch mt-4">
+                    <input asp-for="IsVatPayer" class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Người nộp VAT</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Loại hóa đơn</label>
+                <select asp-for="InvoiceType" class="form-select">
+                    <option value="">-- Chọn --</option>
+                    <option value="VAT">Hóa đơn VAT</option>
+                    <option value="NonVAT">Hóa đơn thường</option>
+                    <option value="Export">Hóa đơn xuất khẩu</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                <i class="bi bi-trash me-1"></i>Xóa
+            </button>
+            <div class="d-flex gap-3">
+                <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Hủy</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xóa nhà cung cấp</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa nhà cung cấp này?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form asp-action="Delete" asp-controller="Vendors" method="post">
+                    <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function confirmDelete() {
+        new bootstrap.Modal('#deleteModal').show();
+    }
+</script>
+}

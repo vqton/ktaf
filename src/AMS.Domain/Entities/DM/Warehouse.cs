@@ -1,4 +1,5 @@
 using AMS.Domain.Entities;
+using AMS.Domain.Entities.Inventory;
 
 namespace AMS.Domain.Entities.DM;
 
@@ -36,4 +37,9 @@ public class Warehouse : BaseAuditEntity
     /// Indicates if the warehouse is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Navigation property for inventory balances in this warehouse.
+    /// </summary>
+    public ICollection<InventoryBalance> InventoryBalances { get; set; } = new List<InventoryBalance>();
 }

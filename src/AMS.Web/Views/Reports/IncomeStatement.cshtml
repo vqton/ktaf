@@ -1,0 +1,137 @@
+@model AMS.Application.Interfaces.IncomeStatementDto
+
+@{
+    ViewData["Title"] = "Báo cáo kết quả kinh doanh";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Báo cáo kết quả kinh doanh (Income Statement)</h1>
+    <div class="page-actions">
+        <button class="btn btn-sm btn-outline-secondary" id="btnExportExcel">
+            <i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>In
+        </button>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="acc-card mb-4">
+        <div class="acc-card-header">
+            <h5>Chọn kỳ kế toán</h5>
+        </div>
+        <div class="acc-card-body">
+            <form id="periodForm" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Năm</label>
+                    <select class="form-select" id="year">
+                        @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 3; y--)
+                        {
+                            <option value="@y" selected="@(y == Model?.Year)">@y</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tháng</label>
+                    <select class="form-select" id="month">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m" selected="@(m == Model?.Month)">Tháng @m</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Xem báo cáo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="acc-card h-100">
+                    <div class="acc-card-body text-center">
+                        <div class="text-muted small">Tổng doanh thu</div>
+                        <div class="h4 mb-0">@Model.TotalRevenue.ToString("N0")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="acc-card h-100">
+                    <div class="acc-card-body text-center">
+                        <div class="text-muted small">Tổng chi phí</div>
+                        <div class="h4 mb-0">@Model.TotalExpenses.ToString("N0")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="acc-card h-100">
+                    <div class="acc-card-body text-center">
+                        <div class="text-muted small">Lợi nhuận sau thuế</div>
+                        <div class="h4 mb-0 @(Model.NetProfitAfterTax >= 0 ? "text-success" : "text-danger")">
+                            @Model.NetProfitAfterTax.ToString("N0")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="acc-card">
+            <div class="acc-card-header">
+                <h5>Chi tiết</h5>
+            </div>
+            <div class="acc-card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã TK</th>
+                            <th>Tên tài khoản</th>
+                            <th class="text-end">Số tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in Model.Lines.OrderBy(l => l.LineOrder))
+                        {
+                            <tr>
+                                <td class="fw-semibold">@line.AccountCode</td>
+                                <td>@line.AccountName</td>
+                                <td class="text-end col-amount">@line.Amount.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-total-row">
+                            <td colspan="2" class="text-end fw-bold">Tổng cộng:</td>
+                            <td class="text-end col-amount">@Model.Lines.Sum(l => l.Amount).ToString("N0")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+$(function() {
+    $('#periodForm').on('submit', function(e) {
+        e.preventDefault();
+        const year = $('#year').val();
+        const month = $('#month').val();
+        window.location.href = `/Reports/IncomeStatement?year=${year}&month=${month}`;
+    });
+
+    $('#btnExportExcel').on('click', function() {
+        const year = $('#year').val();
+        const month = $('#month').val();
+        window.location.href = `/Reports/ExportIncomeStatement?year=${year}&month=${month}&format=excel`;
+    });
+});
+</script>
+}

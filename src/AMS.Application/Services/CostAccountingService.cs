@@ -202,7 +202,7 @@ public class CostAccountingService : ICostAccountingService
         if (!result.IsSuccess)
             return result;
 
-        result.Data.ReportType = "Variance";
+        result.Data!.ReportType = "Variance";
         return result;
     }
 

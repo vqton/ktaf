@@ -354,4 +354,76 @@ public class VoucherService : IVoucherService
             CitAdjFlag = l.CitAdjFlag
         }).ToList()
     };
+
+    /// <inheritdoc />
+    public async Task<ServiceResult<VoucherDto>> UpdateAsync(Guid id, VoucherDto voucherDto, CancellationToken cancellationToken = default)
+    {
+        var voucher = await _voucherRepository.GetByIdWithLinesAsync(id, cancellationToken);
+        if (voucher == null)
+            return ServiceResult<VoucherDto>.Failure("Không tìm thấy chứng từ.");
+
+        if (voucher.Status != VoucherStatus.Draft)
+            return ServiceResult<VoucherDto>.Failure("Chỉ có thể sửa chứng từ ở trạng thái nháp.");
+
+        var totalDebit = voucherDto.Lines.Sum(l => l.DebitAmount);
+        var totalCredit = voucherDto.Lines.Sum(l => l.CreditAmount);
+
+        if (totalDebit != totalCredit)
+            return ServiceResult<VoucherDto>.Failure($"Tổng nợ ({totalDebit:N0}) phải bằng tổng có ({totalCredit:N0}).");
+
+        try
+        {
+            voucher.Description = voucherDto.Description;
+            voucher.VoucherDate = voucherDto.VoucherDate;
+            voucher.TotalDebit = totalDebit;
+            voucher.TotalCredit = totalCredit;
+
+            voucher.Lines.Clear();
+            foreach (var line in voucherDto.Lines)
+            {
+                voucher.Lines.Add(new Domain.Entities.VoucherLine
+                {
+                    Id = Guid.NewGuid(),
+                    VoucherId = voucher.Id,
+                    AccountId = line.AccountId,
+                    DebitAmount = line.DebitAmount,
+                    CreditAmount = line.CreditAmount,
+                    Description = line.Description,
+                    CustomerId = line.CustomerId,
+                    VendorId = line.VendorId,
+                    IsExciseTaxLine = line.IsExciseTaxLine,
+                    CitAdjFlag = line.CitAdjFlag
+                });
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return ServiceResult<VoucherDto>.Success(MapToDto(voucher));
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<VoucherDto>.Failure($"Lỗi khi cập nhật: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ServiceResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var voucher = await _voucherRepository.GetByIdAsync(id, cancellationToken);
+        if (voucher == null)
+            return ServiceResult.Failure("Không tìm thấy chứng từ.");
+
+        if (voucher.Status != VoucherStatus.Draft)
+            return ServiceResult.Failure("Chỉ có thể xóa chứng từ ở trạng thái nháp.");
+
+        try
+        {
+            voucher.IsDeleted = true;
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return ServiceResult.Success();
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult.Failure($"Lỗi khi xóa: {ex.Message}");
+        }
+    }
 }

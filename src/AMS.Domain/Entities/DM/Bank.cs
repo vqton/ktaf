@@ -8,16 +8,6 @@ namespace AMS.Domain.Entities.DM;
 public class Bank : BaseLookupEntity
 {
     /// <summary>
-    /// Bank code (Mã ngân hàng).
-    /// </summary>
-    public string Code { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Bank name (Tên ngân hàng).
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
     /// Bank SWIFT code (Mã SWIFT).
     /// </summary>
     public string? SwiftCode { get; set; }
@@ -41,11 +31,6 @@ public class Bank : BaseLookupEntity
     /// Phone number (Điện thoại).
     /// </summary>
     public string? Phone { get; set; }
-
-    /// <summary>
-    /// Is this bank active for transactions (Còn hoạt động).
-    /// </summary>
-    public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Collection of bank accounts for this bank.

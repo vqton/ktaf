@@ -1,6 +1,6 @@
 # AMS Development Status
 
-**Last Updated:** 2026-03-27 10:30  
+**Last Updated:** 2026-03-27 14:30  
 **Project:** Accounting Management System (AMS)  
 **Framework:** .NET 10 + Bootstrap 5.3 + jQuery  
 **Database:** PostgreSQL 16
@@ -14,10 +14,11 @@
 | AMS.Domain | ✅ Pass | 0 |
 | AMS.Application | ✅ Pass | 0 |
 | AMS.Infrastructure | ✅ Pass | 0 |
-| AMS.Web | ⚠️ Warning | 1 (Newtonsoft.Json vulnerability) |
+| AMS.Web | ✅ Pass | 0 |
 | AMS.Domain.Tests | ✅ Pass | 0 |
 
-**Last Build:** ✅ PASSED - 2026-03-26 14:45 (16 warnings, 0 errors)
+**Last Build:** ✅ PASSED - 2026-03-27 14:30 (4 warnings, 0 errors)
+- Warnings: Package version constraints (ClosedXML requires DocumentFormat.OpenXml 2.x, resolved 3.x)
 
 ---
 
@@ -293,6 +294,43 @@ All exceptions in `DomainExceptions.cs`: DomainException, BusinessRuleException,
 
 ---
 
+## Priority 3 Implementation Summary (2026-03-27)
+
+### Files Created
+1. `Web/Filters/RequirePermissionAttribute.cs` - Permission-based authorization filter
+2. `Web/Controllers/AuthorizationController.cs` - RBAC management API
+3. `Web/Controllers/ExportController.cs` - Data export API (Excel/PDF/CSV)
+4. `Web/Controllers/DataTablesController.cs` - DataTables server-side processing API
+5. `Web/Hubs/NotificationHub.cs` - SignalR real-time notification hub
+6. `Web/Services/NotificationService.cs` - SignalR notification service
+7. `Web/Services/ExportModels.cs` - Export request/response models
+8. `Web/Services/ExportService.cs` - Excel/PDF/CSV export implementation
+9. `Web/Common/DataTablesModels.cs` - DataTables request/response models
+
+### Files Modified
+1. `Web/Program.cs` - Added:
+   - Windows Negotiate authentication
+   - Authorization policies (Admin, Accountant, Viewer)
+   - Hangfire scheduler with PostgreSQL storage
+   - SignalR configuration with custom UserIdProvider
+   - Export service registration
+   - Sample background job
+2. `Web/AMS.Web.csproj` - Added packages:
+   - Hangfire.AspNetCore, Hangfire.Core, Hangfire.PostgreSql
+   - ClosedXML, QuestPDF, DocumentFormat.OpenXml
+   - Serilog.AspNetCore, Serilog.Sinks.Console, Serilog.Sinks.File
+3. `Infrastructure/AMS.Infrastructure.csproj` - Added packages:
+   - Hangfire.Core, Hangfire.PostgreSql
+   - ClosedXML, QuestPDF
+   - Serilog packages
+
+### Configuration Changes
+- Authentication: Windows Negotiate for AD integration
+- Authorization: Role-based policies (RequireAdminRole, RequireAccountantRole, RequireViewerRole)
+- Hangfire: Dashboard at `/hangfire` with PostgreSQL persistence
+- SignalR: Hub endpoint at `/hubs/notifications`
+- Logging: Serilog with Console and File sinks
+
 ## Recent Fixes (2026-03-25)
 
 1. Fixed `VoucherStatus` namespace ambiguity in IVoucherRepository.cs
@@ -556,10 +594,11 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
   - ITaxService (interface, all methods)
   - TaxDto (all DTOs and properties)
 
-## Test Infrastructure (2026-03-26)
+## Test Infrastructure (2026-03-27)
 
 ### Test Projects Created
-- `tests/AMS.Domain.Tests/AMS.Domain.Tests.csproj` - Unit test project for Domain and Application layers
+- `tests/AMS.Domain.Tests/AMS.Domain.Tests.csproj` - Unit test project for Domain layer
+- `tests/AMS.Application.Tests/AMS.Application.Tests.csproj` - Unit test project for Application layer
 
 ### Test Frameworks & Packages
 - xUnit 2.6.2 - Test framework
@@ -579,10 +618,11 @@ All domain entities, enums, exceptions, interfaces, and Application layer have X
 | Test Class | Tests | Coverage |
 |------------|-------|----------|
 | ChartOfAccountsServiceTests | 25 | CRUD operations, validation, hierarchy |
+| AuthorizationServiceTests | 10 | CRUD operations, validation, edge cases |
 
 ### Test Results
 ```
-Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
+Passed! - Failed: 0, Passed: 35, Skipped: 0, Total: 35, Duration: 450 ms
 ```
 
 ### Test Naming Convention (per TEST_STRATEGY.md)
@@ -634,12 +674,13 @@ Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
 | Controller | Index View | Status |
 |------------|------------|--------|
 | Vouchers | ✅ | Complete with filters, workflow buttons |
-| ChartOfAccounts | ✅ | With account type filter |
-| Customers | ✅ | With status filter |
-| Vendors | ✅ | With status filter |
-| Products | ✅ | With type filter |
-| Home/Dashboard | ✅ | KPIs, charts, pending vouchers, recent transactions |
+| ChartOfAccounts | ✅ | With account type filter. Details, Create, Edit views added. |
+| Customers | ✅ | With status filter. Details, Create, Edit views added. |
+| Vendors | ✅ | With status filter. Details, Create, Edit views added. |
+| Products | ✅ | With type filter. Details, Create, Edit views added. |
+| Home/Dashboard | ✅ | Enhanced with workflow integration, drill-down capabilities, accessibility features, real-time data loading, and visual workflow indicators |
 | Tax | 4 views | GTGT, TNDN, TNCN, Index |
+| Reports | ✅ | TrialBalance, BalanceSheet, IncomeStatement, CashFlowStatement views added. |
 
 ### CDN Libraries Added
 - Bootstrap 5.3.3
@@ -657,16 +698,122 @@ Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25, Duration: 318 ms
 - [x] FiscalPeriodsController - Period management
 - [x] BankAccountsController - Bank/Cash management
 - [x] WarehousesController - Inventory locations
+- [x] DashboardController - API endpoints for dashboard widgets (KPIs, charts, pending vouchers, recent transactions)
 
 ### Priority 2 - Views Needed
-- Details views for all entities
-- Create views for ChartOfAccounts, Customers, Vendors, Products
-- Edit views for all entities
-- Reports views (TrialBalance, BalanceSheet, IncomeStatement, CashFlow)
+- Details views for all entities ✅ (ChartOfAccounts, Customers, Vendors, Products)
+- Create views for ChartOfAccounts, Customers, Vendors, Products ✅
+- Edit views for all entities ✅ (ChartOfAccounts, Customers, Vendors, Products)
+- Reports views (TrialBalance, BalanceSheet, IncomeStatement, CashFlow) ✅
 
-### Priority 3 - Features
-- Authorization (RBAC with AD groups)
-- Hangfire scheduler setup
-- SignalR for real-time notifications
-- Export functionality (Excel/PDF)
-- API endpoints for DataTables
+### Priority 3 - Features (2026-03-27)
+
+#### 1. Authorization (RBAC with AD groups) - Enhanced
+| Component | Status | Notes |
+|-----------|--------|-------|
+| RequirePermissionAttribute | ✅ Done | Web/Filters/RequirePermissionAttribute.cs - Custom permission-based auth |
+| AuthorizationController | ✅ Done | Web/Controllers/AuthorizationController.cs - User/Role/ADGroup management API |
+| Authentication Config | ✅ Done | Windows Negotiate authentication in Program.cs |
+| Authorization Policies | ✅ Done | RequireAdminRole, RequireAccountantRole, RequireViewerRole |
+
+**API Endpoints:**
+- `GET /api/authorization/me` - Get current user
+- `GET /api/authorization/users/{userId}/roles` - Get user roles
+- `GET /api/authorization/users/{userId}/permissions` - Get user permissions
+- `POST /api/authorization/users` - Create user
+- `POST /api/authorization/users/{userId}/roles` - Assign role
+- `GET /api/authorization/users/{userId}/has-permission` - Check permission
+- `GET /api/authorization/ad-groups` - Get mapped AD groups
+- `POST /api/authorization/ad-groups/{adGroupId}/roles` - Map AD group to role
+- `POST /api/authorization/sync-ad-groups` - Sync AD groups for user
+
+#### 2. Hangfire Scheduler Setup
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Hangfire Configuration | ✅ Done | PostgreSQL storage configured in Program.cs |
+| Hangfire Dashboard | ✅ Done | Available at `/hangfire` with authentication |
+| DashboardAuthorizationFilter | ✅ Done | Custom auth filter for Hangfire dashboard |
+| SampleBackgroundJob | ✅ Done | Demo job with notification integration |
+| Recurring Jobs Registration | ✅ Done | Sample daily job configured |
+
+**Features:**
+- Dashboard with real-time job monitoring
+- PostgreSQL persistence for job storage
+- Authorization-protected dashboard access
+- Support for fire-and-forget, delayed, recurring, and continuous jobs
+
+#### 3. SignalR for Real-time Notifications
+| Component | Status | Notes |
+|-----------|--------|-------|
+| NotificationHub | ✅ Done | Web/Hubs/NotificationHub.cs - SignalR hub |
+| INotificationService | ✅ Done | Web/Services/NotificationService.cs - Service interface |
+| SignalRNotificationService | ✅ Done | Implementation with SendToAll/User/Group |
+| NameUserIdProvider | ✅ Done | Custom user ID provider for SignalR |
+| SignalR Configuration | ✅ Done | Hub endpoint at `/hubs/notifications` |
+
+**Hub Methods:**
+- `JoinGroup(groupName)` - Join notification group
+- `LeaveGroup(groupName)` - Leave notification group
+- `SendMessageToAll(message)` - Broadcast message
+- `SendMessageToUser(userId, message)` - Send to specific user
+- `SendMessageToGroup(groupName, message)` - Send to group
+
+**Notification Types:**
+- Voucher approval notifications
+- System job completion notifications
+- Custom group/user broadcasts
+
+#### 4. Export Functionality (Excel/PDF/CSV)
+| Component | Status | Notes |
+|-----------|--------|-------|
+| IExportService | ✅ Done | Web/Services/ExportModels.cs - Interface and models |
+| ExportService | ✅ Done | Web/Services/ExportService.cs - Implementation |
+| ExportController | ✅ Done | Web/Controllers/ExportController.cs - API controller |
+| Excel Export | ✅ Done | Using ClosedXML library |
+| PDF Export | ✅ Done | Using QuestPDF library |
+| CSV Export | ✅ Done | Native implementation |
+
+**API Endpoints:**
+- `POST /api/export` - Export with auto-detect format
+- `POST /api/export/excel` - Export to Excel (.xlsx)
+- `POST /api/export/pdf` - Export to PDF
+- `POST /api/export/csv` - Export to CSV
+
+**Features:**
+- Dynamic column configuration
+- Currency and date formatting
+- Professional PDF layouts with headers/footers
+- CSV with proper escaping
+
+#### 5. API Endpoints for DataTables
+| Component | Status | Notes |
+|-----------|--------|-------|
+| DataTablesRequest | ✅ Done | Web/Common/DataTablesModels.cs - Request model |
+| DataTablesResponse<T> | ✅ Done | Response model with draw, recordsTotal, recordsFiltered |
+| DataTablesHelper | ✅ Done | Helper class for server-side processing |
+| DataTablesController | ✅ Done | Web/Controllers/DataTablesController.cs - API endpoints |
+
+**API Endpoints:**
+- `POST /api/datatables/vouchers` - Vouchers for DataTables
+- `POST /api/datatables/chart-of-accounts` - Chart of accounts for DataTables
+- `POST /api/datatables/customers` - Customers for DataTables
+- `POST /api/datatables/vendors` - Vendors for DataTables
+
+**Features:**
+- Server-side pagination
+- Search/filter support
+- Column ordering
+- Draw counter for async request matching
+
+### Packages Added
+| Package | Version | Purpose |
+|---------|---------|---------|
+| Hangfire.AspNetCore | 1.8.14 | Job scheduling framework |
+| Hangfire.Core | 1.8.14 | Core Hangfire functionality |
+| Hangfire.PostgreSql | 1.21.1 | PostgreSQL storage for Hangfire |
+| ClosedXML | 0.102.3 | Excel file generation |
+| QuestPDF | 2024.3.0 | PDF generation |
+| DocumentFormat.OpenXml | 3.2.0 | Open XML support (ClosedXML dependency) |
+| Serilog.AspNetCore | 8.0.3 | Structured logging |
+| Serilog.Sinks.Console | 6.0.0 | Console log sink |
+| Serilog.Sinks.File | 6.0.0 | File log sink |

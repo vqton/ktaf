@@ -38,8 +38,4 @@ public class OutboxMessage : BaseEntity
     /// </summary>
     public string? LastError { get; set; }
 
-    /// <summary>
-    /// Timestamp when the message was created.
-    /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

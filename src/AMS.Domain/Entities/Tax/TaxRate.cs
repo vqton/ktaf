@@ -48,13 +48,4 @@ public class TaxRate : BaseEntity
     /// </summary>
     public bool IsActive { get; set; } = true;
 
-    /// <summary>
-    /// Timestamp when the record was created.
-    /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// Username of the creator.
-    /// </summary>
-    public string CreatedBy { get; set; } = string.Empty;
 }

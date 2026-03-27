@@ -1,0 +1,182 @@
+@model AMS.Application.DTOs.ChartOfAccountsDto
+
+@{
+    ViewData["Title"] = "Chi tiết tài khoản";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Chi tiết tài khoản</h1>
+    <div class="page-actions">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+            <i class="bi bi-pencil me-1"></i>Sửa
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="acc-card mb-4">
+                <div class="acc-card-header">
+                    <h5>Thông tin tài khoản</h5>
+                </div>
+                <div class="acc-card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Mã tài khoản</dt>
+                        <dd class="col-sm-8 font-mono fw-semibold">@Model.Code</dd>
+                        
+                        <dt class="col-sm-4">Tên tài khoản</dt>
+                        <dd class="col-sm-8">@Model.Name</dd>
+                        
+                        <dt class="col-sm-4">Số tài khoản</dt>
+                        <dd class="col-sm-8">@Model.AccountNumber</dd>
+                        
+                        <dt class="col-sm-4">Loại tài khoản</dt>
+                        <dd class="col-sm-8">@Model.AccountType</dd>
+                        
+                        <dt class="col-sm-4">TK cha</dt>
+                        <dd class="col-sm-8">@(Model.ParentCode ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">TK chi tiết</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsDetail)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-4">Cho phép nhập</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.AllowEntry)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Ngừng</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="acc-card mb-4">
+                <div class="acc-card-header">
+                    <h5>Thông tin bổ sung</h5>
+                </div>
+                <div class="acc-card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Phân loại thuế</dt>
+                        <dd class="col-sm-8">@(Model.TaxCategory ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Tài khoản ngân hàng</dt>
+                        <dd class="col-sm-8">@(Model.BankAccount ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Tên ngân hàng</dt>
+                        <dd class="col-sm-8">@(Model.BankName ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Số dư đầu kỳ</dt>
+                        <dd class="col-sm-8 font-mono">@(Model.OpeningBalance ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Mã ngoại tệ</dt>
+                        <dd class="col-sm-8">@(Model.CurrencyCode ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">TK ngân hàng</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsBankAccount)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-4">TK thuế</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsTaxAccount)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-4">TK VAT</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsVatAccount)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-4">Mã mức VAT</dt>
+                        <dd class="col-sm-8">@(Model.VatRateCode ?? "—")</dd>
+                        
+                        <dt class="col-sm-4">Chia sẻ doanh thu</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsRevenueSharing)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                                <span class="ms-2">@Model.RevenueSharingPercentage%</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-dash"></i>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-4">TK đối ứng</dt>
+                        <dd class="col-sm-8">@(Model.ReconciliationAccount ?? "—")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="acc-card mb-4">
+        <div class="acc-card-header">
+            <h5>Thông tin hệ thống</h5>
+        </div>
+        <div class="acc-card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-2">Ngày tạo</dt>
+                <dd class="col-sm-4">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                <dt class="col-sm-2">Người tạo</dt>
+                <dd class="col-sm-4">@(Model.CreatedBy ?? "—")</dd>
+                <dt class="col-sm-2">Ngày sửa</dt>
+                <dd class="col-sm-4">@(Model.ModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "—")</dd>
+                <dt class="col-sm-2">Người sửa</dt>
+                <dd class="col-sm-4">@(Model.ModifiedBy ?? "—")</dd>
+            </dl>
+        </div>
+    </div>
+</div>

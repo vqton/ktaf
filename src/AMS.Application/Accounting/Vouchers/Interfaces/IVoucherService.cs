@@ -85,4 +85,21 @@ public interface IVoucherService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Service result with the updated voucher DTO.</returns>
     Task<ServiceResult<VoucherDto>> ReverseAsync(Guid id, string reversedById, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing voucher.
+    /// </summary>
+    /// <param name="id">The voucher ID.</param>
+    /// <param name="voucher">The voucher data to update.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Service result with the updated voucher DTO.</returns>
+    Task<ServiceResult<VoucherDto>> UpdateAsync(Guid id, VoucherDto voucher, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a voucher.
+    /// </summary>
+    /// <param name="id">The voucher ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Service result.</returns>
+    Task<ServiceResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

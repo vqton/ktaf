@@ -17,6 +17,7 @@ public class BalanceSheet : BaseAuditEntity
 
 public class BalanceSheetLine
 {
+    public Guid Id { get; set; }
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
     public int LineOrder { get; set; }
@@ -43,6 +44,7 @@ public class IncomeStatement : BaseAuditEntity
 
 public class IncomeStatementLine
 {
+    public Guid Id { get; set; }
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
     public int LineOrder { get; set; }
@@ -66,6 +68,7 @@ public class CashFlowStatement : BaseAuditEntity
 
 public class CashFlowLine
 {
+    public Guid Id { get; set; }
     public string AccountCode { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
     public int LineOrder { get; set; }

@@ -9,12 +9,12 @@ public interface ICostAccountingService
     Task<ServiceResult<CostCenterDto>> GetCostCenterByIdAsync(Guid id);
     Task<ServiceResult<List<CostCenterDto>>> GetAllCostCentersAsync(int page, int pageSize);
     Task<ServiceResult<List<CostCenterDto>>> GetCostCentersByDepartmentAsync(Guid departmentId);
-    
+
     Task<ServiceResult<CostAllocationDto>> CreateCostAllocationAsync(CreateCostAllocationDto dto);
     Task<ServiceResult<CostAllocationDto>> GetCostAllocationByIdAsync(Guid id);
     Task<ServiceResult<List<CostAllocationDto>>> GetCostAllocationsByPeriodAsync(int year, int month);
     Task<ServiceResult<CostAllocationDto>> ApproveCostAllocationAsync(Guid id);
-    
+
     Task<ServiceResult<CostReportDto>> GetCostReportAsync(int year, int month, Guid? costCenterId = null);
     Task<ServiceResult<CostReportDto>> GetCostVarianceReportAsync(int year, int month, Guid? costCenterId = null);
     Task<ServiceResult<CostReportDto>> GenerateCostReportAsync(int year, int month, Guid? costCenterId = null);

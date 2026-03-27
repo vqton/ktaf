@@ -111,7 +111,7 @@ public class ProductsController : BaseController
     public async Task<IActionResult> Search(string term)
     {
         var products = await _inventoryService.GetActiveProductsAsync();
-        var filtered = products.Where(p => 
+        var filtered = products.Where(p =>
             p.ProductName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
             p.ProductCode.Contains(term, StringComparison.OrdinalIgnoreCase));
         return Json(filtered);

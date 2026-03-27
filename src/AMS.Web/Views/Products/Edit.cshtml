@@ -1,0 +1,145 @@
+@model AMS.Application.DTOs.CreateProductDto
+
+@{
+    ViewData["Title"] = "Sửa sản phẩm";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Sửa sản phẩm</h1>
+    <div class="page-actions">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+        <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-eye me-1"></i>Xem chi tiết
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Mã sản phẩm <span class="required">*</span></label>
+                <input asp-for="ProductCode" class="form-control font-mono" required>
+                <span asp-validation-for="ProductCode" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tên sản phẩm <span class="required">*</span></label>
+                <input asp-for="ProductName" class="form-control" required>
+                <span asp-validation-for="ProductName" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tên tiếng Anh</label>
+                <input asp-for="ProductNameEn" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Nhóm sản phẩm</label>
+                <input asp-for="ProductGroupId" class="form-control">
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Loại <span class="required">*</span></label>
+                <select asp-for="Type" class="form-select" required>
+                    <option value="">-- Chọn loại --</option>
+                    <option value="Goods">Hàng hóa</option>
+                    <option value="Service">Dịch vụ</option>
+                    <option value="RawMaterial">Nguyên vật liệu</option>
+                    <option value="FinishedProduct">Thành phẩm</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Đơn vị tính</label>
+                <input asp-for="UnitOfMeasure" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Đơn giá</label>
+                <input asp-for="UnitPrice" type="number" step="0.01" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ngoại tệ</label>
+                <input asp-for="CurrencyCode" class="form-control">
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Thuế VAT (%)</label>
+                <input asp-for="VatRate" type="number" step="0.01" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <div class="form-check form-switch mt-4">
+                    <input asp-for="IsExciseTaxItem" class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Thuế tiêu thụ đặc biệt</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Mã thuế</label>
+                <input asp-for="TaxCode" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Kho mặc định</label>
+                <input asp-for="WarehouseId" class="form-control">
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Qui cách</label>
+                <input asp-for="Specification" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Xuất xứ</label>
+                <input asp-for="Origin" class="form-control">
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                <i class="bi bi-trash me-1"></i>Xóa
+            </button>
+            <div class="d-flex gap-3">
+                <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Hủy</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xóa sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form asp-action="Delete" asp-controller="Products" method="post">
+                    <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function confirmDelete() {
+        new bootstrap.Modal('#deleteModal').show();
+    }
+</script>
+}

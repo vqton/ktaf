@@ -43,14 +43,14 @@ public class TaxController : BaseController
     {
         var inputVat = await _taxService.GetVATInputRegisterAsync(fiscalPeriodId);
         var outputVat = await _taxService.GetVATOutputRegisterAsync(fiscalPeriodId);
-        
+
         var model = new GTGTViewModel
         {
             FiscalPeriodId = fiscalPeriodId,
             VATInputs = inputVat.ToList(),
             VATOutputs = outputVat.ToList()
         };
-        
+
         return View(model);
     }
 

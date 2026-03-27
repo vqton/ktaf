@@ -11,7 +11,7 @@ public interface IRevenueService
     Task<ServiceResult<List<RevenueDto>>> GetRevenuesByPeriodAsync(int year, int month);
     Task<ServiceResult<List<RevenueDto>>> GetUnrecognizedRevenuesAsync(int page, int pageSize);
     Task<ServiceResult<RevenueDto>> RecognizeRevenueAsync(Guid id, int year, int month);
-    
+
     Task<ServiceResult<RevenueReportDto>> GetRevenueSummaryAsync(int year, int month);
     Task<ServiceResult<RevenueReportDto>> GenerateRevenueReportAsync(int year, int month, Guid? customerId = null);
 }

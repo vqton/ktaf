@@ -100,7 +100,7 @@ public class TrialBalanceService : ITrialBalanceService
             result.Add(new LedgerSummaryDto
             {
                 AccountId = accountId,
-                AccountCode = prev?.AccountCode ?? currentPeriodMovements.GetValueOrDefault(accountId).ToString() ?? "",
+                AccountCode = prev?.AccountCode ?? currentPeriodMovements.GetValueOrDefault(accountId)?.ToString() ?? "",
                 AccountName = accounts.GetValueOrDefault(accountId, ""),
                 OpeningDebit = openingDebit,
                 OpeningCredit = openingCredit,

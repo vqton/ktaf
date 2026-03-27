@@ -17,8 +17,10 @@ public interface IProductRepository
 public interface IWarehouseRepository
 {
     Task<Warehouse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Warehouse?> GetByCodeAsync(string code, CancellationToken cancellationToken = default);
     Task<IEnumerable<Warehouse>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<Warehouse>> GetActiveAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Warehouse>> GetAllActiveAsync(CancellationToken cancellationToken = default);
+    Task<(IEnumerable<Warehouse> Warehouses, int TotalCount)> GetAllPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
     Task AddAsync(Warehouse warehouse, CancellationToken cancellationToken = default);
     Task UpdateAsync(Warehouse warehouse, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);

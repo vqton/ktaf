@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS acc.vouchers (
     created_by VARCHAR(100) NOT NULL,
     modified_at TIMESTAMP,
     modified_by VARCHAR(100),
+    row_version BYTEA,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 )
 """);

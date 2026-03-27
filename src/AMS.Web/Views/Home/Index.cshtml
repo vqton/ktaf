@@ -5,54 +5,19 @@
 <div class="page-header">
     <h1 class="page-title">Dashboard</h1>
     <div class="page-actions">
-        <input type="text" class="form-control form-control-sm date-range-picker" 
-               style="width:220px" placeholder="Chọn kỳ...">
-        <button class="btn btn-sm btn-outline-secondary">
+        <label for="dateRangePicker" class="visually-hidden">Chọn kỳ báo cáo</label>
+        <input type="text" id="dateRangePicker" class="form-control form-control-sm date-range-picker" 
+               style="width:220px" placeholder="Chọn kỳ..." aria-label="Chọn kỳ báo cáo">
+        <button class="btn btn-sm btn-outline-secondary" id="refreshBtn" aria-label="Làm mới dữ liệu">
             <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
         </button>
     </div>
 </div>
 
 <div class="page-body">
-
     <!-- KPI Row -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <i class="bi bi-arrow-up-circle kpi-icon text-success" style="color:#DCFCE7!important"></i>
-                <div class="kpi-label">Doanh thu tháng này</div>
-                <div class="kpi-value" id="kpiRevenue">—</div>
-                <div class="kpi-change up" id="kpiRevenueChange">
-                    <i class="bi bi-arrow-up"></i> <span></span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-card kpi-danger">
-                <i class="bi bi-arrow-down-circle kpi-icon" style="color:#FEE2E2!important"></i>
-                <div class="kpi-label">Chi phí tháng này</div>
-                <div class="kpi-value" id="kpiExpenses">—</div>
-                <div class="kpi-change down" id="kpiExpensesChange">
-                    <i class="bi bi-arrow-down"></i> <span></span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-card kpi-success">
-                <i class="bi bi-graph-up-arrow kpi-icon" style="color:#DCFCE7!important"></i>
-                <div class="kpi-label">Lợi nhuận ròng</div>
-                <div class="kpi-value" id="kpiProfit">—</div>
-                <div class="kpi-change" id="kpiProfitChange"></div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <i class="bi bi-wallet2 kpi-icon"></i>
-                <div class="kpi-label">Số dư tiền mặt</div>
-                <div class="kpi-value" id="kpiCash">—</div>
-                <div class="kpi-change" id="kpiCashChange"></div>
-            </div>
-        </div>
+    <div class="row g-4 mb-4" id="kpiRow">
+        <!-- KPI cards will be populated by JavaScript -->
     </div>
 
     <!-- Charts Row -->
@@ -61,14 +26,28 @@
             <div class="acc-card">
                 <div class="acc-card-header">
                     <h5>Doanh thu vs Chi phí</h5>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary active" data-period="month">Tháng</button>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Chọn periodo">
+                        <button class="btn btn-outline-secondary active" data-period="month" aria-pressed="true">Tháng</button>
                         <button class="btn btn-outline-secondary" data-period="quarter">Quý</button>
                         <button class="btn btn-outline-secondary" data-period="year">Năm</button>
                     </div>
                 </div>
                 <div class="acc-card-body">
-                    <canvas id="revenueChart" height="280"></canvas>
+                    <div class="chart-container" style="position: relative; height:280px;">
+                        <canvas id="revenueChart"></canvas>
+                        <!-- Fallback table for accessibility -->
+                        <table class="visually-hidden" id="revenueChartFallback">
+                            <caption>Biểu đồ doanh thu vs chi phí</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tháng</th>
+                                    <th scope="col">Doanh thu</th>
+                                    <th scope="col">Chi phí</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,7 +55,20 @@
             <div class="acc-card">
                 <div class="acc-card-header"><h5>Phân loại chi phí</h5></div>
                 <div class="acc-card-body">
-                    <canvas id="expenseChart" height="280"></canvas>
+                    <div class="chart-container" style="position: relative; height:280px;">
+                        <canvas id="expenseChart"></canvas>
+                        <!-- Fallback table for accessibility -->
+                        <table class="visually-hidden" id="expenseChartFallback">
+                            <caption>Biểu đồ phân loại chi phí</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Danh mục</th>
+                                    <th scope="col">Số tiền (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,123 +78,425 @@
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="acc-card">
-                <div class="acc-card-header">
+                <div class="acc-card-header d-flex justify-content-between align-items-center">
                     <h5>Chứng từ chờ duyệt</h5>
-                    <a asp-controller="Vouchers" asp-action="Index" class="btn btn-sm btn-ghost">Xem tất cả</a>
+                    <a asp-controller="Vouchers" asp-action="Index" class="btn btn-sm btn-ghost" aria-label="Xem tất cả chứng từ chờ duyệt">Xem tất</a>
                 </div>
                 <div class="acc-card-body p-0">
-                    <table class="table table-hover mb-0" id="pendingTable">
-                        <thead>
-                            <tr>
-                                <th>Số CT</th>
-                                <th>Ngày</th>
-                                <th>Mô tả</th>
-                                <th class="text-end">Số tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pendingBody">
-                            <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="pendingTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Số CT</th>
+                                    <th scope="col">Ngày</th>
+                                    <th scope="col">Mô tả</th>
+                                    <th scope="col" class="text-end">Số tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingBody">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="pendingEmpty" class="text-center py-3 d-none">
+                        <p class="text-muted">Không có chứng từ chờ duyệt</p>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="acc-card">
-                <div class="acc-card-header">
+                <div class="acc-card-header d-flex justify-content-between align-items-center">
                     <h5>Giao dịch gần đây</h5>
-                    <a asp-controller="Vouchers" asp-action="Index" class="btn btn-sm btn-ghost">Xem tất cả</a>
+                    <a asp-controller="Vouchers" asp-action="Index" class="btn btn-sm btn-ghost" aria-label="Xem tất cả giao dịch gần đây">Xem tất</a>
                 </div>
                 <div class="acc-card-body p-0">
-                    <table class="table table-hover mb-0" id="recentTxTable">
-                        <thead>
-                            <tr>
-                                <th>Ngày</th>
-                                <th>Mô tả</th>
-                                <th class="text-end">Nợ</th>
-                                <th class="text-end">Có</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentTxBody">
-                            <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="recentTxTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ngày</th>
+                                    <th scope="col">Mô tả</th>
+                                    <th scope="col" class="text-end">Nợ</th>
+                                    <th scope="col" class="text-end">Có</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTxBody">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="recentTxEmpty" class="text-center py-3 d-none">
+                        <p class="text-muted">Không có giao dịch</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 
 @section Scripts {
 <script>
 $(function() {
-    // Load pending vouchers
-    $.get('/api/vouchers/pending', function(data) {
-        if (data && data.length > 0) {
-            $('#pendingBody').html(data.map(v => `
-                <tr>
-                    <td><a href="/Vouchers/Details/${v.id}">${v.voucherNo}</a></td>
-                    <td>${ACC.format.date(v.voucherDate)}</td>
-                    <td>${v.description || '—'}</td>
-                    <td class="text-end">${ACC.format.currency(v.totalDebit)}</td>
-                </tr>
-            `).join(''));
-        } else {
-            $('#pendingBody').html('<tr><td colspan="4" class="text-center text-muted">Không có chứng từ chờ duyệt</td></tr>');
+    // State
+    let currentPeriod = 'month';
+    let isLoading = false;
+
+    // Initialize
+    loadKPIs();
+    loadCharts();
+    loadPendingVouchers();
+    loadRecentTransactions();
+
+    // Event handlers
+    $('#refreshBtn').on('click', function() {
+        if (!isLoading) {
+            refreshAll();
         }
     });
 
-    // Load recent transactions
-    $.get('/api/vouchers/recent', function(data) {
-        if (data && data.length > 0) {
-            $('#recentTxBody').html(data.map(v => `
-                <tr>
-                    <td>${ACC.format.date(v.voucherDate)}</td>
-                    <td>${v.description || '—'}</td>
-                    <td class="text-end">${ACC.format.currency(v.totalDebit)}</td>
-                    <td class="text-end">${ACC.format.currency(v.totalCredit)}</td>
-                </tr>
-            `).join(''));
-        } else {
-            $('#recentTxBody').html('<tr><td colspan="4" class="text-center text-muted">Không có giao dịch</td></tr>');
+    $('.btn-group .btn').on('click', function() {
+        const $btn = $(this);
+        if (!$btn.hasClass('active')) {
+            currentPeriod = $btn.data('period');
+            $btn.addClass('active').siblings().removeClass('active');
+            loadCharts();
         }
     });
 
-    // Revenue vs Expense Chart
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    const revenueChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
-            datasets: [
-                { label: 'Doanh thu', data: [120, 150, 180, 140, 160, 200], backgroundColor: 'rgba(29,111,164,0.7)', borderRadius: 4 },
-                { label: 'Chi phí',   data: [80, 90, 100, 85, 95, 110], backgroundColor: 'rgba(239,68,68,0.5)',  borderRadius: 4 }
-            ]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'top' } },
-            scales: {
-                y: { ticks: { callback: v => ACC.format.currency(v) } }
+    // Make KPI cards clickable
+    $(document).on('click', '.kpi-card', function() {
+        const kpiType = $(this).data('kpi');
+        navigateToKpiDetail(kpiType);
+    });
+
+    // Functions
+    function loadKPIs() {
+        isLoading = true;
+        $('#kpiRow').html('<div class="col-12"><div class="alert alert-info">Đang tải chỉ số...</div></div>');
+        
+        $.get('/api/kpis', function(data) {
+            if (data && data.success) {
+                const kpis = data.data;
+                $('#kpiRow').html(`
+                    <div class="col-md-3">
+                        <div class="kpi-card" data-kpi="revenue" style="cursor:pointer;">
+                            <i class="bi bi-arrow-up-circle kpi-icon"></i>
+                            <div class="kpi-label">Doanh thu tháng này</div>
+                            <div class="kpi-value" id="kpiRevenue">${ACC.format.currency(kpis.revenue)}</div>
+                            <div class="kpi-change up" id="kpiRevenueChange">
+                                <i class="bi bi-arrow-up"></i> <span>${kpis.revenueChange >= 0 ? '+' : ''}${kpis.revenueChange}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card kpi-danger" data-kpi="expenses" style="cursor:pointer;">
+                            <i class="bi bi-arrow-down-circle kpi-icon"></i>
+                            <div class="kpi-label">Chi phí tháng này</div>
+                            <div class="kpi-value" id="kpiExpenses">${ACC.format.currency(kpis.expenses)}</div>
+                            <div class="kpi-change down" id="kpiExpensesChange">
+                                <i class="bi bi-arrow-down"></i> <span>${kpis.expensesChange >= 0 ? '+' : ''}${kpis.expensesChange}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card kpi-success" data-kpi="profit" style="cursor:pointer;">
+                            <i class="bi bi-graph-up-arrow kpi-icon"></i>
+                            <div class="kpi-label">Lợi nhuận ròng</div>
+                            <div class="kpi-value" id="kpiProfit">${ACC.format.currency(kpis.profit)}</div>
+                            <div class="kpi-change" id="kpiProfitChange">
+                                ${kpis.profitChange >= 0 ? 
+                                    `<i class="bi bi-arrow-up"></i> <span>+${kpis.profitChange}%</span>` : 
+                                    `<i class="bi bi-arrow-down"></i> <span>${kpis.profitChange}%</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card" data-kpi="cash" style="cursor:pointer;">
+                            <i class="bi bi-wallet2 kpi-icon"></i>
+                            <div class="kpi-label">Số dư tiền mặt</div>
+                            <div class="kpi-value" id="kpiCash">${ACC.format.currency(kpis.cash)}</div>
+                            <div class="kpi-change" id="kpiCashChange">
+                                ${kpis.cashChange >= 0 ? 
+                                    `<i class="bi bi-arrow-up"></i> <span>+${kpis.cashChange}%</span>` : 
+                                    `<i class="bi bi-arrow-down"></i> <span>${kpis.cashChange}%</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `);
+            } else {
+                $('#kpiRow').html('<div class="col-12"><div class="alert alert-danger">Không thể tải chỉ số</div></div>');
             }
-        }
-    });
+            isLoading = false;
+        }).fail(function() {
+            $('#kpiRow').html('<div class="col-12"><div class="alert alert-danger">Lỗi kết nối khi tải chỉ số</div></div>');
+            isLoading = false;
+        });
+    }
 
-    // Expense pie chart
-    const ctx2 = document.getElementById('expenseChart').getContext('2d');
-    new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: ['Nhân sự', 'Mua hàng', 'Chi phí khác', 'Thuế'],
-            data: [40, 35, 15, 10],
-            backgroundColor: ['#1D6FA4', '#22C55E', '#F59E0B', '#EF4444']
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom' } }
+    function loadCharts() {
+        isLoading = true;
+        
+        // Revenue vs Expense Chart
+        $.get(`/api/charts/revenue-expense?period=${currentPeriod}`, function(data) {
+            if (data && data.success) {
+                updateRevenueChart(data.data);
+                updateRevenueChartFallback(data.data);
+            }
+        }).always(function() {
+            // Expense Pie Chart
+            $.get('/api/charts/expense-breakdown', function(data) {
+                if (data && data.success) {
+                    updateExpenseChart(data.data);
+                    updateExpenseChartFallback(data.data);
+                }
+            }).always(function() {
+                isLoading = false;
+            });
+        });
+    }
+
+    function updateRevenueChart(data) {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        if (window.revenueChart) {
+            window.revenueChart.destroy();
         }
-    });
+        window.revenueChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    { 
+                        label: 'Doanh thu', 
+                        data: data.revenueData, 
+                        backgroundColor: 'rgba(29,111,164,0.7)', 
+                        borderRadius: 4 
+                    },
+                    { 
+                        label: 'Chi phí', 
+                        data: data.expenseData, 
+                        backgroundColor: 'rgba(239,68,68,0.5)',  
+                        borderRadius: 4 
+                    }
+                ]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${ACC.format.currency(context.parsed.y)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        ticks: { 
+                            callback: function(value) { return ACC.format.currency(value); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateRevenueChartFallback(data) {
+        const $tbody = $('#revenueChartFallback tbody');
+        $tbody.empty();
+        data.labels.forEach((label, index) => {
+            $tbody.append(`
+                <tr>
+                    <td>${label}</td>
+                    <td>${ACC.format.currency(data.revenueData[index])}</td>
+                    <td>${ACC.format.currency(data.expenseData[index])}</td>
+                </tr>
+            `);
+        });
+    }
+
+    function updateExpenseChart(data) {
+        const ctx2 = document.getElementById('expenseChart').getContext('2d');
+        if (window.expenseChart) {
+            window.expenseChart.destroy();
+        }
+        window.expenseChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.data,
+                    backgroundColor: data.backgroundColor
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { 
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = data.data[context.dataIndex];
+                                const total = data.data.reduce((a,b) => a+b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${data.labels[context.dataIndex]}: ${ACC.format.currency(value)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateExpenseChartFallback(data) {
+        const $tbody = $('#expenseChartFallback tbody');
+        $tbody.empty();
+        data.labels.forEach((label, index) => {
+            $tbody.append(`
+                <tr>
+                    <td>${label}</td>
+                    <td>${ACC.format.currency(data.data[index])} (${((data.data[index]/data.data.reduce((a,b)=>a+b,0))*100).toFixed(1)}%)</td>
+                </tr>
+            `);
+        });
+    }
+
+    function loadPendingVouchers() {
+        $('#pendingBody').html('<tr><td colspan="4" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>');
+        $('#pendingEmpty').addClass('d-none');
+        
+        $.get('/api/vouchers/pending', function(data) {
+            if (data && data.length > 0) {
+                $('#pendingBody').html(data.map(v => `
+                    <tr>
+                        <td><a href="/Vouchers/Details/${v.id}" class="text-decoration-none">${v.voucherNo}</a></td>
+                        <td>${ACC.format.date(v.voucherDate)}</td>
+                        <td>${v.description || '—'}</td>
+                        <td class="text-end">${ACC.format.currency(v.totalDebit)}</td>
+                    </tr>
+                `).join(''));
+                
+                // Add row highlighting for overdue items (example)
+                $('#pendingBody tr').each(function() {
+                    const voucherDate = new Date($(this).find('td:eq(1)').text());
+                    const daysOverdue = (Date.now() - voucherDate) / (1000 * 60 * 60 * 24);
+                    if (daysOverdue > 3) {
+                        $(this).addClass('table-danger');
+                    }
+                });
+            } else {
+                $('#pendingBody').empty();
+                $('#pendingEmpty').removeClass('d-none');
+            }
+        }).fail(function() {
+            $('#pendingBody').html('<tr><td colspan="4" class="text-center text-danger py-4">Lỗi khi tải dữ liệu</td></tr>');
+        });
+    }
+
+    function loadRecentTransactions() {
+        $('#recentTxBody').html('<tr><td colspan="4" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>');
+        $('#recentTxEmpty').addClass('d-none');
+        
+        $.get('/api/vouchers/recent', function(data) {
+            if (data && data.length > 0) {
+                $('#recentTxBody').html(data.map(v => `
+                    <tr>
+                        <td>${ACC.format.date(v.voucherDate)}</td>
+                        <td>${v.description || '—'}</td>
+                        <td class="text-end">${ACC.format.currency(v.totalDebit)}</td>
+                        <td class="text-end">${ACC.format.currency(v.totalCredit)}</td>
+                    </tr>
+                `).join(''));
+            } else {
+                $('#recentTxBody').empty();
+                $('#recentTxEmpty').removeClass('d-none');
+            }
+        }).fail(function() {
+            $('#recentTxBody').html('<tr><td colspan="4" class="text-center text-danger py-4">Lỗi khi tải dữ liệu</td></tr>');
+        });
+    }
+
+    function refreshAll() {
+        isLoading = true;
+        $('#refreshBtn').prop('disabled', true).addClass('btn-loading');
+        
+        loadKPIs();
+        loadCharts();
+        loadPendingVouchers();
+        loadRecentTransactions();
+        
+        // Reset loading state after 2 seconds (adjust as needed)
+        setTimeout(() => {
+            isLoading = false;
+            $('#refreshBtn').prop('disabled', false).removeClass('btn-loading');
+        }, 2000);
+    }
+
+    function navigateToKpiDetail(kpiType) {
+        let url = '';
+        switch(kpiType) {
+            case 'revenue':
+                url = '/Reports/IncomeStatement';
+                break;
+            case 'expenses':
+                url = '/Reports/ExpenseReport';
+                break;
+            case 'profit':
+                url = '/Reports/ProfitLoss';
+                break;
+            case 'cash':
+                url = '/Reports/CashFlow';
+                break;
+            default:
+                url = '/Reports/Index';
+        }
+        window.location.href = url;
+    }
+
+    // Add CSS for loading state
+    $('<style>').text(`
+        .btn-loading {
+            position: relative;
+        }
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-top: -8px;
+            margin-left: -8px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            opacity: 0.7;
+        }
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .visually-hidden { 
+            position: absolute !important; 
+            width: 1px; height: 1px; 
+            padding: 0; margin: -1px; 
+            overflow: hidden; clip: rect(0, 0, 0, 0); 
+            white-space: nowrap; 
+            border: 0;
+        }
+        .chart-container {
+            height: 100%;
+        }
+    `).appendTo('head');
 });
 </script>
 }
